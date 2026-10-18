@@ -1,6 +1,6 @@
-# Base Repository Agent Instructions
+# TreatFlow Repository Agent Instructions
 
-These instructions apply to coding agents working in repositories cloned from Base.
+These instructions apply to agents working on TreatFlow. TreatFlow inherits Base methodology, but the project-specific [Phase 000 exit](docs/phases/000/000-e-treatflow-exit-review.md) and [current intake](docs/canonical/project/intake.md) establish the active baseline; inherited Base template execution is not TreatFlow completion evidence.
 
 ## Start with repository authority
 
