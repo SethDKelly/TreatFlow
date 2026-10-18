@@ -45,6 +45,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Phase 004 modularity exit and Phase 005 handoff](../phases/004/004-f-treatflow-exit-review.md) — five current behavioral owners and composition questions.
 
+- [TreatFlow provisional application action surface](composition/application-action-surface.md) — current direct, protected, internal and composed-candidate classifications pending 005-C–G.
+
 ## Navigation
 
 - [Bundle root](../)
