@@ -8,7 +8,7 @@ tags: [treatflow, composition, phase-005, observation, stewardship, revision]
 
 # Observation, Stewardship and Revision — Current Composition Semantics
 
-**Authority:** [005-C execution decision](../../phases/005/005-c-treatflow-execution.md). This document owns current application-level conceptual composition rules for these three independently specified concepts. Their [intrinsic specifications](../concepts/candidates.md) remain separate and authoritative. Scope is *conceptual*, not API, service choreography, database relations or authenticated production behavior. [005-E](../../phases/005/005-a-treatflow-execution.md) must recheck chaining/denial compatibility, and 005-F/G may revise these rules.
+**Authority:** [005-C execution decision](../../phases/005/005-c-treatflow-execution.md). This document owns current application-level conceptual composition rules for these three independently specified concepts. Their [intrinsic specifications](../concepts/candidates.md) remain separate and authoritative. Scope is *conceptual*, not API, service choreography, database relations or authenticated production behavior. Phase 005-G has exited with carry-forward; any newly demonstrated chain conflict requires deliberate upstream reopening rather than silently treating these guards as pending.
 
 ## Semantic identity and participation boundary
 
