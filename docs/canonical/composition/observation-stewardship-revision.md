@@ -67,3 +67,7 @@ No event bus, synchronously coordinated write, transaction, account implementati
 ## 005-E chain and authority qualification
 
 [005-E adversarial audit](../../phases/005/005-e-treatflow-execution.md) confirms C-01 is an **optional** association composition, not a mandatory `Report → Associate → EstablishSubject` chain; valid reporting survives failed, disputed or absent standing. C-02 never infers amendment entitlement from Recognize/DetermineStanding, and C-03 never automatically converts attribution disputes into factual correction. No unconditional concept-to-concept trigger or protected-adjudicator impersonation is authorized. Denied or unavailable participants cannot be bypassed by implied operator action. 005-F/G retain independent sufficiency review.
+
+## 005-F consolidated application relevance
+
+[005-F purpose/scenario trace](../../phases/005/005-f-treatflow-execution.md) confirms C-01 optional attribution and C-02 protected historical correction support P-01/P-02/P-05 without requiring compulsory registration, silently replacing an Observation assertion, or announcing an unqualified current truth. C-03 keeps contributor responsibility contested independently of factual claims. Recipient notification after later amendments is **not** currently a promised application action; no additional automatic synchronization is implied. 005-G retains independent exit challenge.
