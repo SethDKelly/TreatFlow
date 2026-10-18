@@ -15,6 +15,10 @@ Phase 007 maps the in-scope conceptual application into faithful user-visible in
 
 Project-specific substantive subphases remain dynamically derived by `007-A`; Base does not prescribe a fixed screen inventory, wireframe set, navigation structure, mapping notation, platform, or B–X sequence.
 
+## TreatFlow execution
+
+- [007-A Mapping Scope, Representation Semantics & Planning](007-a-treatflow-execution.md) — PASS; 007-B–G planned, 007-B next after merge.
+
 ## Navigation
 
 - [Previous phase](../006/)
