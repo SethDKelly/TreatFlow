@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `007-A`; Ba
 
 - [007-A Mapping Scope, Representation Semantics & Planning](007-a-treatflow-execution.md) — PASS; 007-B–G planned, 007-A complete; 007-B record governs current handoff.
 
-- [007-B Observation, Measurement, Coverage & Low-Burden Mapping](007-b-treatflow-execution.md) — seven actions, evidence and coverage distinction, counterexamples; 007-C next after merge.
+- [007-B Observation, Measurement, Coverage & Low-Burden Mapping](007-b-treatflow-execution.md) — seven actions, evidence and coverage distinction, counterexamples; 007-B complete; 007-C record governs handoff.
+
+- [007-C Contribution Standing, Factual Revision & Historical Mapping](007-c-treatflow-execution.md) — protected standing, factual challenge/currentness and eleven intrinsic actions mapped; 007-D next after merge.
 
 ## Navigation
 
