@@ -54,3 +54,13 @@ These provisional edges hold within the **named native-evidence family**. They d
 **Next:** 006-C computes representative subset validity and optionality **within explicit family context** and attempts to falsify both supported edges; 006-D selects scope. This document does not select a product tier, MVP or architecture.
 
 **Limits:** actual minor/guardian consent, legal actor authority, protected release, retention, scientific methodology and operator feasibility must be established before real-world operation. Implementation is not authorized.
+
+## 006-C subset, closure and cycle qualification
+
+[006-C counterexample evidence](../../phases/006/006-c-treatflow-execution.md) sustains **S → O and V → O solely for TreatFlow-native observation contribution/correction roles**, not as universal independent-concept relationships. Within that context, a subset is edge-valid if S implies O and V implies O. Consequently closure({S}) = {S,O}, closure({V}) = {V,O}, closure({S,V}) = {S,V,O}, and closure({O}) = {O}. No accepted multi-hop extension or directed co-inclusion cycle exists.
+
+**Discriminating cases:** {O}, {O,S}, {O,V}, {O,R}, {O,D} and {O,S,V,R,D} satisfy the presently accepted conditional edges, without thereby being approved products or safe operational configurations. {S} and {V} are **invalid for their named native-evidence role**, but can represent coherent generic responsibility/history behavior outside that context. {R} may support an external-evidence, no-delivery suitability inquiry only with legitimate available qualifiers; {D} may govern nonresearch material, though neither's TreatFlow product scope is established. An absence-only research result is not automatically a useful sustained application.
+
+**Rejected apparent cycles:** O↔S, O↔V, S↔V and R↔D lack independent purpose justifications for mutual inclusion. Research Provision → Observation and Controlled Disclosure → Observation **remain undecided for adopted native scope** until 006-D; D-02's protected research-delivery participants are an action-level co-presence condition, not by themselves universal dependencies.
+
+**Scope reminder:** edge-valid ≠ meaningful for full P-01–P-06 mandate ≠ adopted/in-scope ≠ verified protection. [006-D](../../phases/006/006-a-treatflow-execution.md) selects contextual roles and adopted variants; [006-E](../../phases/006/006-a-treatflow-execution.md) audits variant-specific composition. No product variant, implementation or data-use permission is authorized by this section.
