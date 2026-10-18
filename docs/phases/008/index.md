@@ -17,7 +17,9 @@ Project-specific substantive subphases remain dynamically derived by `008-A`; Ba
 
 ## TreatFlow execution
 
-- [008-A Familiarity Baseline, Reuse Opportunities & Planning](008-a-treatflow-execution.md) — PASS with carry-forward; 008-B–G planned, 008-B next after merge.
+- [008-A Familiarity Baseline, Reuse Opportunities & Planning](008-a-treatflow-execution.md) — PASS with carry-forward; 008-B–G planned, 008-A complete; 008-B record governs current handoff.
+
+- [008-B Familiar Precedents, Behavioral Fitness & Evidence Qualification](008-b-treatflow-execution.md) — five concept comparisons against documented precedents; no substitutes adopted; 008-C next after merge.
 
 ## Navigation
 
