@@ -21,7 +21,9 @@ Project-specific substantive subphases remain dynamically derived by `004-A`; Ba
 
 - [004-B Observation & Exposure boundary review](004-b-treatflow-execution.md) — retain integrated Observation, no standalone Exposure; 004-B complete; later records govern active handoff.
 
-- [004-C Stewardship, Revision & correction authority](004-c-treatflow-execution.md) — reduce/refine stewardship and retain provisional independent Revision; 004-D next eligible after merge.
+- [004-C Stewardship, Revision & correction authority](004-c-treatflow-execution.md) — reduce/refine stewardship and retain provisional independent Revision; 004-C complete; later records govern current handoff.
+
+- [004-D Controlled Disclosure & Research Provision modularity](004-d-treatflow-execution.md) — separate prospective protection and inquiry fitness; 004-E next eligible after merge.
 
 ## Navigation
 
