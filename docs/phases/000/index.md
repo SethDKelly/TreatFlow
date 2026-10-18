@@ -9,6 +9,10 @@ Phase 000 is the pre-methodology intake phase. It establishes a sufficiently gro
 - [Intake Knowledge & Evidence Contract](intake-knowledge-contract.md) — statement classes, evidence posture, uncertainty, and required intake coverage.
 - [Exit Review & Phase 001 Handoff Template](exit-review-template.md) — reusable closure test used by the dynamically selected final Phase 000 subphase.
 
+## TreatFlow execution
+
+- [TreatFlow 000-A execution](000-a-treatflow-execution.md) — approved project-specific intake plan; 000-B next eligible; Phase 000 not yet closed.
+
 ## Navigation
 
 - [All phases](../)
