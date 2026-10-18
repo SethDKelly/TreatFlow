@@ -21,7 +21,9 @@ Project-specific substantive subphases remain dynamically derived by `005-A`; Ba
 
 - [005-B application action surface, direct exposure and non-exposure](005-b-treatflow-execution.md) — 29 actions classified, protected/non-public cases; 005-B complete; later record governs current handoff.
 
-- [005-C Observation, Stewardship & Revision synchronization](005-c-treatflow-execution.md) — guarded optional attribution and protected correction; 005-D next eligible after merge.
+- [005-C Observation, Stewardship & Revision synchronization](005-c-treatflow-execution.md) — guarded optional attribution and protected correction; 005-C complete; later record governs current handoff.
+
+- [005-D Research, Disclosure & Revision composition](005-d-treatflow-execution.md) — guarded research currentness, scoped release and prospective reassessment; 005-E next eligible after merge.
 
 ## Navigation
 

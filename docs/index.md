@@ -54,6 +54,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [005-C correction and stewardship composition](phases/005/005-c-treatflow-execution.md) — optional attribution and protected historical amendment; 005-D next eligible after merge.
 
+- [005-D research/disclosure/revision composition](phases/005/005-d-treatflow-execution.md) — qualified research evidence and protected prospective sharing; 005-E next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
