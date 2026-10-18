@@ -27,7 +27,9 @@ Project-specific substantive subphases remain dynamically derived by `007-A`; Ba
 
 - [007-E Integrated Actions, Availability, Language & Structural Integrity](007-e-treatflow-execution.md) — 29 actions reconciled, cross-concept vocabulary/accessibility reviewed; 007-E complete; 007-F record governs handoff.
 
-- [007-F Experience Counterexamples, Misfit/Reentry & Completeness](007-f-treatflow-execution.md) — eight purpose scenarios, eight cross-concept sequences, twelve coverage dimensions; 007-G next after merge.
+- [007-F Experience Counterexamples, Misfit/Reentry & Completeness](007-f-treatflow-execution.md) — eight purpose scenarios, eight cross-concept sequences, twelve coverage dimensions; 007-F complete; 007-G record governs exit.
+
+- [007-G Documentation Integrity, Exit Review & Phase 008 Handoff](007-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 008-A next eligible.
 
 ## Navigation
 
