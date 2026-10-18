@@ -23,7 +23,9 @@ Project-specific substantive subphases remain dynamically derived by `002-A`; th
 
 - [002-C alternative decompositions](002-c-treatflow-execution.md) — compares competing behavior allocations and boundary questions; 002-C complete; subsequent review governs current status.
 
-- [002-D concept-likeness and purpose coverage](002-d-treatflow-execution.md) — all 28 seeds screened; 002-E bounded convergence next eligible after merge.
+- [002-D concept-likeness and purpose coverage](002-d-treatflow-execution.md) — all 28 seeds screened; 002-D complete; 002-E records the provisional shortlist.
+
+- [002-E bounded convergence](002-e-treatflow-execution.md) — five provisional candidates and explicit Phase 003 doubts; 002-F next eligible after merge.
 
 ## Navigation
 
