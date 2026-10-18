@@ -1,12 +1,14 @@
-# Base
+# TreatFlow
 
-Base is a cloneable repository template for taking a software product from project intake through completed concept design, then through a final pre-implementation repository audit before downstream engineering begins.
+TreatFlow is a proposed community-driven Halloween observation application intended to collect voluntarily reported trick-or-treater timing and volume data for exploratory analysis, including whether arrivals resemble Poisson processes. Its design must balance interpretable observations, simple contributor identity and safe access to research data. **No app implementation has begun.**
+
+The repository inherits the Base concept-design template and its methodology; its **project-specific Phase 000 intake is complete with carry-forwards, and Phase 001-A is the next eligible design gate**. Start with [current TreatFlow intake](docs/canonical/project/intake.md) and [Phase 000 exit/handoff](docs/phases/000/000-e-treatflow-exit-review.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
 ## Lifecycle
 
-Base deliberately separates conceptual design from implementation preparation and implementation execution.
+The inherited Base lifecycle deliberately separates conceptual design from implementation preparation and implementation execution.
 
 ### Concept design — Phases 000–011
 
@@ -22,7 +24,7 @@ Before successful Phase 011 closure:
 - **Implementation execution:** not started
 - **Implementation authorization:** not yet
 
-A successful Phase 011 closure may move implementation readiness to **ready**, but implementation remains **not started** and Base does not itself authorize coding.
+A successful Phase 011 closure may move implementation readiness to **ready**, but implementation remains **not started** and this lifecycle does not itself authorize coding.
 
 ### Pre-implementation preparation — Phase 012
 
@@ -37,16 +39,15 @@ A successful Phase 011 closure may move implementation readiness to **ready**, b
 
 Successful Phase 012 completion means **pre-implementation preparation is complete**. It still does not mean feature implementation has started or been authorized by this lifecycle.
 
-## How to use this template
+## TreatFlow design workflow
 
-1. Clone or create a repository from Base.
-2. Begin with [`Phase 000`](docs/phases/000/).
-3. At each phase start gate (`NNN-A`), review incoming authority and derive only the dependency-safe subphases the project actually needs.
-4. Keep durable current design meaning in [`docs/canonical/`](docs/canonical/) and chronological reasoning/evidence in [`docs/phases/`](docs/phases/).
-5. Finish every phase with its consolidation/exit review and explicit handoff.
-6. Complete the full concept-design lifecycle through Phase 011 before treating implementation as ready.
-7. Complete Phase 012 to audit/polish the knowledge corpus and prepare agent/development governance.
-8. Begin representation, architecture, implementation planning, and eventual implementation execution only under a separate downstream engineering process.
+1. Begin from the [completed Phase 000 handoff](docs/phases/000/000-e-treatflow-exit-review.md) and proceed to [Phase 001](docs/phases/001/).
+2. At each phase start gate (`NNN-A`), review incoming authority and derive only the dependency-safe subphases the project actually needs.
+3. Keep durable current design meaning in [`docs/canonical/`](docs/canonical/) and chronological reasoning/evidence in [`docs/phases/`](docs/phases/).
+4. Finish every phase with its consolidation/exit review and explicit handoff.
+5. Complete the full concept-design lifecycle through Phase 011 before treating implementation as ready.
+6. Complete Phase 012 to audit/polish the knowledge corpus and prepare agent/development governance.
+7. Begin representation, architecture, implementation planning, and eventual implementation execution only under a separate downstream engineering process.
 
 ## Documentation model
 
@@ -61,7 +62,7 @@ Start with [`docs/index.md`](docs/index.md).
 
 ## Agentic development
 
-Base includes shared project instructions for common coding agents:
+The inherited methodology includes shared project instructions for common coding agents:
 
 - [`AGENTS.md`](AGENTS.md) — shared operational instructions for Codex and compatible agents; Cursor also understands this format.
 - [`CLAUDE.md`](CLAUDE.md) — Claude Code adapter that imports the shared instructions rather than duplicating them.
@@ -70,6 +71,6 @@ Base includes shared project instructions for common coding agents:
 
 Agents are expected to inspect current canonical knowledge before making substantive changes, distinguish current truth from phase history, preserve OKF/documentation authority, avoid speculative repository bloat, and surface design contradictions rather than silently coding around them.
 
-## Important template rule
+## Authority reminder
 
-The fact that Base itself contains refined phase templates does **not** mean a cloned project's design is complete. Each cloned project must execute the lifecycle against its own product, evidence, actors, purposes, concepts, risks, and constraints.
+Inherited Base phase definitions, including historical Base Phase 012 self-audit records, describe template methodology rather than TreatFlow project completion. Only the TreatFlow-specific phase execution records establish project progress.
