@@ -21,7 +21,9 @@ Project-specific substantive subphases remain dynamically derived by `009-A`; Ba
 
 - [009-B Observer Independence, Standing, Revision & Protected Authority Integrity](009-b-treatflow-execution.md) — directed O/S/V and C-01–C-03 integrity review; 009-B complete; 009-C record governs handoff.
 
-- [009-C Research Fitness, Disclosure Permission & Recipient Integrity](009-c-treatflow-execution.md) — directional R/D and D-01–D-03 integrity audit; 009-D next after merge.
+- [009-C Research Fitness, Disclosure Permission & Recipient Integrity](009-c-treatflow-execution.md) — directional R/D and D-01–D-03 integrity audit; 009-C complete; 009-D record governs handoff.
+
+- [009-D Cross-Concept Chains, Temporal State, Disputes & Authority Interference](009-d-treatflow-execution.md) — fourteen full-family adversarial chains; 009-E next after merge.
 
 ## Navigation
 
