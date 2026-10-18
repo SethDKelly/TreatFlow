@@ -53,6 +53,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Phase 005 composition exit and Phase 006 handoff](../phases/005/005-g-treatflow-exit-review.md) — current action and C/D composition owner map; extrinsic inclusion remains for Phase 006.
 
+- [TreatFlow contextual concept dependence](dependencies/concept-dependence.md) — current 006-B conditional edges, rejected edges and unresolved roles; not adopted scope.
+
 ## Navigation
 
 - [Bundle root](../)
