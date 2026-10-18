@@ -42,8 +42,35 @@ A participant may have several needs, and needs of different parties may conflic
 - Open exploratory access versus misuse, researcher misunderstanding and operator stewardship load.
 - Exciting public conclusions versus disciplined treatment of missingness, nonrandom sampling and rejected hypotheses.
 
+## Product-level purpose (provisional, 001-C)
+
+**Enable willing community observers to turn everyday Halloween arrival experiences into interpretable evidence that others can explore responsibly, without making contribution unduly burdensome or exposing participating households and observed people to avoidable harm.**
+
+The value is shared, qualified understanding rather than data volume, a particular interface, or proof that arrival patterns are Poisson. This purpose remains sponsor-derived and subject to scrutiny in 001-D.
+
+## Distinct design-purpose obligations
+
+These are **candidate independent obligations**, not named software concepts, requirements for specific mechanisms, or ranked features.
+
+| ID | Purpose obligation: meaningful change | Beneficiaries / protected parties | Discriminating evaluation question |
+|---|---|---|---|
+| P-01 Participation without disproportionate burden | Volunteer observers | Can someone contribute meaningfully amid interruptions and grouped arrivals without becoming a dedicated data clerk? |
+| P-02 Observational intelligibility | Observers and analysts | Can an analyst distinguish what was counted, when it occurred, what was actually monitored and what is unknown rather than treating ambiguity as evidence? |
+| P-03 Honest research interpretation | Analysts and public | Can the resulting evidence support competing explanations, uncertainty or rejection of a Poisson hypothesis without asserting representativeness or false precision? |
+| P-04 Protection against involuntary exposure | Contributors, co-residents, visitors and guardians | Can information be useful without unnecessarily disclosing people, household patterns, identifiable sites or stable account linkages? |
+| P-05 Accountable contribution and correction | Contributors, analysts and operator | Can a contribution be distinguishable enough to address meaningful mistakes or abuse without making identities publicly traceable? |
+| P-06 Sustainable trustworthy stewardship | Contributors, analysts and operator | Can the project handle foreseeable misuse, disclosures and lifecycle obligations without demands disproportionate to a small seasonal initiative? |
+
+**Separability:** P-01 addresses effort, P-02 measurement meaning, P-03 inference, P-04 third-party protection, P-05 correction and attribution, and P-06 long-term operability. A proposed design could satisfy one and fail another. P-02 and P-03 interact but are not identical: interpretable data can still be interpreted dishonestly. P-04 and P-05 may conflict: accountability must not imply public persistent identity. P-06 is provisional because operating capacity is not yet measured.
+
+**Provenance:** P-01, P-02 and P-03 derive from sponsor intent plus [001-B inquiry](../../phases/001/001-b-treatflow-execution.md) and [000-C measurement cautions](../../phases/000/000-c-treatflow-execution.md). P-04–P-06 follow the stakeholder/risk reasoning in [001-B](../../phases/001/001-b-treatflow-execution.md) and the [intake constraints](../project/intake.md). These are reasoned purpose candidates, not observed consumer requirements.
+
+## Purpose quality and downstream validation
+
+The six candidate obligations are stated in terms of improvements and safeguards, with questions capable of rejecting a superficially attractive feature. None requires a particular authentication provider, session model, export format, database, UI, or statistical test. Phase 001-D must test their joint success in plausible Halloween situations, how tradeoffs distribute across parties, whether obligations are too broad or overlapping, and whether evidence warrants regrouping. Phase 001-E must determine final purpose-readiness. Phase 002 alone may discover candidate concepts.
+
 ## Uncertainty and validation destinations
 
-These are **candidate needs**, not observed participant behavior. The sponsor premise supports the opportunity; interview/pilot evidence, research-use scenario validation and privacy threat review remain needed before asserting widespread demand, calibrated burden or safe disclosure. Phase 001-C must derive discriminating, solution-neutral purpose obligations from these needs; 001-D must check meaningful success situations and conflicts. Later phases may reject or refine this provisional picture. Eligibility, consent, withdrawal, release and applicable law remain prelaunch concerns.
+These are **candidate needs**, not observed participant behavior. The sponsor premise supports the opportunity; interview/pilot evidence, research-use scenario validation and privacy threat review remain needed before asserting widespread demand, calibrated burden or safe disclosure. Phase 001-C has derived provisional design-purpose obligations; 001-D must check meaningful success situations and conflicts. Later phases may reject or refine this provisional picture. Eligibility, consent, withdrawal, release and applicable law remain prelaunch concerns.
 
 **No purpose here selects a sign-in provider, location field, interface, database, download policy or statistical test.**
