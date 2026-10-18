@@ -1,0 +1,20 @@
+---
+description: "Apply when editing Base documentation, lifecycle governance, agent instructions, or OKF knowledge so Cursor preserves canonical authority, progressive disclosure, and anti-bloat rules."
+globs: "docs/**/*.md,README.md,AGENTS.md,CLAUDE.md,.cursor/rules/*.mdc"
+alwaysApply: false
+---
+
+# OKF and repository-governance edits
+
+- Read `AGENTS.md` and the relevant current documents under `docs/` before editing.
+- Treat `docs/` as an OKF v0.2 bundle.
+- Ordinary concept documents require YAML frontmatter with a non-empty `type`.
+- Non-root `index.md` files are frontmatter-free navigation; `docs/index.md` is the bundle-root exception.
+- Preserve one natural current owner for each durable rule; prefer links over duplicated summaries.
+- Keep phase records historical and canonical knowledge current.
+- Check affected indexes and cross-links after renames, moves, supersession, or new knowledge.
+- Do not add `status`, `stale_after`, timestamps, or other metadata mechanically; use lifecycle/freshness metadata only when it carries real maintenance value.
+- If current documentation is stale, update or supersede it rather than coding around it.
+- Do not create extra audit/report files when the finding belongs in an existing owner or phase record.
+- Preserve the lifecycle boundary: `000–011` concept design, `012` pre-implementation preparation, then a separate downstream engineering lifecycle.
+- Agent adapters must remain thin; shared policy belongs in `AGENTS.md` and `docs/methodology/agentic-development-governance.md`.
