@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `003-A`; Ba
 
 - [003-A specification start gate](003-a-treatflow-execution.md) — five provisional identities challenged; 003-A complete; subsequent execution records govern current handoff.
 
-- [003-B concept identity and operational-principle challenge](003-b-treatflow-execution.md) — five characteristic stories and conditional disposition gates; 003-C next eligible after merge.
+- [003-B concept identity and operational-principle challenge](003-b-treatflow-execution.md) — five characteristic stories and conditional disposition gates; 003-B complete; subsequent records govern the active handoff.
+
+- [003-C Observation behavioral specification](003-c-treatflow-execution.md) — exposure, measurement and temporal behavior provisionally specified; 003-D next eligible after merge.
 
 ## Navigation
 

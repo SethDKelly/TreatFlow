@@ -28,6 +28,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [003-B identity and OP challenge](phases/003/003-b-treatflow-execution.md) — characteristic behavioral stories and provisional candidate dispositions.
 
+- [Observation provisional specification](canonical/concepts/observation.md) — concept-level state, actions, exposure and time semantics; [003-C evidence](phases/003/003-c-treatflow-execution.md).
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
