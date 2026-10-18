@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `006-A`; Ba
 
 - [006-A Dependence Scope, Subset Semantics & Planning](006-a-treatflow-execution.md) — start gate PASS; contextual edge tests and 006-B–F planned; 006-A complete; 006-B record governs the next handoff.
 
-- [006-B application-family roles and extrinsic dependence tests](006-b-treatflow-execution.md) — two provisional native-family edges; 006-C next after merge.
+- [006-B application-family roles and extrinsic dependence tests](006-b-treatflow-execution.md) — two provisional native-family edges; 006-B complete; 006-C record governs handoff.
+
+- [006-C coherent subsets, closure and cycle challenge](006-c-treatflow-execution.md) — qualified S→O/V→O, representative subsets, no accepted cycle; 006-D next after merge.
 
 ## Navigation
 
