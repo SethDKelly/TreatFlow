@@ -16,6 +16,10 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 - [Current TreatFlow purpose and actor needs](canonical/purpose/purposes.md) — product purpose, P-01–P-06 obligations and success contexts, with explicit untested assumptions.
 - [Phase 001 exit and handoff](phases/001/001-e-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; Phase 002-A next eligible after merge.
 
+## Active Phase 002
+
+- [002-A concept-discovery start gate](phases/002/002-a-treatflow-execution.md) — approved project-specific discovery workstreams; 002-B next eligible after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
