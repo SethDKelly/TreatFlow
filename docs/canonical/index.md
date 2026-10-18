@@ -65,6 +65,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Research suitability, controlled disclosure & protected recipient mapping](mapping/research-disclosure-representation.md) — qualification versus authorization, scoped availability and historical exposure representations.
 
+- [Integrated application action and representation integrity](mapping/integrated-action-language.md) — consolidated exposure, terminology, structural and accessibility obligations.
+
 ## Navigation
 
 - [Bundle root](../)
