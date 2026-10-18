@@ -51,3 +51,12 @@ State: a relation of requests to prepared/qualified/delivered provisions and the
 **Deliberately unspecified:** document/export structure, analytical software, sorting/grouping implementation, confidence metric, statistical method and study UI.
 
 **Open questions:** whether meaningful provision needs ongoing independent state; which limits must be mandatory for every evidence type; how privacy-preserving scope interacts with scientific usefulness; how updated/corrected evidence affects an earlier provision without claiming copies revoked; whether research work belongs externally. 003-F must test these as semantic, not infrastructural, questions.
+
+## 003-F semantic closure: qualifications and version relevance
+
+`QualifyProvision` must expose, where applicable and known, **measurement units** (group encounters versus individual visitors), **claimed monitored exposure and reporting completeness**, **missing/uncertain extents**, **time precision and retrospective provenance**, **voluntary selection/nonrepresentativeness**, and **disputed or superseded evidence standing**. When indispensable qualification is unavailable, a provision can be **unavailable** or expressly **limited/unsuitable for the requested inference**; merely presenting unqualified records as research-ready is invalid.
+
+A prepared/delivered provision refers to a **conceptual evidence standing at provision time**, not a guarantee that its content stays current when a source later corrects an assertion. `InspectProvision` must distinguish known supersession/staleness if subsequently known, while past delivery remains historical and recipients' copies cannot be silently recalled. `Provide` requires a separately legitimate availability decision; it cannot infer access from scientific fitness.
+
+**Conditional identity test:** independent inquiry scoping and qualification may provide distinct behavior, but if they have no separately useful lifecycle beyond making released evidence intelligible, Phase 004 must merge or retire Research Provision. Research interpretation and Poisson-model testing remain outside this concept.
+

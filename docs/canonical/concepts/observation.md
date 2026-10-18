@@ -81,4 +81,11 @@ No automatic infinite monitoring or absence-of-event observation is encoded. Set
 - [003-F](../../phases/003/003-a-treatflow-execution.md) must stress monitored zero/completeness, contradiction and imprecise intervals.
 - Phase 004 tests whether observation and coverage are correctly factored as one independent concept.
 
-**Implementation readiness not ready; execution not started; authorization not yet.**
+## 003-F semantic closure: completeness and conflicting coverage
+
+A `Coverage` assertion now also has a **reporting-completeness qualification** for a declared measurement unit and bounded extent: **complete claimed**, **partial**, or **unknown**. This states the observer's own claim, not verified perfect detection. `AssertCoverage` may include this qualification, and `Qualify` may add it without changing a past factual assertion. An observed zero is *interpretable as a reported zero* only when the monitored extent is explicitly asserted observed, the same unit/extent is explicitly asserted complete, and no unresolved contradictory activity claims undermine that interpretation. A `Report` of quantity zero by itself does not establish monitored exposure; an empty evidence set never does. For partial/unknown completeness, silence remains *not established*, not zero.
+
+Overlapping coverage assertions retain their source, extent and qualification; an overlap with incompatible statuses/completeness is flagged as **contested** for interpretation instead of resolved by last-write-wins or by combining all intervals into one observed span. `Inspect` must expose this contested meaning. `Close` prevents direct new Observation actions that add claims, but does not decide whether a later separately authorized factual Revision is possible. A future external revision must not secretly rewrite this concept's prior account; cross-concept interpretation is left for later composition. This resolves the semantic zero rule and conflict treatment without choosing a database or revision algorithm.
+
+**Residual Phase 004 question:** should attention coverage have independent concept identity, and is Observer/source association intrinsic or better separately factored?
+

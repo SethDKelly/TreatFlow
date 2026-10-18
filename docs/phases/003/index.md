@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `003-A`; Ba
 
 - [003-D contribution stewardship and revision qualification](003-d-treatflow-execution.md) — conditional behavioral specifications and stop/merge tests; 003-D complete; subsequent record governs active handoff.
 
-- [003-E Controlled Disclosure and Research Provision qualification](003-e-treatflow-execution.md) — independent behavioral challenge and conditional merge-or-stop decision; 003-F next eligible after merge.
+- [003-E Controlled Disclosure and Research Provision qualification](003-e-treatflow-execution.md) — independent behavioral challenge and conditional merge-or-stop decision; 003-E complete; later execution records govern the current handoff.
+
+- [003-F cross-candidate behavioral completeness](003-f-treatflow-execution.md) — edge-case and authority audit, semantic repairs; 003-G next eligible after merge.
 
 ## Navigation
 
