@@ -57,3 +57,12 @@ Association starts absent, is established, may be contested or relinquished; req
 **Intentionally unspecified:** contributor identification mechanism, entitlement evidence, number of legitimate stewards, notification/presentation, concrete decision authority, processing time and implementation of accepted requests.
 
 **Open, not waived:** independent purpose versus an entitlement relation inside Observation/Revision; response if two parties claim one contribution; semantics of a declined or accepted withdrawal request; administrative overreach; how this actor-contribution relation can be removed under future retention policies. If independent behavior remains only a bookkeeping wrapper at 003-F/004, **absorb/reframe and retire this standalone concept authority**.
+
+## 003-F semantic closure: control-request limits and disputed standing
+
+`ResolveControl` changes **only** the request's disposition. **Accepted** means the request is recognized as a legitimate control claim *within this concept*; it is neither proof that external action happened nor permission to mutate Observation, Revision, or disclosure. Where fulfillment lies elsewhere, `Recognize` or an appropriate request inspection must distinguish *accepted but externally unfulfilled/unknown* from *completed*. This is a semantic status distinction, not an assumed workflow implementation.
+
+When competing parties claim the same contribution, standing remains **contested** until a legitimate determination; no default winner by account age, location, or timing. Whether multiple responsible parties can legitimately coexist depends on an explicit authorization basis and remains a later authority-policy question. Relinquishment must not be mislabeled as erasure of the underlying contribution or retroactive consent revocation.
+
+**Conditional independent-identity result:** The request/standing lifecycle is meaningful enough for further factoring, but could still be an overgeneric permission fragment. Phase 004 must test merge/reframe rather than preserve a fifth concept by quota.
+
