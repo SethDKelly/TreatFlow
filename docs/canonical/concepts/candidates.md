@@ -23,6 +23,8 @@ tags: [treatflow, concepts, provisional, phase-002]
 
 **004-D boundary decision:** [Controlled Disclosure](controlled-disclosure.md) provisionally retains independent prospective availability decisions, while [Research Provision](research-provision.md) is reframed around independently valuable *evidence fitness/qualification* rather than delivery artifacts; its survival remains conditional on 004-E. [Decision evidence](../../phases/004/004-d-treatflow-execution.md).
 
+**004-E cross-candidate qualification:** All five working identities passed a provisional peer-removal, minimal-completeness and genericity challenge, **not** independent final exit. [004-E evidence](../../phases/004/004-e-treatflow-execution.md); 004-F may reopen or reject any result.
+
 **003-C refinement:** Observation's current semantics are owned by [its specification](observation.md); the table below is candidate navigation, not competing specification authority.
 
 **003-D status:** [Contribution Stewardship](contribution-stewardship.md) and [Revision](revision.md) now have *conditional* canonical behavioral specifications; their independent concept status is subject to 003-F/Phase 004. The list above is navigational and not competing specification authority.
