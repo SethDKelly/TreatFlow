@@ -64,6 +64,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [006-A dependence, subset and product-family start gate](phases/006/006-a-treatflow-execution.md) — 006-B next eligible after merge; no dependency edges yet authorized.
 
+- [006-B contextual dependence tests](phases/006/006-b-treatflow-execution.md) — native contribution/correction edges provisional; 006-C next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
