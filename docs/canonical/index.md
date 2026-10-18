@@ -67,6 +67,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Integrated application action and representation integrity](mapping/integrated-action-language.md) — consolidated exposure, terminology, structural and accessibility obligations.
 
+- [Phase 007 mapping exit and Phase 008 handoff](../phases/007/007-g-treatflow-exit-review.md) — mapping-owner, concept, action and scope authority reconciliation.
+
 ## Navigation
 
 - [Bundle root](../)
