@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `009-A`; Ba
 
 - [009-D Cross-Concept Chains, Temporal State, Disputes & Authority Interference](009-d-treatflow-execution.md) — fourteen full-family adversarial chains; 009-D complete; 009-E record governs handoff.
 
-- [009-E Whole-Family Coverage, Scope/Mapping/Familiarity & Purpose Preservation](009-e-treatflow-execution.md) — five purposes, twenty directions, 29 actions and native scope; 009-F next after merge.
+- [009-E Whole-Family Coverage, Scope/Mapping/Familiarity & Purpose Preservation](009-e-treatflow-execution.md) — five purposes, twenty directions, 29 actions and native scope; 009-E complete; 009-F record governs handoff.
+
+- [009-F Misfit Adjudication, Upstream Repairs, Propagation & Regression](009-f-treatflow-execution.md) — five canonical status corrections, twelve conceptual regressions; 009-G next after merge.
 
 ## Navigation
 
