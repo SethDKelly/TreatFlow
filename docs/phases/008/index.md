@@ -27,7 +27,9 @@ Project-specific substantive subphases remain dynamically derived by `008-A`; Ba
 
 - [008-E Reusable Concept Knowledge, Catalog Candidate Dispositions & Refinements](008-e-treatflow-execution.md) — all five assigned constrained reuse dispositions, no parallel catalog; 008-E complete; 008-F record governs handoff.
 
-- [008-F Adopted-Change Propagation, Misfit Regression & Reentry Review](008-f-treatflow-execution.md) — canonical index authority repaired, eleven negative controls assessed; 008-G next after merge.
+- [008-F Adopted-Change Propagation, Misfit Regression & Reentry Review](008-f-treatflow-execution.md) — canonical index authority repaired, eleven negative controls assessed; 008-F complete; 008-G record governs exit.
+
+- [008-G Documentation Integrity, Independent Exit Review & Phase 009 Handoff](008-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 009-A next eligible.
 
 ## Navigation
 
