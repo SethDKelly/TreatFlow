@@ -102,6 +102,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [008-F propagation and misfit regression](phases/008/008-f-treatflow-execution.md) — 008-G independent exit next after merge.
 
+- [009-A whole-system integrity start gate](phases/009/009-a-treatflow-execution.md) — five-concept directional interference plan; 009-B next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
