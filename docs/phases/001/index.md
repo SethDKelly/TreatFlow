@@ -9,6 +9,10 @@ Phase 001 is the first Jackson-aligned concept-design phase. It converts grounde
 - [Purpose, Need & Success Framing Contract](purpose-success-contract.md) — purpose levels, quality criteria, success framing, evidence, tensions, and anti-solutioning rules.
 - [Exit Review & Phase 002 Handoff Template](exit-review-template.md) — reusable closure test used by the dynamically selected final Phase 001 subphase.
 
+## TreatFlow execution
+
+- [001-A TreatFlow start-gate execution](001-a-treatflow-execution.md) — purpose inquiry planned; 001-B next eligible on merge.
+
 ## Navigation
 
 - [Previous phase](../000/)
