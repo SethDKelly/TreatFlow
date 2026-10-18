@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `002-A`; th
 
 - [002-A TreatFlow discovery start gate](002-a-treatflow-execution.md) — divergence and convergence strategy approved; 002-A complete; see subsequent execution records for current status.
 
-- [002-B divergent seed exploration](002-b-treatflow-execution.md) — 28 exploratory hypotheses mapped to P-01–P-06 and eight scenarios; 002-C next eligible after merge.
+- [002-B divergent seed exploration](002-b-treatflow-execution.md) — 28 exploratory hypotheses mapped to P-01–P-06 and eight scenarios; 002-B complete; see later records for active handoff.
+
+- [002-C alternative decompositions](002-c-treatflow-execution.md) — compares competing behavior allocations and boundary questions; 002-D next eligible after merge.
 
 ## Navigation
 
