@@ -62,3 +62,9 @@ An amendment adds a successor without deleting its predecessor. For a subject, *
 
 **Remaining Phase 004 question:** is this generalized history lifecycle independently useful, or should it be expressed within Observation? Its abstract `Subject` is not automatically the private Observation type.
 
+
+## 004-C modularity disposition: retain independent claim-revision history provisionally
+
+[004-C boundary comparison](../../phases/004/004-c-treatflow-execution.md) tests embedding factual correction within Observation against a generic independent revision lifecycle. **Retain Revision as a provisional independent concept**: a corrected subject may be an observation claim or another abstract assertion; its valuable purpose is the intelligible standing of successive assertions, not merely editing a field. `Subject` remains a generic external object identity whose internals are not inspected; `Assertion` contents are treated as opaque qualified claims for revision purposes. Any future application may synchronize current revised standing with Observation, but neither changes the other's private state intrinsically.
+
+**Scope restriction:** `Challenge` and `ResolveChallenge` express a dispute about factual standing of assertions, **not** contributor-attribution standing (owned by Contribution Stewardship) or future-use consent (owned by disclosure/authority policy). `Amend` requires a legitimately authorized factual amender and does not let an arbitrary reviewer replace another's claim. A dispute's acceptance does not itself manufacture a corrected value. Branches remain contested until a legitimate accepted lineage determination; no implicit last-write-wins or post-closure prohibition. Whether the generalized historical behavior is *too abstract to merit independent reuse* is a specific Phase 004-E counterexample test.

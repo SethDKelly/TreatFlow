@@ -1,68 +1,53 @@
 ---
 type: Concept Specification
-title: TreatFlow — Contribution Stewardship (Provisional)
-description: Abstract protected contribution-control behavior and independent-identity challenge.
-tags: [treatflow, concept, provisional, contribution, phase-003]
+title: TreatFlow — Contribution Stewardship (Refined)
+description: Generic protected responsibility standing over contributed items, corrected at 004-C.
+tags: [treatflow, concept, contribution, phase-004, provisional]
 ---
 
-# Contribution Stewardship — Provisional Behavioral Specification
+# Contribution Stewardship — Refined Behavioral Specification
 
-**Status:** **Conditionally specified in [003-D](../../phases/003/003-d-treatflow-execution.md)**; independent end-to-end purpose **not proven**, Phase 003-F and Phase 004 factoring review required. Consult [purpose obligations P-04/P-05](../purpose/purposes.md), [candidate owner](candidates.md), and [Observation](observation.md). This document does not prescribe login, account, authorization infrastructure, or public contributor identity.
+**Status:** **RETAIN, REDUCE AND REFRAME** in [004-C](../../phases/004/004-c-treatflow-execution.md); Phase 004-E independent recheck pending. [Purposes P-04/P-05](../purpose/purposes.md). Supersedes the broader Phase 003 specification that treated general-purpose control requests as intrinsic. This concept is about **recognizable responsibility standing**, not authentication, public authorship, permission to edit or requests to every other concept.
 
 ## Purpose and operational principle
 
-Enable a willing contributor to **recognize the contributions for which they hold legitimate continuing responsibility and exercise bounded control over their standing**, without making a recognizable person or household part of research-visible identity.
+Enable a contributor to **recognize and, when legitimately warranted, contest or relinquish a protected association of responsibility to contributed items** without inferring public identity or responsibility from a shared household.
 
-**Archetypal story:** Two volunteers at one home independently contribute overlapping observations. Each later recognizes the contributions they can legitimately manage, and one initiates a request to correct their own report. Neither contributor acquires automatic control of the other's report merely by sharing the same address; research consumers need not learn either individual's identity. The request demonstrates contributor control but does **not** itself alter the observation's asserted truth.
+Two volunteers report activity from one location. Each may privately recognize the contributions for which they have legitimate standing. If an attribution is erroneous, an affected contributor contests that association; its standing becomes unresolved until an authorized determination is made. One may later relinquish their standing, but the underlying evidence does not disappear and nobody acquires unilateral amendment or release rights. This story has a meaningful result *without requiring an Observation or Revision concept*: the meaning of responsibility associations themselves can be understood and challenged.
 
-**Identity challenge:** If the only resulting behavior is granting a credential, remembering an account, or forwarding a correction, this concept has no independent purpose. Its distinguishing promise is *continued, appropriately scoped responsibility for contributions*; 003-F must test whether that promise belongs inside Observation or Revision instead.
+## Abstract domains and state
 
-## Abstract types and minimal state
+- `Party`: abstract claimant/holder; **not** a login account or public identity.
+- `Item`: generic contributed object identity with no imported Observation type.
+- `Standing`: association of Party to Item with **active**, **contested**, or **relinquished** status.
+- `Determination`: protected conclusion about contested standing with rationale; may affirm, replace or decline an asserted association under a legitimate authority basis.
 
-- `Party`: abstract potential contributor/holder of responsibility, not a verified real-world identity.
-- `Contribution`: opaque thing capable of being associated with a responsible party, independent of Observation's private state/type.
-- `Standing`: **active**, **relinquished**, or **contested**, describing stewardship relation only—not evidentiary truth, deletion, disclosure or withdrawal from external circulation.
-- `Association`: relation among Party, Contribution, and Standing.
-- `ControlRequest`: a pending or concluded request for a named **kind of control** over a Contribution, recording request party, disposition (**pending**, **accepted**, **declined**) and rationale where needed for user-understandable meaning.
+State: associations and any current unresolved contest/determination history sufficient to explain standing. No contributor addresses, public pseudonyms, credentials, control requests, corrections, withdrawal state, or copied Observation content. Multiple legitimate parties may hold separate standing for an Item where valid authority permits; the same address never entails shared control.
 
-State: a set of Associations, a set of ControlRequests, and the abstract authority relation determining who may exercise concept-intrinsic control. No household location, session credentials, public pseudonym, or copied Observation/Revision state is required. A request may be meaningful even when external fulfillment belongs elsewhere.
+## Conceptual actions
 
-## Abstract actions
-
-| Action | Semantic guard | Effect / user-recognizable result |
+| Action | Guard / inputs | Semantic effect |
 |---|---|---|
-| **Associate** | Party legitimately able to claim responsibility for an unassigned or explicitly transferable Contribution | Establishes a bounded active responsibility association; returns its abstract reference |
-| **Recognize** | Requester is entitled to inspect a scoped subset of associations | Returns the contributions they may steward and relevant standing; does not reveal other parties |
-| **RequestControl** | Requester has standing to seek a specified control over a Contribution | Establishes a pending request with scope and reason; does not automatically correct observations or stop disclosed access |
-| **ResolveControl** | A conceptually legitimate decision authority for this request is present | Accepts or declines with rationale; produces a determination, but another concept's state must not change implicitly |
-| **ContestStanding** | Party can provide a meaningful challenge to a standing association | Marks the association contested without transferring ownership automatically |
-| **Relinquish** | Legitimate holder elects to end their stewardship relation and is allowed to do so | Changes association standing without erasing the contribution, denying prior source provenance or promising external deletion |
+| **Associate** | Legitimate claimant and Item, consistent with standing requirements | Records claimed/accepted association without proving identity publicly |
+| **Recognize** | Entitled Party and scope | Returns that Party's standing and contest state without exposing unrelated contributors |
+| **ContestStanding** | Legitimate affected challenger, identified association and rationale | Marks standing contested; does not transfer responsibility or alter the item |
+| **DetermineStanding** | Authorized decision maker, contested standing and justified determination | Resolves or refuses resolution of association standing; preserves intelligible contest rationale |
+| **Relinquish** | Legitimate active holder and permitted relinquishment | Changes association to relinquished without deleting or changing the Item |
 
-**Intrinsic constraint:** only a legitimately responsible party or legitimate decision authority can exercise the relevant action. Exactly how that legitimacy is established, verified or delegated is **an open authority-design question**, not an assumed authentication mechanism.
+## Invariants, lifecycle and authority
 
-## Invariants and lifecycle
+1. A source's or household's identity is not publicly implied by Item standing.
+2. Sharing a site, name, device or arrival report does not grant control over another Party's association.
+3. `ContestStanding` does not confer amendment authority; `DetermineStanding` changes **standing only**, not observation truth or disclosure.
+4. Relinquishment is not deletion, future-use withdrawal, retroactive consent rescission, public anonymization or historical revision.
+5. Conflict cannot be settled by last claim or household ownership alone.
+6. The abstract legitimacy of claimants and resolvers must be justified; which actors qualify and what evidence is required remain protected policy/authority obligations.
+7. No indefinite retention, real-world verification or public transparency requirement follows from the concept.
 
-1. Same household/site does not imply same Party, Contribution, or control authority.
-2. Association alone does not prove observation truth, authorship identity to outsiders, or consent by household members/visitors.
-3. A request or accepted request is not an automatic cross-concept correction, suppression, or revocation.
-4. Contesting standing cannot silently transfer rights to an arbitrary challenger.
-5. Research-facing information need not expose stewardship associations; this concept grants no publication permission.
-6. Relinquishment changes stewardship standing, not prior distribution, retention or evidentiary existence.
-7. Contested standing does not by itself settle the validity of the observation; other protected decisions remain unresolved.
+An association may be established, contested, determined or relinquished. These states have observable meaning even if all other application concepts are absent.
 
-Association starts absent, is established, may be contested or relinquished; requests have explicit pending/concluded histories. No indefinite account lifetime or retention period is asserted.
+**Deliberately unspecified:** actor authentication, proof-of-identity mechanism, adjudication workflow, implementation and presentation.
 
-## Under-specification and unresolved identity
+**Explicitly removed from intrinsic behavior:** Phase 003's `RequestControl` and `ResolveControl` general-purpose external requests. Their only promised effect was tracking acceptance, not satisfying a distinct responsibility purpose. Appropriate requests to correct, withdraw future disclosure or amend a claim belong to the concept that owns that requested **outcome**, or later authority/composition design; no generic request-manager is adopted by default.
 
-**Intentionally unspecified:** contributor identification mechanism, entitlement evidence, number of legitimate stewards, notification/presentation, concrete decision authority, processing time and implementation of accepted requests.
-
-**Open, not waived:** independent purpose versus an entitlement relation inside Observation/Revision; response if two parties claim one contribution; semantics of a declined or accepted withdrawal request; administrative overreach; how this actor-contribution relation can be removed under future retention policies. If independent behavior remains only a bookkeeping wrapper at 003-F/004, **absorb/reframe and retire this standalone concept authority**.
-
-## 003-F semantic closure: control-request limits and disputed standing
-
-`ResolveControl` changes **only** the request's disposition. **Accepted** means the request is recognized as a legitimate control claim *within this concept*; it is neither proof that external action happened nor permission to mutate Observation, Revision, or disclosure. Where fulfillment lies elsewhere, `Recognize` or an appropriate request inspection must distinguish *accepted but externally unfulfilled/unknown* from *completed*. This is a semantic status distinction, not an assumed workflow implementation.
-
-When competing parties claim the same contribution, standing remains **contested** until a legitimate determination; no default winner by account age, location, or timing. Whether multiple responsible parties can legitimately coexist depends on an explicit authorization basis and remains a later authority-policy question. Relinquishment must not be mislabeled as erasure of the underlying contribution or retroactive consent revocation.
-
-**Conditional independent-identity result:** The request/standing lifecycle is meaningful enough for further factoring, but could still be an overgeneric permission fragment. Phase 004 must test merge/reframe rather than preserve a fifth concept by quota.
-
+**Phase 004-E challenge:** determine whether protected standing remains a complete independent concept or can be represented as intrinsic source/provenance semantics in another coherent concept without erasing contested responsibility.

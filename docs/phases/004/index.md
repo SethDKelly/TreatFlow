@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `004-A`; Ba
 
 - [004-A modularity start gate](004-a-treatflow-execution.md) — scoped adversarial boundary testing and 004-B–F workstreams; 004-A complete; subsequent records govern current handoff.
 
-- [004-B Observation & Exposure boundary review](004-b-treatflow-execution.md) — retain integrated Observation, no standalone Exposure; 004-C next eligible after merge.
+- [004-B Observation & Exposure boundary review](004-b-treatflow-execution.md) — retain integrated Observation, no standalone Exposure; 004-B complete; later records govern active handoff.
+
+- [004-C Stewardship, Revision & correction authority](004-c-treatflow-execution.md) — reduce/refine stewardship and retain provisional independent Revision; 004-D next eligible after merge.
 
 ## Navigation
 
