@@ -64,3 +64,13 @@ These provisional edges hold within the **named native-evidence family**. They d
 **Rejected apparent cycles:** O↔S, O↔V, S↔V and R↔D lack independent purpose justifications for mutual inclusion. Research Provision → Observation and Controlled Disclosure → Observation **remain undecided for adopted native scope** until 006-D; D-02's protected research-delivery participants are an action-level co-presence condition, not by themselves universal dependencies.
 
 **Scope reminder:** edge-valid ≠ meaningful for full P-01–P-06 mandate ≠ adopted/in-scope ≠ verified protection. [006-D](../../phases/006/006-a-treatflow-execution.md) selects contextual roles and adopted variants; [006-E](../../phases/006/006-a-treatflow-execution.md) audits variant-specific composition. No product variant, implementation or data-use permission is authorized by this section.
+
+## 006-D adopted native-family context — additional qualified edges
+
+[006-D adopted conceptual scope](../project/concept-family-scope.md) selects an integrated **five-concept** TreatFlow-native observation/inquiry design. This is a project scope decision, not an assertion that all five are mathematically dependent on each other.
+
+**Now supported for the adopted native roles:** `Research Provision → Observation` because R is intended to assess *TreatFlow-native reported evidence*, not independently imported external evidence; and `Controlled Disclosure → Observation` because D's chosen application role protects *observation-derived material*, not arbitrary nonresearch assets. These are **context-qualified extrinsic edges**, like S→O and V→O. Removing O defeats those adopted target roles, although generic Research Provision and Disclosure retain coherent independent applications elsewhere.
+
+Thus in this selected native-evidence context: S, V, R or D included for its designated native role **implies O**. There is **no O→S/V/R/D dependency**; O remains independently valid and may be reported without any companion action. There is **no R→D or D→R universal inclusion edge**: D-02 protected research delivery involves both only *when that particular composed action is intended and its guards hold*. A no-delivery R assessment and D's independent protective denial remain coherent.
+
+This paragraph supersedes earlier **pending** R→O/D→O questions **for the adopted native role only**; nonnative evidence/release roles are coherent but **outside adopted scope**. 006-E must test variant action-surface/guard coherence; 006-F retains independent exit authority. No real disclosure or data collection is thereby authorized.
