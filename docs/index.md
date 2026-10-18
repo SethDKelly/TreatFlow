@@ -22,6 +22,10 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [Provisional retained candidates](canonical/concepts/candidates.md) — five working identities for Phase 003 specification, not finalized.
 
+## Active Phase 003
+
+- [003-A specification start gate](phases/003/003-a-treatflow-execution.md) — conceptual specification work planned; 003-B next eligible after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
