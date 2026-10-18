@@ -46,6 +46,10 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [004-E cross-candidate independence audit](phases/004/004-e-treatflow-execution.md) — provisional five-concept factoring challenged; 004-F next eligible after merge.
 
+## Active Phase 005
+
+- [005-A composition start gate](phases/005/005-a-treatflow-execution.md) — conceptual synchronization and application action planning only; 005-B next eligible after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
