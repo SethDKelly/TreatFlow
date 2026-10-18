@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `008-A`; Ba
 
 - [008-A Familiarity Baseline, Reuse Opportunities & Planning](008-a-treatflow-execution.md) — PASS with carry-forward; 008-B–G planned, 008-A complete; 008-B record governs current handoff.
 
-- [008-B Familiar Precedents, Behavioral Fitness & Evidence Qualification](008-b-treatflow-execution.md) — five concept comparisons against documented precedents; no substitutes adopted; 008-C next after merge.
+- [008-B Familiar Precedents, Behavioral Fitness & Evidence Qualification](008-b-treatflow-execution.md) — five concept comparisons against documented precedents; no substitutes adopted; 008-B complete; 008-C record governs handoff.
+
+- [008-C False Familiarity, Concept Names & Mental-Model Collision Audit](008-c-treatflow-execution.md) — semantic name hazards reviewed, narrowly clarified; 008-D next after merge.
 
 ## Navigation
 

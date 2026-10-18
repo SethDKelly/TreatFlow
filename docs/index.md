@@ -92,6 +92,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [008-B familiar precedent and behavioral fitness audit](phases/008/008-b-treatflow-execution.md) — 008-C false-familiarity terminology next after merge.
 
+- [008-C false-familiarity audit](phases/008/008-c-treatflow-execution.md) — high-consequence name collisions and 008-D handoff.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
