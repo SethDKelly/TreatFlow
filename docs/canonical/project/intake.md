@@ -51,6 +51,20 @@ Contributor identity, location/context and dataset publication must be considere
 
 See [000-C supporting evidence](../../phases/000/000-c-treatflow-execution.md).
 
+## Initial boundary, constraints and deferrals (000-D)
+
+The intake mandate is a **small, voluntary, Halloween observation and exploratory research** project, not individual visitor tracking, commercial data brokerage or a claim to representative scientific conclusions. Sponsor expectations include simple secure contributor distinction, geographically contextualized reporting and safely downloadable analytical data. The precise interface, observation unit, authentication method, internal geographic detail and download policy are **not selected**.
+
+**Provisional initial-scope candidates** (subject to purpose/concept validation) include adult household observers, a single initial season, coarse location categories, web-first reporting and non-live dataset access. Proposed non-goals include gathering names/photos/routes of visiting children, exact household address publication, personal visitor tracking, public identity leaderboards and speculative platform features.
+
+**Material constraints to qualify:** data usefulness depends on actual observation exposure and unit clarity; identity and research release need distinct treatment; sparse timestamps and geography can expose households; children may require participation safeguards; applicable legal duties depend on operating circumstances. No particular jurisdiction-specific legal conclusion or safe release granularity is established.
+
+**Working assumptions:** willingness to contribute, feasible low-burden measurement, coarse geography's usefulness, and manageable operation remain untested. Self-selection, group effects, reporting error and time-varying arrival rates are plausible research limitations.
+
+**Question ownership:** Initial audience/eligibility, observational unit, missingness, geographic collection-versus-release, download eligibility, stable identifiers, corrections/withdrawal, retention, quality controls and analytic methodology remain assigned to Phase 001 and later concept/design work. Applicable consent, disclosure and operational policies must be resolved before launch; deferral is not approval.
+
+See [000-D scope and question dispositions](../../phases/000/000-d-treatflow-execution.md).
+
 ## What is not established
 
 - A validated audience size, a public versus gated download policy, or a particular account architecture.
@@ -62,9 +76,10 @@ See [000-C supporting evidence](../../phases/000/000-c-treatflow-execution.md).
 ## Open intake destinations
 
 - **000-C:** completed intake distinctions and risk exploration; unresolved reporting units and data release policy carried forward.
-- **000-D:** bound initial participants, geography, privacy/consent obligations, user identity expectations, open access, misuse risk, operational responsibilities, non-goals and release restrictions.
+- **000-D:** scope and uncertainty assessed; unresolved policy and design questions have downstream owners.
+- **000-E:** audit intake integrity and decide Phase 000 exit; explicitly address inherited Base identity/documentation carry-forward.
 - **001 onward:** independently validate human purposes and discover concepts rather than assuming the initial interface or data model.
 
 ## Provenance and authority
 
-Derived from the sponsor's initial TreatFlow premise and the [000-A project-specific intake gate](../../phases/000/000-a-treatflow-execution.md). This is **provisional current intake knowledge**, refined by [000-B evidence](../../phases/000/000-b-treatflow-execution.md) and [000-C evidence](../../phases/000/000-c-treatflow-execution.md), not verified empirical research. Process rules remain under [methodology](../../methodology/). Inherited Base template completion records do not evidence TreatFlow product completion.
+Derived from the sponsor's initial TreatFlow premise and the [000-A project-specific intake gate](../../phases/000/000-a-treatflow-execution.md). This is **provisional current intake knowledge**, refined by [000-B evidence](../../phases/000/000-b-treatflow-execution.md) [000-C evidence](../../phases/000/000-c-treatflow-execution.md), and [000-D evidence](../../phases/000/000-d-treatflow-execution.md), not verified empirical research. Process rules remain under [methodology](../../methodology/). Inherited Base template completion records do not evidence TreatFlow product completion.
