@@ -8,7 +8,7 @@ tags: [treatflow, phase-006, product-family, scope, canonical]
 
 # TreatFlow — Adopted Concept Family and Intentional Scope
 
-**Authority:** [006-D decision evidence](../../phases/006/006-d-treatflow-execution.md). **Provisional through 006-E variant-composition verification and 006-F exit.** This document owns deliberately adopted *conceptual design scope*, not software packages, launch commitments, released products, or approval to collect or disclose information. The [dependency owner](../dependencies/concept-dependence.md) owns contextual edge semantics; the [Phase 005 action surface](../composition/application-action-surface.md) and its C/D composition specifications own action behavior.
+**Authority:** [006-D decision evidence](../../phases/006/006-d-treatflow-execution.md). **The Phase 006-F review has exited with carry-forward.** This document owns deliberately adopted *conceptual design scope*, not software packages, launch commitments, released products, or approval to collect or disclose information. The [dependency owner](../dependencies/concept-dependence.md) owns contextual edge semantics; the [Phase 005 action surface](../composition/application-action-surface.md) and its C/D composition specifications own action behavior.
 
 ## Family anchor and chosen design scope
 

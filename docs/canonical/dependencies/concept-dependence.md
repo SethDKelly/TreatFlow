@@ -8,7 +8,7 @@ tags: [treatflow, phase-006, dependence, concept-family, provisional]
 
 # TreatFlow — Contextual Concept Inclusion Dependencies
 
-**Current decision owner:** [006-B evidence](../../phases/006/006-b-treatflow-execution.md). **Provisional until 006-C subset/cycle stress testing and Phase 006-F exit.** A directed `A → B` means that *in a specified application-family role*, A's inclusion makes sense only when B also participates. This is **not** an intrinsic reference, synchronization, data relationship, API, implementation dependency, scope commitment or assertion that B must occur before A.
+**Current decision owner:** [006-B evidence](../../phases/006/006-b-treatflow-execution.md). **Phase 006-F exited with carry-forward; the adopted TreatFlow-native contextual edges are S/V/R/D → O as qualified by the [current family owner](../project/concept-family-scope.md).** A directed `A → B` means that *in a specified application-family role*, A's inclusion makes sense only when B also participates. This is **not** an intrinsic reference, synchronization, data relationship, API, implementation dependency, scope commitment or assertion that B must occur before A.
 
 ## Application context
 

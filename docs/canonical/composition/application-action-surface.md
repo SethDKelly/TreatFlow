@@ -8,7 +8,7 @@ tags: [treatflow, composition, application-actions, provisional]
 
 # TreatFlow — Provisional Application Action Surface
 
-**Authority:** [005-B decision](../../phases/005/005-b-treatflow-execution.md). This is the **current provisional application-level action surface**, not an API or UI plan. Multi-concept actions are **candidates, not approved synchronizations**, until 005-C–E. Phase 005-F/G will review final exposure and exclusions. The five [canonical concepts](../concepts/candidates.md) retain intrinsic action semantics independently.
+**Authority:** [005-B decision](../../phases/005/005-b-treatflow-execution.md). This is the **current qualified application-level action surface after Phase 005-G exit**, not an API or UI plan. C-01–C-03 and D-01–D-03 have separately specified guarded composition semantics in their canonical owners; 'candidate' classifications below do not create unconditional, independently exposed or production-authorized actions. The five [canonical concepts](../concepts/candidates.md) retain intrinsic action semantics independently.
 
 ## Classification
 
