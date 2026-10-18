@@ -6,6 +6,11 @@ okf_version: "0.2"
 
 This directory is the Open Knowledge Format (OKF) v0.2 knowledge bundle for Base. It guides a cloned project from project intake through completed Jackson-aligned software concept design, then through a post-closure pre-implementation repository preparation phase before downstream engineering begins.
 
+## TreatFlow active intake
+
+- [TreatFlow project intake](canonical/project/intake.md) — provisional current product premise, affected parties and outcomes.
+- [Phase 000 execution](phases/000/) — TreatFlow 000-B completed on its feature branch; 000-C next eligible following merge. Inherited Base template execution does not represent TreatFlow completion.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

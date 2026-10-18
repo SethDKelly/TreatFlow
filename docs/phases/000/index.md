@@ -11,7 +11,9 @@ Phase 000 is the pre-methodology intake phase. It establishes a sufficiently gro
 
 ## TreatFlow execution
 
-- [TreatFlow 000-A execution](000-a-treatflow-execution.md) — approved project-specific intake plan; 000-B next eligible; Phase 000 not yet closed.
+- [TreatFlow 000-A execution](000-a-treatflow-execution.md) — approved project-specific intake plan; 000-A passed; see subsequent execution records for active status.
+
+- [TreatFlow 000-B execution](000-b-treatflow-execution.md) — actor/context/outcome assessment complete; 000-C next eligible upon merge.
 
 ## Navigation
 
