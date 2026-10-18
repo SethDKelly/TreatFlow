@@ -89,3 +89,13 @@ Overlapping coverage assertions retain their source, extent and qualification; a
 
 **Residual Phase 004 question:** should attention coverage have independent concept identity, and is Observer/source association intrinsic or better separately factored?
 
+
+## 004-B modularity decision: integrated observation and exposure
+
+**Current boundary: retain one Observation concept**, not separate Exposure. [004-B comparison and counterexamples](../../phases/004/004-b-treatflow-execution.md) establishes that reporting a witnessed event and qualifying the opportunity to observe activity are separable **actions or reporting modes** serving the same coherent purpose of bounded, interpretable observational evidence. An event report **does not require** a surrounding monitored interval, and an interval claim **does not require** an arrival event; their individual incompleteness must remain visible rather than fabricated.
+
+**Minimum behavior:** `Establish`, `Report`, `AssertCoverage` (including completeness qualification), `Qualify`, `Inspect` and `Close` together permit the full OP without another concept. `Report` may state an explicit bounded zero for a declared unit; `AssertCoverage` may declare observed attention and a complete reporting claim for that unit/extent. A zero is interpretable as **reported observed zero** only where explicit observed coverage and claimed full reporting completeness support it, with no unresolved contradicting claim. A missing event report, an unknown coverage interval or a lone zero without monitored extent never establishes a watched zero. Completeness is an assertion, **not proof of flawless observation**.
+
+**Independence:** even without other TreatFlow concepts, Observation can supply and inspect qualified evidence. Source/account identities are abstract; group/visitor units, known coverage, uncertain extents, and retrospective precision remain semantically important and must not be generalized away. Correction rights, revision history, research provision and disclosure are distinct prospective boundary challenges—not hidden prerequisites of the observed activity claim.
+
+**Boundary carry-forward:** [004-C](../../phases/004/004-a-treatflow-execution.md) must test whether post-closure factual correction belongs here or in independent Revision; [004-E](../../phases/004/004-a-treatflow-execution.md) independently verifies remaining modularity. An Exposure concept may be reconsidered only if new evidence shows a distinct meaningful user-facing purpose, not merely separate time fields or bookkeeping.

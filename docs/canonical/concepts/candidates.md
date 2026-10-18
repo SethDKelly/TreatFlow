@@ -17,6 +17,8 @@ tags: [treatflow, concepts, provisional, phase-002]
 | **Controlled disclosure** | Information can be made available to an appropriate audience under conditions that limit avoidable harm, while respecting data consumers' research needs | P-03, P-04, P-06 | Is protected release independently coherent from research access and review? Who has authority? |
 | **Research provision** | A recipient obtains a meaningfully scoped, interpretable body of observations accompanied by relevant measurement limitations, without prescribing the recipient's statistical conclusions | P-02, P-03, P-04 | Is this distinct from controlled disclosure, or merely its output? Can limitations remain intelligible without an in-product analysis suite? |
 
+**004-B boundary decision:** [Observation](observation.md) retains monitoring exposure, evidence and reporting completeness as one coherent concept; **no standalone Exposure** is retained. [Rationale](../../phases/004/004-b-treatflow-execution.md). Further correction, ownership and research boundaries remain under audit.
+
 **003-C refinement:** Observation's current semantics are owned by [its specification](observation.md); the table below is candidate navigation, not competing specification authority.
 
 **003-D status:** [Contribution Stewardship](contribution-stewardship.md) and [Revision](revision.md) now have *conditional* canonical behavioral specifications; their independent concept status is subject to 003-F/Phase 004. The list above is navigational and not competing specification authority.
