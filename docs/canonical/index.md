@@ -35,6 +35,9 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Observation provisional behavioral specification](concepts/observation.md) — current abstract coverage, measurement and temporal semantics, pending Phase 003/004 review.
 
+- [Contribution Stewardship](concepts/contribution-stewardship.md) — conditional contributor responsibility/control behavior; independence unresolved.
+- [Revision](concepts/revision.md) — conditional factual supersession and challenge-history behavior; independence unresolved.
+
 ## Navigation
 
 - [Bundle root](../)
