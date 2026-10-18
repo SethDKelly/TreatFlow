@@ -21,7 +21,9 @@ Project-specific substantive subphases remain dynamically derived by `006-A`; Ba
 
 - [006-B application-family roles and extrinsic dependence tests](006-b-treatflow-execution.md) — two provisional native-family edges; 006-B complete; 006-C record governs handoff.
 
-- [006-C coherent subsets, closure and cycle challenge](006-c-treatflow-execution.md) — qualified S→O/V→O, representative subsets, no accepted cycle; 006-D next after merge.
+- [006-C coherent subsets, closure and cycle challenge](006-c-treatflow-execution.md) — qualified S→O/V→O, representative subsets, no accepted cycle; 006-C complete; 006-D governs current handoff.
+
+- [006-D product-family variants, adopted scope & exclusions](006-d-treatflow-execution.md) — integrated five-concept design adopted; 006-E next after merge.
 
 ## Navigation
 
