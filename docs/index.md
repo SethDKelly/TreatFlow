@@ -74,6 +74,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [006-E variant action and composition audit](phases/006/006-e-treatflow-execution.md) — Phase 006-F independent exit next after merge.
 
+- [007-A concept mapping start gate](phases/007/007-a-treatflow-execution.md) — mapping risk plan and 007-B–G sequence; 007-B next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
