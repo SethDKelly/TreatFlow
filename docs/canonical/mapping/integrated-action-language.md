@@ -78,3 +78,15 @@ Words above are **collision tests**, not mandatory UI labels. Later linguistic w
 If a faithful mapping would require information, a state transition, a new automatic effect, a notification, public-source inspection or permission not established upstream, **record the misfit and reopen its owner**: 001 for missing legitimate purpose, 003/004 for intrinsic behavior/boundary, 005 for application action/composition, 006 for product scope. Do not solve with copy, placement, a mock permission or a new interface-only field.
 
 **007-F** must adversarially replay integrated actions and affected-party situations; **007-G** independently audits authority/OKF and Phase 008 handoff. The actual legality and feasibility of consent, minors, household privacy, retention, protected adjudication, science, and safe disclosure remain unresolved. No real operation, code, design system or UI artifact is authorized here.
+
+## 008-C false-familiarity precision
+
+[008-C review](../../phases/008/008-c-treatflow-execution.md) tested familiar concept/action names against current purpose, authority and temporal behavior; no complete rename was justified. These are **user-visible semantic constraints**, not new intrinsic rules or prescribed labels:
+
+- **Recognize** means entitled inspection of contribution *standing*, not publicly verified identity, unilateral ownership or correction rights.
+- **Amend / Challenge / ResolveChallenge** respectively mean reasoned successor assertion, factual challenge and challenge disposition, never interchangeable with destructive edit or guaranteed single current truth.
+- **QualifyProvision** communicates evidence fitness *and its limitations*; it does not certify a Poisson hypothesis or grant protected access. **Provide** is a guarded delivery participant, not an ordinary public export.
+- **Decide** records a scoped prospective protective decision, not actual `MakeAvailable` exposure. **SuspendFuture** constrains later availability, not prior recipient copies.
+- **Inspect**-family actions are entitled/scoped views, not promises of public raw details; “anonymous” and “safe” cannot be inferred from a pseudonym, coarse location or lack of a displayed name.
+
+Use the natural owning concept and composition rules for action effects. A later 008-D/E rename or broader genericity decision must update these linguistic constraints and recheck the 007-F adverse scenarios; 008-C did not approve a concept rewrite.
