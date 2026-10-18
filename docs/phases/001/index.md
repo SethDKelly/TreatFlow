@@ -15,7 +15,9 @@ Phase 001 is the first Jackson-aligned concept-design phase. It converts grounde
 
 - [001-B TreatFlow execution](001-b-treatflow-execution.md) — affected-party needs and burdens examined; 001-C next eligible upon merge.
 
-- [001-C TreatFlow execution](001-c-treatflow-execution.md) — provisional product purpose and six distinct obligations; 001-D next eligible on merge.
+- [001-C TreatFlow execution](001-c-treatflow-execution.md) — provisional product purpose and six distinct obligations; 001-C completed; later execution records govern the current handoff.
+
+- [001-D TreatFlow execution](001-d-treatflow-execution.md) — context-qualified success and purpose tensions assessed; 001-E next eligible after merge.
 
 ## Navigation
 
