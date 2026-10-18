@@ -1,3 +1,5 @@
+- [Phase 007 mapping exit and Phase 008 familiarity handoff](phases/007/007-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 008-A next eligible.
+
 - [Phase 006 dependence/scope exit and Phase 007 mapping handoff](phases/006/006-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 007-A next eligible.
 
 - [Phase 005 composition exit and Phase 006 handoff](phases/005/005-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 006-A next eligible.
