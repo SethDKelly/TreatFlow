@@ -32,6 +32,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [003-D stewardship and revision qualification](phases/003/003-d-treatflow-execution.md) — conditional concept behavior and independence questions.
 
+- [003-E disclosure and research provision qualification](phases/003/003-e-treatflow-execution.md) — provisional protective and research behavior with conditional independence.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

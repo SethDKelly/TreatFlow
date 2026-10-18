@@ -38,6 +38,9 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 - [Contribution Stewardship](concepts/contribution-stewardship.md) — conditional contributor responsibility/control behavior; independence unresolved.
 - [Revision](concepts/revision.md) — conditional factual supersession and challenge-history behavior; independence unresolved.
 
+- [Controlled Disclosure](concepts/controlled-disclosure.md) — provisional protective sharing behavior, no approved release policy.
+- [Research Provision](concepts/research-provision.md) — conditional research-scope and evidence qualification behavior.
+
 ## Navigation
 
 - [Bundle root](../)
