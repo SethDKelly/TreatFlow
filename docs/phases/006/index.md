@@ -23,7 +23,9 @@ Project-specific substantive subphases remain dynamically derived by `006-A`; Ba
 
 - [006-C coherent subsets, closure and cycle challenge](006-c-treatflow-execution.md) — qualified S→O/V→O, representative subsets, no accepted cycle; 006-C complete; 006-D governs current handoff.
 
-- [006-D product-family variants, adopted scope & exclusions](006-d-treatflow-execution.md) — integrated five-concept design adopted; 006-E next after merge.
+- [006-D product-family variants, adopted scope & exclusions](006-d-treatflow-execution.md) — integrated five-concept design adopted; 006-D complete; 006-E record governs current handoff.
+
+- [006-E variant-specific composition, action exposure and upstream defect review](006-e-treatflow-execution.md) — guarded experience paths verified, no blocking upstream defect; 006-F next after merge.
 
 ## Navigation
 
