@@ -57,6 +57,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Adopted TreatFlow concept-family scope](project/concept-family-scope.md) — integrated five-concept design and coherent-but-unadopted variants; no launch authorization.
 
+- [Phase 006 exit and Phase 007 handoff](../phases/006/006-f-treatflow-exit-review.md) — current native-family dependency and product-scope authority reconciliation.
+
 ## Navigation
 
 - [Bundle root](../)
