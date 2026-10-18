@@ -21,6 +21,8 @@ tags: [treatflow, concepts, provisional, phase-002]
 
 **004-C boundary decision:** [Contribution Stewardship](contribution-stewardship.md) retains protected attribution/standing, but no longer owns generic requests to correct or withdraw other concepts' outputs. [Revision](revision.md) provisionally retains independent factual supersession history. Both face 004-E independent recheck. [Rationale](../../phases/004/004-c-treatflow-execution.md).
 
+**004-D boundary decision:** [Controlled Disclosure](controlled-disclosure.md) provisionally retains independent prospective availability decisions, while [Research Provision](research-provision.md) is reframed around independently valuable *evidence fitness/qualification* rather than delivery artifacts; its survival remains conditional on 004-E. [Decision evidence](../../phases/004/004-d-treatflow-execution.md).
+
 **003-C refinement:** Observation's current semantics are owned by [its specification](observation.md); the table below is candidate navigation, not competing specification authority.
 
 **003-D status:** [Contribution Stewardship](contribution-stewardship.md) and [Revision](revision.md) now have *conditional* canonical behavioral specifications; their independent concept status is subject to 003-F/Phase 004. The list above is navigational and not competing specification authority.
