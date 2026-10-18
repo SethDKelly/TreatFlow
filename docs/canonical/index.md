@@ -55,6 +55,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [TreatFlow contextual concept dependence](dependencies/concept-dependence.md) — current 006-B conditional edges, rejected edges and unresolved roles; not adopted scope.
 
+- [Adopted TreatFlow concept-family scope](project/concept-family-scope.md) — integrated five-concept design and coherent-but-unadopted variants; no launch authorization.
+
 ## Navigation
 
 - [Bundle root](../)
