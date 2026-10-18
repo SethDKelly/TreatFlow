@@ -15,6 +15,10 @@ Phase 005 composes independently specified concepts through explicit synchroniza
 
 Project-specific substantive subphases remain dynamically derived by `005-A`; Base does not prescribe a fixed synchronization notation, interaction matrix, action count, or B–X sequence.
 
+## TreatFlow execution
+
+- [005-A composition and synchronization start gate](005-a-treatflow-execution.md) — five-concept baseline, candidate semantic seams, action exposure and 005-B–G plan; 005-B next eligible after merge.
+
 ## Navigation
 
 - [Previous phase](../004/)
