@@ -7,7 +7,7 @@ tags: [treatflow, concepts, provisional, phase-002]
 
 # TreatFlow — Provisional Concept Candidates
 
-**Status: Retained for specification with carry-forwards at [002-F exit](../../phases/002/002-f-treatflow-exit-review.md); Phase 003-B identity and OP challenge completed; detailed specifications remain pending.** These working identities are *not final concepts*. Read the [purpose model](../purpose/purposes.md) and [002-E convergence rationale](../../phases/002/002-e-treatflow-execution.md). [Observation](observation.md) now has a provisional 003-C behavioral specification; other candidate specifications and cross-concept authority remain unresolved. Technical representation has not been decided. Phase 003 may revise, combine, split or reject any candidate. See [003-B identity challenge](../../phases/003/003-b-treatflow-execution.md) for behavioral stories and conditional decisions.
+**Status: Retained for specification with carry-forwards at [002-F exit](../../phases/002/002-f-treatflow-exit-review.md); Phase 003-D conditionally specifies contribution control and factual revision; later specifications and exit review remain pending.** These working identities are *not final concepts*. Read the [purpose model](../purpose/purposes.md) and [002-E convergence rationale](../../phases/002/002-e-treatflow-execution.md). [Observation](observation.md) now has a provisional 003-C behavioral specification; other candidate specifications and cross-concept authority remain unresolved. Technical representation has not been decided. Phase 003 may revise, combine, split or reject any candidate. See [003-B identity challenge](../../phases/003/003-b-treatflow-execution.md) for behavioral stories and conditional decisions.
 
 | Working candidate | Short semantic/behavioral hypothesis | Purpose association | Critical Phase 003/004 question |
 |---|---|---|---|
@@ -18,6 +18,8 @@ tags: [treatflow, concepts, provisional, phase-002]
 | **Research provision** | A recipient obtains a meaningfully scoped, interpretable body of observations accompanied by relevant measurement limitations, without prescribing the recipient's statistical conclusions | P-02, P-03, P-04 | Is this distinct from controlled disclosure, or merely its output? Can limitations remain intelligible without an in-product analysis suite? |
 
 **003-C refinement:** Observation's current semantics are owned by [its specification](observation.md); the table below is candidate navigation, not competing specification authority.
+
+**003-D status:** [Contribution Stewardship](contribution-stewardship.md) and [Revision](revision.md) now have *conditional* canonical behavioral specifications; their independent concept status is subject to 003-F/Phase 004. The list above is navigational and not competing specification authority.
 
 **003-B disposition:** Observation proceeds to 003-C; Controlled disclosure proceeds to 003-E with its boundary under challenge. Contribution stewardship and Revision face conditional reframe-or-stop decisions in 003-D; Research provision faces a conditional merge-or-stop test in 003-E. None has a complete behavioral specification.
 
