@@ -1,3 +1,5 @@
+- [Phase 005 composition exit and Phase 006 handoff](phases/005/005-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 006-A next eligible.
+
 ---
 okf_version: "0.2"
 ---

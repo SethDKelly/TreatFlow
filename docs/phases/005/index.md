@@ -27,7 +27,9 @@ Project-specific substantive subphases remain dynamically derived by `005-A`; Ba
 
 - [005-E Chains, authority, over-/under-synchronization and automation](005-e-treatflow-execution.md) — guarded chain audit, no unconditional automation; 005-E complete; 005-F governs current handoff.
 
-- [005-F synergy, purpose coverage and consolidation](005-f-treatflow-execution.md) — P-01–P-06 and eight scenarios reconciled, bounded synergy hypothesis; 005-G next eligible after merge.
+- [005-F synergy, purpose coverage and consolidation](005-f-treatflow-execution.md) — P-01–P-06 and eight scenarios reconciled, bounded synergy hypothesis; 005-F complete; 005-G governs final handoff.
+
+- [005-G integrity audit, exit review and Phase 006 handoff](005-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 006-A next eligible.
 
 ## Navigation
 

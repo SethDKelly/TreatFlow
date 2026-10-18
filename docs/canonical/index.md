@@ -51,6 +51,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Revision, Research Provision & Controlled Disclosure composition](composition/revision-research-disclosure.md) — D-01–D-03 current guarded application semantics, historical exposure preserved.
 
+- [Phase 005 composition exit and Phase 006 handoff](../phases/005/005-g-treatflow-exit-review.md) — current action and C/D composition owner map; extrinsic inclusion remains for Phase 006.
+
 ## Navigation
 
 - [Bundle root](../)
