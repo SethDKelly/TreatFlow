@@ -88,7 +88,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [007-F adversarial mapping completeness](phases/007/007-f-treatflow-execution.md) — Phase 007-G independent exit next after merge.
 
-- [008-A familiarity and reuse start gate](phases/008/008-a-treatflow-execution.md) — five-concept comparison baseline and 008-B–G plan; 008-B next after merge.
+- [008-A familiarity and reuse start gate](phases/008/008-a-treatflow-execution.md) — five-concept comparison baseline and 008-B–G plan; 008-A complete; 008-B record governs current handoff.
+
+- [008-B familiar precedent and behavioral fitness audit](phases/008/008-b-treatflow-execution.md) — 008-C false-familiarity terminology next after merge.
 
 ## Start here
 
