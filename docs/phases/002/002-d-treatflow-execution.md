@@ -58,7 +58,7 @@ These are not numerical scores. **Plausible** does not mean retained.
 | S-27 Privacy-preserving comparison | Reframe/split/merge | Could be an analytical output/share policy rather than independently coherent behavior |
 | S-28 Evidence challenge | Plausible — examine | Challenge/response potentially separate from contributor correction, but authority and scale unclear |
 
-**Inventory reconciliation:** 11 plausible for 002-E examination, 8 reframe/split/merge, 5 deferred, 4 rejected as standalone. All 28 seeds explicitly dispositioned without claiming this constitutes a shortlist.
+**Inventory reconciliation:** 12 plausible for 002-E examination, 8 reframe/split/merge, 5 deferred, 3 rejected as standalone. All 28 seeds explicitly dispositioned without claiming this constitutes a shortlist.
 
 ## 3. Decomposition-level concept concerns
 
@@ -98,7 +98,7 @@ These are not numerical scores. **Plausible** does not mean retained.
 
 ## 6. 002-E handoff and completion evidence
 
-002-E should now perform **bounded convergence**, comparing plausible alternatives rather than simply choosing all eleven plausible seeds. For any provisional retained candidate, record its user-facing mental model, behavioral purpose, P-01–P-06 association, reasons against a competing decomposition, and unresolved boundary/independence/genericity issues. Retain only sufficiently coherent candidates for Phase 003; allow explicit reframing, re-divergence, deferral or nonselection. Any concept canonicalization must wait for demonstrably stable semantic identity.
+002-E should now perform **bounded convergence**, comparing plausible alternatives rather than simply choosing all twelve plausible seeds. For any provisional retained candidate, record its user-facing mental model, behavioral purpose, P-01–P-06 association, reasons against a competing decomposition, and unresolved boundary/independence/genericity issues. Retain only sufficiently coherent candidates for Phase 003; allow explicit reframing, re-divergence, deferral or nonselection. Any concept canonicalization must wait for demonstrably stable semantic identity.
 
 - [x] All 28 seed records dispositioned and reconciled.
 - [x] Reviewed observation/identity/correction/sharing/whole-system decomposition families.
