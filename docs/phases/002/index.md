@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `002-A`; th
 
 - [002-D concept-likeness and purpose coverage](002-d-treatflow-execution.md) — all 28 seeds screened; 002-D complete; 002-E records the provisional shortlist.
 
-- [002-E bounded convergence](002-e-treatflow-execution.md) — five provisional candidates and explicit Phase 003 doubts; 002-F next eligible after merge.
+- [002-E bounded convergence](002-e-treatflow-execution.md) — five provisional candidates and explicit Phase 003 doubts; 002-E complete; the 002-F exit decision governs the handoff.
+
+- [002-F exit review and Phase 003 handoff](002-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; 003-A next eligible after merge.
 
 ## Navigation
 

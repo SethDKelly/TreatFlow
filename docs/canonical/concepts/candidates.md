@@ -1,13 +1,13 @@
 ---
 type: Provisional Concept Candidates
 title: TreatFlow — Candidates Retained for Behavioral Specification
-description: Phase 002-E provisional candidate identities and purpose associations, subject to 002-F review and Phase 003 challenge.
+description: Phase 002 retained candidate identities and purpose associations, accepted for Phase 003 specification with carry-forwards.
 tags: [treatflow, concepts, provisional, phase-002]
 ---
 
 # TreatFlow — Provisional Concept Candidates
 
-**Status: Retained for specification, provisionally in 002-E; Phase 002 exit not yet passed.** These working identities are *not final concepts*. Read the [purpose model](../purpose/purposes.md) and [002-E convergence rationale](../../phases/002/002-e-treatflow-execution.md). Detailed state, actions, operational principles, dependencies, authority policies and technical representation have not been decided. Phase 003 may revise, combine, split or reject any candidate.
+**Status: Retained for specification with carry-forwards at [002-F exit](../../phases/002/002-f-treatflow-exit-review.md); Phase 003 has not begun.** These working identities are *not final concepts*. Read the [purpose model](../purpose/purposes.md) and [002-E convergence rationale](../../phases/002/002-e-treatflow-execution.md). Detailed state, actions, operational principles, dependencies, authority policies and technical representation have not been decided. Phase 003 may revise, combine, split or reject any candidate.
 
 | Working candidate | Short semantic/behavioral hypothesis | Purpose association | Critical Phase 003/004 question |
 |---|---|---|---|

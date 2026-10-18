@@ -11,16 +11,16 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 - [TreatFlow project intake](canonical/project/intake.md) — provisional current product premise, affected parties and outcomes.
 - [Phase 000 execution](phases/000/) — Phase 000 PASS WITH CARRY-FORWARD; Phase 000 complete; its carry-forwards remain active. See the [exit decision and handoff](phases/000/000-e-treatflow-exit-review.md).
 
-## Current Phase 001 exit and Phase 002 entry
+## Completed purpose framing
 
 - [Current TreatFlow purpose and actor needs](canonical/purpose/purposes.md) — product purpose, P-01–P-06 obligations and success contexts, with explicit untested assumptions.
-- [Phase 001 exit and handoff](phases/001/001-e-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; Phase 002-A next eligible after merge.
+- [Phase 001 exit and handoff](phases/001/001-e-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; Phase 001 complete; Phase 002 discovery executed.
 
-## Active Phase 002
+## Phase 002 exit and Phase 003 entry
 
-- [002-A concept-discovery start gate](phases/002/002-a-treatflow-execution.md) — approved project-specific discovery workstreams; 002-B next eligible after merge.
+- [Phase 002 exit review](phases/002/002-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; 003-A next eligible after merge.
 
-- [Provisional Phase 002-E concept candidates](canonical/concepts/candidates.md) — retained for specification, not finalized; see [convergence evidence](phases/002/002-e-treatflow-execution.md).
+- [Provisional retained candidates](canonical/concepts/candidates.md) — five working identities for Phase 003 specification, not finalized.
 
 ## Start here
 
