@@ -47,6 +47,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [TreatFlow provisional application action surface](composition/application-action-surface.md) — current direct, protected, internal and composed-candidate classifications pending 005-C–G.
 
+- [Observation, Stewardship & Revision composition](composition/observation-stewardship-revision.md) — C-01–C-03 current guarded semantics; no automatic authority or mandatory registration.
+
 ## Navigation
 
 - [Bundle root](../)
