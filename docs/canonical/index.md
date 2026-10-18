@@ -63,6 +63,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Protected standing, revision & history mapping](mapping/standing-revision-history.md) — current semantic representation of private responsibility, protected correction and contested factual history.
 
+- [Research suitability, controlled disclosure & protected recipient mapping](mapping/research-disclosure-representation.md) — qualification versus authorization, scoped availability and historical exposure representations.
+
 ## Navigation
 
 - [Bundle root](../)

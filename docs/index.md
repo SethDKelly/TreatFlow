@@ -80,6 +80,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [007-C standing and correction-history mapping](phases/007/007-c-treatflow-execution.md) — 007-D research suitability/disclosure mapping next after merge.
 
+- [007-D research and protected disclosure mapping](phases/007/007-d-treatflow-execution.md) — 007-E integrated action/terminology audit next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

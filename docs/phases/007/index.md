@@ -21,7 +21,9 @@ Project-specific substantive subphases remain dynamically derived by `007-A`; Ba
 
 - [007-B Observation, Measurement, Coverage & Low-Burden Mapping](007-b-treatflow-execution.md) — seven actions, evidence and coverage distinction, counterexamples; 007-B complete; 007-C record governs handoff.
 
-- [007-C Contribution Standing, Factual Revision & Historical Mapping](007-c-treatflow-execution.md) — protected standing, factual challenge/currentness and eleven intrinsic actions mapped; 007-D next after merge.
+- [007-C Contribution Standing, Factual Revision & Historical Mapping](007-c-treatflow-execution.md) — protected standing, factual challenge/currentness and eleven intrinsic actions mapped; 007-C complete; 007-D record governs handoff.
+
+- [007-D Research Suitability, Controlled Disclosure & Recipient Mapping](007-d-treatflow-execution.md) — 11 research/disclosure actions, D-01–D-03 and protected historical exposure; 007-E next after merge.
 
 ## Navigation
 
