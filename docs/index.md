@@ -20,6 +20,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [002-A concept-discovery start gate](phases/002/002-a-treatflow-execution.md) — approved project-specific discovery workstreams; 002-B next eligible after merge.
 
+- [Provisional Phase 002-E concept candidates](canonical/concepts/candidates.md) — retained for specification, not finalized; see [convergence evidence](phases/002/002-e-treatflow-execution.md).
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

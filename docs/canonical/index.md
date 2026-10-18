@@ -31,6 +31,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [TreatFlow actor needs and participation context](purpose/purposes.md) — current Phase 001 purpose baseline (P-01–P-06 and success contexts), with carry-forwards; separate from project intake.
 
+- [TreatFlow provisional concept candidates](concepts/candidates.md) — five working candidates retained for specification, subject to Phase 002 exit and Phase 003 review.
+
 ## Navigation
 
 - [Bundle root](../)
