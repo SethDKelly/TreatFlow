@@ -49,6 +49,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Observation, Stewardship & Revision composition](composition/observation-stewardship-revision.md) — C-01–C-03 current guarded semantics; no automatic authority or mandatory registration.
 
+- [Revision, Research Provision & Controlled Disclosure composition](composition/revision-research-disclosure.md) — D-01–D-03 current guarded application semantics, historical exposure preserved.
+
 ## Navigation
 
 - [Bundle root](../)
