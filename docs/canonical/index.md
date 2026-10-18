@@ -59,6 +59,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Phase 006 exit and Phase 007 handoff](../phases/006/006-f-treatflow-exit-review.md) — current native-family dependency and product-scope authority reconciliation.
 
+- [Observation state and action mapping](mapping/observation-representation.md) — current user-visible obligations for units, monitored extent, temporal uncertainty, lifecycle and reporting feedback.
+
 ## Navigation
 
 - [Bundle root](../)
