@@ -34,6 +34,10 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [003-E disclosure and research provision qualification](phases/003/003-e-treatflow-execution.md) — provisional protective and research behavior with conditional independence.
 
+## Active Phase 004
+
+- [004-A modularity start gate](phases/004/004-a-treatflow-execution.md) — five provisional concepts under corrective factoring review; 004-B next eligible after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
