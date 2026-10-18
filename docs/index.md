@@ -2,14 +2,14 @@
 okf_version: "0.2"
 ---
 
-# Base Knowledge Bundle
+# TreatFlow Knowledge Bundle
 
-This directory is the Open Knowledge Format (OKF) v0.2 knowledge bundle for Base. It guides a cloned project from project intake through completed Jackson-aligned software concept design, then through a post-closure pre-implementation repository preparation phase before downstream engineering begins.
+This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-specific design and pre-implementation preparation. Inherited template execution records do not count as TreatFlow progress.
 
-## TreatFlow active intake
+## TreatFlow current state
 
 - [TreatFlow project intake](canonical/project/intake.md) — provisional current product premise, affected parties and outcomes.
-- [Phase 000 execution](phases/000/) — TreatFlow 000-D completed on its feature branch; 000-E next eligible following merge. Inherited Base template execution does not represent TreatFlow completion.
+- [Phase 000 execution](phases/000/) — Phase 000 PASS WITH CARRY-FORWARD; Phase 001-A next eligible after merge of the exit-review PR. See the [exit decision and handoff](phases/000/000-e-treatflow-exit-review.md).
 
 ## Start here
 
