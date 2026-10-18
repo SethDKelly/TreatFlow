@@ -25,6 +25,10 @@ When a conclusion becomes durable, promote its stable meaning here rather than f
 
 See [Canonical and Historical Knowledge Authority](../methodology/knowledge-authority.md) and [Documentation Integrity & OKF Governance](../methodology/documentation-governance.md).
 
+## TreatFlow current knowledge
+
+- [Project intake context](project/intake.md) — provisional current product premise, actors, outcomes, uncertainties and Phase 000 carry-forward.
+
 ## Navigation
 
 - [Bundle root](../)
