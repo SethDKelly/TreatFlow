@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `007-A`; Ba
 
 - [007-D Research Suitability, Controlled Disclosure & Recipient Mapping](007-d-treatflow-execution.md) — 11 research/disclosure actions, D-01–D-03 and protected historical exposure; 007-D complete; 007-E record governs handoff.
 
-- [007-E Integrated Actions, Availability, Language & Structural Integrity](007-e-treatflow-execution.md) — 29 actions reconciled, cross-concept vocabulary/accessibility reviewed; 007-F next after merge.
+- [007-E Integrated Actions, Availability, Language & Structural Integrity](007-e-treatflow-execution.md) — 29 actions reconciled, cross-concept vocabulary/accessibility reviewed; 007-E complete; 007-F record governs handoff.
+
+- [007-F Experience Counterexamples, Misfit/Reentry & Completeness](007-f-treatflow-execution.md) — eight purpose scenarios, eight cross-concept sequences, twelve coverage dimensions; 007-G next after merge.
 
 ## Navigation
 

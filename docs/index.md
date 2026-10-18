@@ -84,6 +84,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [007-E integrated mapping audit](phases/007/007-e-treatflow-execution.md) — 007-F adversarial completeness review next after merge.
 
+- [007-F adversarial mapping completeness](phases/007/007-f-treatflow-execution.md) — Phase 007-G independent exit next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
