@@ -78,3 +78,7 @@ tags: [treatflow, composition, application-actions, provisional]
 7. A legitimate `Challenge` does not execute `Amend`; `Relinquish` does not delete or revoke past exposure.
 
 **Out of scope:** UI screens/buttons, API/routes, roles/authentication implementation, event/message choreography, technical execution, retention policy, and real-world permissions. They remain unapproved.
+
+## 005-E guard and automation audit
+
+[005-E adversarial evidence](../../phases/005/005-e-treatflow-execution.md) preserves all 005-B qualified/protected/internal exposure decisions, with the following interpretation: **composed candidate** does not imply an actor may independently invoke an internal participant, and **protected** does not assign real-world standing to any presumed operator. C-01/C-02 and D-01–D-03 are bounded by applicable legitimate conditions and do not collectively imply unconditional reactive automation. A failed optional contribution association does not invalidate a permitted `Observation.Report`; denied disclosure or insufficient qualification does not expose either `MakeAvailable` or `Provide` through the combined research intention. 005-F/G may further refine the action surface.
