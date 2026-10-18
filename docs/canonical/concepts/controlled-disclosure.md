@@ -53,3 +53,12 @@ Approval cannot bypass unknown or unexamined material risk merely because an ana
 **Deliberately unspecified:** concrete risk methodology, selection/transformation technique, recipient technical controls, release format, operator workflow, schedules, authentication and audit storage.
 
 **Open (not resolved):** who has non-substitutable authority for contribution-related permission and third-party protection; what minimum risk evidence permits approval; how conditions apply to subsequent redisclosures; what happens when recipients have prior access; whether a single sharing concept can incorporate Research Provision without losing meaning. These require 003-F, Phase 004 and later protected authority/policy work. Do not collect or release real data until applicable protections are independently qualified.
+
+## 003-F semantic closure: insufficiency and prospective effect
+
+For a proposed disclosure, `Assess` distinguishes **sufficiently justified under an applicable protection policy**, **insufficient evidence**, and **unresolved**. `Decide` cannot approve prospective exposure unless its applicable protection conditions have a defensible basis; insufficient or unresolved assessment permits decline, further qualification or continued nonavailability, **not** affirmative safe-release certification. This is a conceptual guard only: the actual assessment criteria, regulator/consent/age conditions and accountable decision-maker remain to be independently decided before any real release.
+
+`SuspendFuture` applies prospectively to all later `MakeAvailable` actions under the suspended decision. It cannot change recorded historical exposure or force copies held by recipients to disappear. If material changes materially after a decision (including revised evidence, scope or source permissions), prior approval cannot silently authorize a **different disclosure scope**; renewed assessment/decision may be required. No cross-concept notification or automatic revocation is specified.
+
+**Remaining Phase 004 question:** can prospective sharing decisions and scientific evidence provision remain independently comprehensible when both are present?
+
