@@ -68,7 +68,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [006-C coherent subset and cycle audit](phases/006/006-c-treatflow-execution.md) — 006-D scope selection next after merge.
 
-- [006-D conceptual product-family scope](phases/006/006-d-treatflow-execution.md) — integrated design, contextual R/D dependencies and deliberate exclusions; 006-E next after merge.
+- [006-D conceptual product-family scope](phases/006/006-d-treatflow-execution.md) — integrated design, contextual R/D dependencies and deliberate exclusions; 006-D complete; 006-E record governs current handoff.
+
+- [006-E variant action and composition audit](phases/006/006-e-treatflow-execution.md) — Phase 006-F independent exit next after merge.
 
 ## Start here
 
