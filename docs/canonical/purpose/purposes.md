@@ -7,7 +7,7 @@ tags: [treatflow, purpose, needs, context, phase-001]
 
 # TreatFlow — Actor Needs and Participation Context
 
-**Status:** provisional Phase 001-B current meaning; not an approved concept catalog, feature list or empirically verified user-need model. Read the [current project intake](../project/intake.md) for project scope and stakeholders. The supporting inquiry and evidentiary limits are in [001-B execution](../../phases/001/001-b-treatflow-execution.md).
+**Status:** provisional Phase 001 current meaning; not an approved concept catalog, feature list or empirically verified user-need model. Read the [current project intake](../project/intake.md) for project scope and stakeholders. The supporting inquiry and evidentiary limits are in [001-B execution](../../phases/001/001-b-treatflow-execution.md).
 
 ## Need candidates and burdens
 
@@ -46,7 +46,7 @@ A participant may have several needs, and needs of different parties may conflic
 
 **Enable willing community observers to turn everyday Halloween arrival experiences into interpretable evidence that others can explore responsibly, without making contribution unduly burdensome or exposing participating households and observed people to avoidable harm.**
 
-The value is shared, qualified understanding rather than data volume, a particular interface, or proof that arrival patterns are Poisson. This purpose remains sponsor-derived and subject to scrutiny in 001-D.
+The value is shared, qualified understanding rather than data volume, a particular interface, or proof that arrival patterns are Poisson. This purpose remains sponsor-derived and examined against illustrative 001-D success situations; empirical validation is still pending.
 
 ## Distinct design-purpose obligations
 
@@ -67,10 +67,41 @@ These are **candidate independent obligations**, not named software concepts, re
 
 ## Purpose quality and downstream validation
 
-The six candidate obligations are stated in terms of improvements and safeguards, with questions capable of rejecting a superficially attractive feature. None requires a particular authentication provider, session model, export format, database, UI, or statistical test. Phase 001-D must test their joint success in plausible Halloween situations, how tradeoffs distribute across parties, whether obligations are too broad or overlapping, and whether evidence warrants regrouping. Phase 001-E must determine final purpose-readiness. Phase 002 alone may discover candidate concepts.
+The six candidate obligations are stated in terms of improvements and safeguards, with questions capable of rejecting a superficially attractive feature. None requires a particular authentication provider, session model, export format, database, UI, or statistical test. Phase 001-D has tested their joint success in illustrative Halloween situations, exposed distributional tradeoffs, and found no basis yet to regroup them. Phase 001-E must determine final purpose-readiness. Phase 002 alone may discover candidate concepts.
+
+## Context-qualified success situations (001-D)
+
+These are **illustrative purpose-level situations**, not tested user behavior, approved UI flows, concept operational principles, or implementation acceptance tests. The evaluation asks whether a later design preserves a meaningful human improvement rather than merely producing an activity metric.
+
+| Situation | What meaningful success looks like | False success / warning | Obligations |
+|---|---|---|---|
+| Distracted Halloween observer | A willing contributor can participate in the evening and contribute observations with understandable limitations, without sustained data-entry attention | Many submissions but burdensome monitoring or silently inaccurate recollections | P-01, P-02 |
+| Group arrives together | An analyst can tell whether a claim represents a group encounter or individual visitors and avoid treating all visitors as independent arrivals | Five visitors automatically treated as five independent arrival events | P-02, P-03 |
+| Quiet stretch versus absent observer | A truly monitored period with no arrivals can inform rate interpretation; an unmonitored interval is not misrepresented as a zero | Apparently tidy zero series is actually missing observation | P-01, P-02, P-03 |
+| Data dispute or late correction | An error can be addressed transparently enough that conclusions need not rely on superseded information, without public identity exposure | Quiet overwrite or publicly persistent personal linkage | P-02, P-04, P-05 |
+| Research outcome challenges expectation | Analysts can report changing arrival rates, non-Poisson clustering, inconclusive evidence or plausible fit with clear limitations | An exciting Poisson claim asserted despite incompatible evidence or selection bias | P-02, P-03 |
+| Household member did not opt in | Benefit to contributors and analysts does not depend on unnecessarily revealing a recognizable residence, activity or occupants | Fine spatial/temporal release indirectly identifies a household | P-04, P-05, P-06 |
+| Curious public reader | Regional results can be explored with an explanation of what voluntary samples do and do not establish | Neighborhood comparisons wrongly presented as representative rankings | P-03, P-04 |
+| Small operator during seasonal peak | The initiative remains governable when misuse, correction and information-release requests occur, without offloading excessive risk to nonparticipants | Apparent popularity conceals unmanageable abuse or privacy incident workload | P-04, P-05, P-06 |
+
+### Context, conflict and distribution
+
+The outcome is conditional on **attention during active Halloween participation**, **reliability of observed duration**, **grouping and temporal granularity**, **voluntary sample composition**, **household and visitor identifiability**, **data consumer sophistication**, and **small-project operational capacity**. These are conditions to evaluate, not validated measurements.
+
+- **Participation versus intelligibility (P-01/P-02):** additional reporting effort may improve observation detail but cause observer distraction or selective dropout. Either burden or unknowable measurement exposure can defeat the purpose.
+- **Analytical resolution versus nonparticipant protection (P-02/P-03/P-04):** precise timings and narrow locations may support some tests but allow household re-identification. Scientific convenience does not automatically override privacy interests of people who did not opt in.
+- **Correction/accountability versus unlinkability (P-04/P-05):** traceability useful within a protected participation context must not silently become persistent public traceability.
+- **Access and credibility versus operator burden (P-03/P-06):** maximal public access can increase misuse/disclosure duties; heavy moderation may exceed the project's practical scope.
+- **Contributor enjoyment versus public inference (P-01/P-03):** participation or high record counts cannot by themselves justify claims about all households, nor does rejection of a Poisson model make the activity worthless.
+
+### Purpose-quality assessment and remaining uncertainties
+
+P-01–P-06 remain **separable and provisionally suitable** for subsequent concept discovery: no scenario demonstrates a need to collapse them or add a seventh canonical purpose. P-06 remains a viability/stewardship obligation rather than a promise of particular infrastructure. Success is qualitative and falsifiable by the counterexamples above; quantitative targets require later evidence.
+
+Unresolved: contributor tolerance for attention, precision and corrections; acceptable reporting units; participant age and consent; geographic disclosure risk under sparse/repeated releases; defensible scientific analyses; operator resources; trusted access policies. These remain assigned through [intake question disposition](../../phases/000/000-d-treatflow-execution.md) and will be reviewed at [001-E](../../phases/001/) before handoff. **Prelaunch safety and release decisions remain required; they are not declared complete here.** The rationale and challenge scenarios are in [001-D execution](../../phases/001/001-d-treatflow-execution.md).
 
 ## Uncertainty and validation destinations
 
-These are **candidate needs**, not observed participant behavior. The sponsor premise supports the opportunity; interview/pilot evidence, research-use scenario validation and privacy threat review remain needed before asserting widespread demand, calibrated burden or safe disclosure. Phase 001-C has derived provisional design-purpose obligations; 001-D must check meaningful success situations and conflicts. Later phases may reject or refine this provisional picture. Eligibility, consent, withdrawal, release and applicable law remain prelaunch concerns.
+These are **candidate needs**, not observed participant behavior. The sponsor premise supports the opportunity; interview/pilot evidence, research-use scenario validation and privacy threat review remain needed before asserting widespread demand, calibrated burden or safe disclosure. Phase 001-C has derived provisional design-purpose obligations; 001-D has framed provisional success situations and conflicts; empirical testing remains necessary. Later phases may reject or refine this provisional picture. Eligibility, consent, withdrawal, release and applicable law remain prelaunch concerns.
 
 **No purpose here selects a sign-in provider, location field, interface, database, download policy or statistical test.**
