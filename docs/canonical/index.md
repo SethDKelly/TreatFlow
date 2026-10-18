@@ -33,6 +33,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [TreatFlow provisional concept candidates](concepts/candidates.md) — five working candidates retained for specification, subject to Phase 002 exit and Phase 003 review.
 
+- [Observation provisional behavioral specification](concepts/observation.md) — current abstract coverage, measurement and temporal semantics, pending Phase 003/004 review.
+
 ## Navigation
 
 - [Bundle root](../)
