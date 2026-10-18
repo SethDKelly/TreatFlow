@@ -110,6 +110,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [009-D five-concept temporal and authority interference](phases/009/009-d-treatflow-execution.md) — 009-E whole-family coverage next after merge.
 
+- [009-E whole-family purpose preservation audit](phases/009/009-e-treatflow-execution.md) — 009-F adjudication and repair review next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
