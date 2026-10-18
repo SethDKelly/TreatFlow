@@ -53,3 +53,12 @@ State: for each Subject, a nonempty set of Assertions when established; a relati
 **Intentionally unspecified:** storage history strategy, ordering representation, specific reason taxonomy, revision display, authentication and adjudication infrastructure, and exact concurrency conflict-resolution algorithm.
 
 **Must be decided for coherent semantics in 003-F:** how many simultaneously current successors are allowed, what makes an amendment authorized, how disputed corrections alter research-facing interpretation, and whether a closed Observation still supports correction. These cannot be treated as harmless omissions. Phase 004 must assess whether a revisable Subject with no independent human context is overgeneric and should be merged into Observation.
+
+## 003-F semantic closure: branches, currentness and post-closure correction
+
+An amendment adds a successor without deleting its predecessor. For a subject, **current unopposed assertion** means a terminal assertion on an acyclic revision lineage that is not part of an unresolved competing-successor conflict and has no unresolved challenge material to its standing. When two incompatible successors branch from the same predecessor, neither is arbitrarily declared the unique current truth: `InspectHistory` returns **contested currentness** until a legitimate conceptual resolution occurs. `MarkSuperseded` may designate the superseded predecessor only when a coherent successor designation can be made; it cannot silently resolve an unresolved fork. A later resolution can identify an accepted lineage through a conceptually authorized decision whose rationale remains intelligible; **choice of adjudication authority** remains a later protected authority question.
+
+`Amend` requires a legitimate amender in this concept; simply viewing or challenging gives no amendment right. `ResolveChallenge` changes a challenge disposition, not the historical factual content. Corrections after an Observation closes are **not forbidden by Revision's intrinsic behavior**, but whether the subject remains eligible for revision depends on independent authorized standing and any later composition rules. Observation's closed status continues to forbid direct new Observation reporting; no automatic cross-concept change is implied.
+
+**Remaining Phase 004 question:** is this generalized history lifecycle independently useful, or should it be expressed within Observation? Its abstract `Subject` is not automatically the private Observation type.
+
