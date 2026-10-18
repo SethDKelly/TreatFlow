@@ -44,3 +44,17 @@ tags: [treatflow, concepts, provisional, phase-002]
 Current individual concept documents are the canonical behavioral authorities after Phase 004; Phase 002 and 003 statuses above are historical decisions, not live gates. Implementation readiness **not ready**, execution **not started**, authorization **not yet**.
 
 **004-F current status:** [Phase 004 exit](../../phases/004/004-f-treatflow-exit-review.md) retains Observation, narrowed Contribution Stewardship, independent factual Revision, Controlled Disclosure and suitability-first Research Provision for Phase 005 composition; independent Exposure, generic cross-concept Control Request and dataset-artifact concepts were not retained.
+
+## Phase 008-E — Lightweight reusable-knowledge dispositions
+
+[008-E decision evidence](../../phases/008/008-e-treatflow-execution.md) classifies all five retained concepts as **potentially reusable but constrained**, not mature proven catalog entries. This table is an **index of reusable lessons**, not a second specification. The individual linked concept files remain authoritative for intrinsic behavior, while Phase 005/006 govern this application's coordination and scope.
+
+| Concept owner | Reuse disposition | Condition that must survive a different application |
+|---|---|---|
+| [Observation](observation.md) | Reusable with constraints | Attentional coverage and absent/uncertain intervals must not become event-count zeroes; units/time/provenance remain qualified |
+| [Contribution Stewardship](contribution-stewardship.md) | Reusable with constraints | Protected disputed responsibility is not public verified ownership, edit or release authority |
+| [Revision](revision.md) | Reusable with constraints | Preserve original claims, successor lineage, challenge states and unresolved conflicting currentness |
+| [Research Provision](research-provision.md) | Reusable candidate — qualification-specific | Inquiry fitness/unsuitability can be meaningful without data delivery or permission to access |
+| [Controlled Disclosure](controlled-disclosure.md) | Reusable with constraints | Material/audience decisions and real exposure are distinct; future suspension cannot recall historical copies |
+
+These are evidence-qualified **candidate transfer patterns**, not approved substitutes, user-familiarity findings, implementation standards, or an independent catalog. No concept name, state, action, invariant, synchronization or family inclusion is changed by this index.
