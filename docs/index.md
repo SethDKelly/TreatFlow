@@ -24,7 +24,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 ## Active Phase 003
 
-- [003-A specification start gate](phases/003/003-a-treatflow-execution.md) — conceptual specification work planned; 003-B next eligible after merge.
+- [003-A specification start gate](phases/003/003-a-treatflow-execution.md) — conceptual specification work planned; 003-A complete; 003-B has been executed, with 003-C next eligible after merge.
+
+- [003-B identity and OP challenge](phases/003/003-b-treatflow-execution.md) — characteristic behavioral stories and provisional candidate dispositions.
 
 ## Start here
 
