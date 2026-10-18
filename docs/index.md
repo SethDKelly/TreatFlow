@@ -62,6 +62,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [005-F synergy and purpose consolidation](phases/005/005-f-treatflow-execution.md) — final independent Phase 005-G exit review next after merge.
 
+- [006-A dependence, subset and product-family start gate](phases/006/006-a-treatflow-execution.md) — 006-B next eligible after merge; no dependency edges yet authorized.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
