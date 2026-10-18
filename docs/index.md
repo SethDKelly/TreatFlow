@@ -58,6 +58,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [005-E chain, authority and automation audit](phases/005/005-e-treatflow-execution.md) — no automatic rights escalation; 005-F next eligible after merge.
 
+- [005-F synergy and purpose consolidation](phases/005/005-f-treatflow-execution.md) — final independent Phase 005-G exit review next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
