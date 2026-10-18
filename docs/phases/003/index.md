@@ -15,6 +15,10 @@ Phase 003 converts retained Phase 002 candidates into precise, representation-in
 
 Project-specific substantive subphases remain dynamically derived by `003-A`; Base does not prescribe a fixed notation, concept count, or B–X sequence.
 
+## TreatFlow execution
+
+- [003-A specification start gate](003-a-treatflow-execution.md) — five provisional identities challenged; 003-B next eligible after merge.
+
 ## Navigation
 
 - [Previous phase](../002/)
