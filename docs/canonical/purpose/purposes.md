@@ -1,13 +1,13 @@
 ---
 type: Purpose Knowledge
-title: TreatFlow — Actor Needs and Participation Context
+title: TreatFlow — Product Purpose, Actor Needs and Success Context
 description: Provisional, need-focused purpose knowledge for relevant participants and affected nonparticipants.
 tags: [treatflow, purpose, needs, context, phase-001]
 ---
 
-# TreatFlow — Actor Needs and Participation Context
+# TreatFlow — Product Purpose, Actor Needs and Success Context
 
-**Status:** provisional Phase 001 current meaning; not an approved concept catalog, feature list or empirically verified user-need model. Read the [current project intake](../project/intake.md) for project scope and stakeholders. The supporting inquiry and evidentiary limits are in [001-B execution](../../phases/001/001-b-treatflow-execution.md).
+**Status:** Phase 001 purpose baseline, accepted with explicit empirical and policy carry-forwards; not an approved concept catalog, feature list or empirically verified user-need model. Read the [current project intake](../project/intake.md) for project scope and stakeholders. The supporting inquiry and evidentiary limits are in [001-B execution](../../phases/001/001-b-treatflow-execution.md).
 
 ## Need candidates and burdens
 
@@ -34,7 +34,7 @@ A participant may have several needs, and needs of different parties may conflic
 - Voluntary self-selected participation can make broad population claims misleading.
 - An affected household member or visiting child may receive no direct benefit but could bear privacy cost.
 
-## Provisional need tensions to analyze in 001-C/001-D
+## Material need tensions
 
 - Low-burden reporting versus trustworthy evidence of observation duration and precision.
 - Analyst-level detail versus household unlinkability and restrained release.
@@ -42,7 +42,7 @@ A participant may have several needs, and needs of different parties may conflic
 - Open exploratory access versus misuse, researcher misunderstanding and operator stewardship load.
 - Exciting public conclusions versus disciplined treatment of missingness, nonrandom sampling and rejected hypotheses.
 
-## Product-level purpose (provisional, 001-C)
+## Product-level purpose
 
 **Enable willing community observers to turn everyday Halloween arrival experiences into interpretable evidence that others can explore responsibly, without making contribution unduly burdensome or exposing participating households and observed people to avoidable harm.**
 
@@ -67,7 +67,7 @@ These are **candidate independent obligations**, not named software concepts, re
 
 ## Purpose quality and downstream validation
 
-The six candidate obligations are stated in terms of improvements and safeguards, with questions capable of rejecting a superficially attractive feature. None requires a particular authentication provider, session model, export format, database, UI, or statistical test. Phase 001-D has tested their joint success in illustrative Halloween situations, exposed distributional tradeoffs, and found no basis yet to regroup them. Phase 001-E must determine final purpose-readiness. Phase 002 alone may discover candidate concepts.
+The six candidate obligations are stated in terms of improvements and safeguards, with questions capable of rejecting a superficially attractive feature. None requires a particular authentication provider, session model, export format, database, UI, or statistical test. Phase 001-D has tested their joint success in illustrative Halloween situations, exposed distributional tradeoffs, and found no basis yet to regroup them. [001-E exit review](../../phases/001/001-e-treatflow-exit-review.md) accepts this model for divergent discovery with carry-forwards. Phase 002 alone may discover candidate concepts.
 
 ## Context-qualified success situations (001-D)
 
@@ -98,10 +98,10 @@ The outcome is conditional on **attention during active Halloween participation*
 
 P-01–P-06 remain **separable and provisionally suitable** for subsequent concept discovery: no scenario demonstrates a need to collapse them or add a seventh canonical purpose. P-06 remains a viability/stewardship obligation rather than a promise of particular infrastructure. Success is qualitative and falsifiable by the counterexamples above; quantitative targets require later evidence.
 
-Unresolved: contributor tolerance for attention, precision and corrections; acceptable reporting units; participant age and consent; geographic disclosure risk under sparse/repeated releases; defensible scientific analyses; operator resources; trusted access policies. These remain assigned through [intake question disposition](../../phases/000/000-d-treatflow-execution.md) and will be reviewed at [001-E](../../phases/001/) before handoff. **Prelaunch safety and release decisions remain required; they are not declared complete here.** The rationale and challenge scenarios are in [001-D execution](../../phases/001/001-d-treatflow-execution.md).
+Unresolved after Phase 001 exit: contributor tolerance for attention, precision and corrections; acceptable reporting units; participant age and consent; geographic disclosure risk under sparse/repeated releases; defensible scientific analyses; operator resources; trusted access policies. These remain assigned through [intake question disposition](../../phases/000/000-d-treatflow-execution.md) and are dispositioned by [001-E](../../phases/001/001-e-treatflow-exit-review.md) for later design. **Prelaunch safety and release decisions remain required; they are not declared complete here.** The rationale and challenge scenarios are in [001-D execution](../../phases/001/001-d-treatflow-execution.md).
 
 ## Uncertainty and validation destinations
 
-These are **candidate needs**, not observed participant behavior. The sponsor premise supports the opportunity; interview/pilot evidence, research-use scenario validation and privacy threat review remain needed before asserting widespread demand, calibrated burden or safe disclosure. Phase 001-C has derived provisional design-purpose obligations; 001-D has framed provisional success situations and conflicts; empirical testing remains necessary. Later phases may reject or refine this provisional picture. Eligibility, consent, withdrawal, release and applicable law remain prelaunch concerns.
+These are **candidate needs**, not observed participant behavior. The sponsor premise supports the opportunity; interview/pilot evidence, research-use scenario validation and privacy threat review remain needed before asserting widespread demand, calibrated burden or safe disclosure. Phase 001-C has derived provisional design-purpose obligations; 001-D framed provisional success situations and conflicts; [001-E](../../phases/001/001-e-treatflow-exit-review.md) accepted the purpose baseline with empirical validation carry-forwards. Later phases may reject or refine this provisional picture. Eligibility, consent, withdrawal, release and applicable law remain prelaunch concerns.
 
 **No purpose here selects a sign-in provider, location field, interface, database, download policy or statistical test.**

@@ -9,13 +9,12 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 ## TreatFlow current state
 
 - [TreatFlow project intake](canonical/project/intake.md) — provisional current product premise, affected parties and outcomes.
-- [Phase 000 execution](phases/000/) — Phase 000 PASS WITH CARRY-FORWARD; Phase 001-A next eligible after merge of the exit-review PR. See the [exit decision and handoff](phases/000/000-e-treatflow-exit-review.md).
+- [Phase 000 execution](phases/000/) — Phase 000 PASS WITH CARRY-FORWARD; Phase 000 complete; its carry-forwards remain active. See the [exit decision and handoff](phases/000/000-e-treatflow-exit-review.md).
 
-## Active Phase 001
+## Current Phase 001 exit and Phase 002 entry
 
-- [TreatFlow 001-A purpose start gate](phases/001/001-a-treatflow-execution.md) — purpose inquiry planned; 001-B next eligible upon merge.
-
-- [Current TreatFlow actor needs](canonical/purpose/purposes.md) — provisional Phase 001-B purpose knowledge, not validated participant research.
+- [Current TreatFlow purpose and actor needs](canonical/purpose/purposes.md) — product purpose, P-01–P-06 obligations and success contexts, with explicit untested assumptions.
+- [Phase 001 exit and handoff](phases/001/001-e-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; Phase 002-A next eligible after merge.
 
 ## Start here
 

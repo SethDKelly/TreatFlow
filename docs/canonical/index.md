@@ -29,7 +29,7 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Project intake context](project/intake.md) — provisional current product premise, actors, outcomes, uncertainties and Phase 000 carry-forward.
 
-- [TreatFlow actor needs and participation context](purpose/purposes.md) — provisional purpose knowledge from 001-B; separate from project intake.
+- [TreatFlow actor needs and participation context](purpose/purposes.md) — current Phase 001 purpose baseline (P-01–P-06 and success contexts), with carry-forwards; separate from project intake.
 
 ## Navigation
 
