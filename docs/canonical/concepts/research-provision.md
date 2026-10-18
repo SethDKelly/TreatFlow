@@ -11,9 +11,9 @@ tags: [treatflow, concept, provisional, research, phase-003]
 
 ## Purpose and operational principle
 
-Enable a research recipient to **obtain a coherent, meaningfully bounded body of evidence with explicit qualifications about observation, coverage, measurement and sampling**, without prescribing the recipient's scientific conclusion.
+Enable a research recipient to **determine what evidence is meaningfully scoped and sufficiently qualified for an inquiry, including when the evidence is unsuitable or unavailable**, without prescribing a scientific conclusion or requiring a disclosure.
 
-**Characteristic story:** A recipient requests observations suitable for investigating time-varying Halloween arrivals. A research provision expresses what observational material is within scope, whether its units represent groups or visitors, where monitored coverage and unknown intervals lie, and what reporting precision and volunteer-selection limitations apply. The recipient can assess whether a Poisson model is unsupported or the evidence inconclusive. If necessary qualifiers are unavailable, the provision is **incomplete/qualified** rather than described as a sound representative sample.
+**Characteristic story:** A recipient asks whether available evidence could support an inquiry into time-varying Halloween arrivals; this assessment remains meaningful even if no material may be disclosed. A research provision expresses what observational material is within scope, whether its units represent groups or visitors, where monitored coverage and unknown intervals lie, and what reporting precision and volunteer-selection limitations apply. The recipient can assess whether a Poisson model is unsupported or the evidence inconclusive. If necessary qualifiers are unavailable, the provision is **incomplete/qualified** rather than described as a sound representative sample.
 
 This purpose may instead be an outcome of disclosure plus qualified Observation; independence must be demonstrated through its own state transitions rather than invented to preserve five concepts.
 
@@ -60,3 +60,7 @@ A prepared/delivered provision refers to a **conceptual evidence standing at pro
 
 **Conditional identity test:** independent inquiry scoping and qualification may provide distinct behavior, but if they have no separately useful lifecycle beyond making released evidence intelligible, Phase 004 must merge or retire Research Provision. Research interpretation and Poisson-model testing remain outside this concept.
 
+
+## 004-D boundary refinement — suitability before delivery
+
+**REFRAME / RETAIN CONDITIONALLY.** The concept's characteristic value is inquiry-scoping and evidence **fitness/limitations assessment**, not a downloadable dataset. `RequestEvidence`, `PrepareScope`, `QualifyProvision` and `InspectProvision` together can produce an intelligible *qualified, unsuitable or unavailable* result **without** Controlled Disclosure and without a `Provide` action. An unfavorable assessment is itself meaningful to an investigator; uncertainty, monitored exposure, units, self-selection and disputed standing remain substantive semantics. `Provide` is a permitted additional result **only if** separately authorized availability exists. It must not imply that a favorable inquiry assessment authorizes release or that a protected disclosure means scientific suitability. No inference engine, source data type or output format is presumed. See [004-D evidence](../../phases/004/004-d-treatflow-execution.md). **004-E must reject or combine this candidate if independent qualification proves illusory.**
