@@ -62,3 +62,7 @@ For a proposed disclosure, `Assess` distinguishes **sufficiently justified under
 
 **Remaining Phase 004 question:** can prospective sharing decisions and scientific evidence provision remain independently comprehensible when both are present?
 
+
+## 004-D boundary refinement — independent protective availability
+
+**RETAIN provisionally.** The purpose is protected *prospective information availability*, independent of any research inquiry. A decision can approve, restrict or deny Material for an Audience without a Research Provision concept. Its minimum meaningful actions are `Propose`, `Assess`, `Decide`, `MakeAvailable`, `SuspendFuture` and `InspectDecision`: an approval is not itself historical exposure, and prospective suspension preserves prior disclosures. `Material` and `Audience` are abstract identity/scope parameters; privacy protection requirements remain semantically essential and require independent policy qualification before real release. No scientific suitability outcome is imported or granted here. See [004-D evidence](../../phases/004/004-d-treatflow-execution.md). **004-E may still revise this boundary.**
