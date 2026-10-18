@@ -61,6 +61,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Observation state and action mapping](mapping/observation-representation.md) — current user-visible obligations for units, monitored extent, temporal uncertainty, lifecycle and reporting feedback.
 
+- [Protected standing, revision & history mapping](mapping/standing-revision-history.md) — current semantic representation of private responsibility, protected correction and contested factual history.
+
 ## Navigation
 
 - [Bundle root](../)
