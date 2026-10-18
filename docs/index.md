@@ -15,6 +15,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [TreatFlow 001-A purpose start gate](phases/001/001-a-treatflow-execution.md) — purpose inquiry planned; 001-B next eligible upon merge.
 
+- [Current TreatFlow actor needs](canonical/purpose/purposes.md) — provisional Phase 001-B purpose knowledge, not validated participant research.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
