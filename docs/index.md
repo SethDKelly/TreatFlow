@@ -34,9 +34,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [003-E disclosure and research provision qualification](phases/003/003-e-treatflow-execution.md) — provisional protective and research behavior with conditional independence.
 
-## Active Phase 004
+## Phase 004 exit and Phase 005 entry
 
-- [004-A modularity start gate](phases/004/004-a-treatflow-execution.md) — five provisional concepts under corrective factoring review; 004-B next eligible after merge.
+- [004-F modularity exit](phases/004/004-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; five current independent concepts; 005-A next eligible after merge.
 
 - [004-B Observation/Exposure boundary decision](phases/004/004-b-treatflow-execution.md) — integrated Observation retained; 004-C next eligible after merge.
 
