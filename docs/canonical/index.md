@@ -41,6 +41,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 - [Controlled Disclosure](concepts/controlled-disclosure.md) — provisional protective sharing behavior, no approved release policy.
 - [Research Provision](concepts/research-provision.md) — conditional research-scope and evidence qualification behavior.
 
+- [Phase 003 specification exit and Phase 004 challenge scope](../phases/003/003-g-treatflow-exit-review.md) — current five provisional owners and boundary carry-forwards.
+
 ## Navigation
 
 - [Bundle root](../)

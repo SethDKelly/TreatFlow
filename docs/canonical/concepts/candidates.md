@@ -7,7 +7,7 @@ tags: [treatflow, concepts, provisional, phase-002]
 
 # TreatFlow — Provisional Concept Candidates
 
-**Status: Retained for specification with carry-forwards at [002-F exit](../../phases/002/002-f-treatflow-exit-review.md); Phase 003-E provisionally specifies disclosure and conditionally specifies research provision; Phase 003-F/G reviews remain pending.** These working identities are *not final concepts*. Read the [purpose model](../purpose/purposes.md) and [002-E convergence rationale](../../phases/002/002-e-treatflow-execution.md). [Observation](observation.md) now has a provisional 003-C behavioral specification; other candidate specifications and cross-concept authority remain unresolved. Technical representation has not been decided. Phase 003 may revise, combine, split or reject any candidate. See [003-B identity challenge](../../phases/003/003-b-treatflow-execution.md) for behavioral stories and conditional decisions.
+**Status: Retained for specification with carry-forwards at [002-F exit](../../phases/002/002-f-treatflow-exit-review.md); Phase 003 exit PASS WITH CARRY-FORWARD at [003-G](../../phases/003/003-g-treatflow-exit-review.md); Phase 004 must challenge candidate boundaries.** These working identities are *not final concepts*. Read the [purpose model](../purpose/purposes.md) and [002-E convergence rationale](../../phases/002/002-e-treatflow-execution.md). All five provisional candidate behaviors now have distinct canonical specification owners linked below; their independence and cross-concept authority remain unresolved. Technical representation has not been decided. Phase 003 may revise, combine, split or reject any candidate. See [003-B identity challenge](../../phases/003/003-b-treatflow-execution.md) for behavioral stories and conditional decisions.
 
 | Working candidate | Short semantic/behavioral hypothesis | Purpose association | Critical Phase 003/004 question |
 |---|---|---|---|
@@ -22,6 +22,8 @@ tags: [treatflow, concepts, provisional, phase-002]
 **003-D status:** [Contribution Stewardship](contribution-stewardship.md) and [Revision](revision.md) now have *conditional* canonical behavioral specifications; their independent concept status is subject to 003-F/Phase 004. The list above is navigational and not competing specification authority.
 
 **003-E status:** [Controlled Disclosure](controlled-disclosure.md) and [Research Provision](research-provision.md) now own their provisional behavioral meaning. Research Provision faces an explicit merge-or-stop test; neither permits actual data release.
+
+**003-G exit disposition:** Observation and Controlled Disclosure specified with boundary questions; Contribution Stewardship, Revision and Research Provision conditionally specified and explicitly subject to merge/reframe/rejection in Phase 004. Five is not a fixed final count.
 
 **003-B disposition:** Observation proceeds to 003-C; Controlled disclosure proceeds to 003-E with its boundary under challenge. Contribution stewardship and Revision face conditional reframe-or-stop decisions in 003-D; Research provision faces a conditional merge-or-stop test in 003-E. None has a complete behavioral specification.
 

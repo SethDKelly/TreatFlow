@@ -22,9 +22,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [Provisional retained candidates](canonical/concepts/candidates.md) — five working identities for Phase 003 specification, not finalized.
 
-## Active Phase 003
+## Phase 003 exit and Phase 004 entry
 
-- [003-A specification start gate](phases/003/003-a-treatflow-execution.md) — conceptual specification work planned; 003-A complete; 003-B has been executed, with 003-C next eligible after merge.
+- [003-G specification exit](phases/003/003-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; 004-A next eligible after merge.
 
 - [003-B identity and OP challenge](phases/003/003-b-treatflow-execution.md) — characteristic behavioral stories and provisional candidate dispositions.
 
