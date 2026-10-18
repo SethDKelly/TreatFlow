@@ -15,6 +15,10 @@ Phase 006 defines contextual concept-inclusion dependencies, coherent applicatio
 
 Project-specific substantive subphases remain dynamically derived by `006-A`; Base does not prescribe a fixed dependency notation, subset enumeration, product-variant count, or B–X sequence.
 
+## TreatFlow execution
+
+- [006-A Dependence Scope, Subset Semantics & Planning](006-a-treatflow-execution.md) — start gate PASS; contextual edge tests and 006-B–F planned; 006-B next after merge.
+
 ## Navigation
 
 - [Previous phase](../005/)
