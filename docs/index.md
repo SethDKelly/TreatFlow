@@ -9,7 +9,7 @@ This directory is the Open Knowledge Format (OKF) v0.2 knowledge bundle for Base
 ## TreatFlow active intake
 
 - [TreatFlow project intake](canonical/project/intake.md) — provisional current product premise, affected parties and outcomes.
-- [Phase 000 execution](phases/000/) — TreatFlow 000-C completed on its feature branch; 000-D next eligible following merge. Inherited Base template execution does not represent TreatFlow completion.
+- [Phase 000 execution](phases/000/) — TreatFlow 000-D completed on its feature branch; 000-E next eligible following merge. Inherited Base template execution does not represent TreatFlow completion.
 
 ## Start here
 
