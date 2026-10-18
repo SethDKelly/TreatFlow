@@ -74,7 +74,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [006-E variant action and composition audit](phases/006/006-e-treatflow-execution.md) — Phase 006-F independent exit next after merge.
 
-- [007-A concept mapping start gate](phases/007/007-a-treatflow-execution.md) — mapping risk plan and 007-B–G sequence; 007-B next after merge.
+- [007-A concept mapping start gate](phases/007/007-a-treatflow-execution.md) — mapping risk plan and 007-B–G sequence; 007-A complete; 007-B record governs current handoff.
+
+- [007-B observation and coverage mapping](phases/007/007-b-treatflow-execution.md) — 007-C contribution standing and revision mapping next after merge.
 
 ## Start here
 
