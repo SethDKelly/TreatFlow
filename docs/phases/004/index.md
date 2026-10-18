@@ -15,6 +15,10 @@ Phase 004 audits and corrects the factoring of behavior into concepts so each re
 
 Project-specific substantive subphases remain dynamically derived by `004-A`; Base does not prescribe a fixed scorecard, concept count, or B–X sequence.
 
+## TreatFlow execution
+
+- [004-A modularity start gate](004-a-treatflow-execution.md) — scoped adversarial boundary testing and 004-B–F workstreams; 004-B next eligible after merge.
+
 ## Navigation
 
 - [Previous phase](../003/)
