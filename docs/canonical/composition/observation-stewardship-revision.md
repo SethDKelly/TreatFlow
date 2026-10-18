@@ -63,3 +63,7 @@ A `ContributionStewardship.ContestStanding` challenges the relationship of a Par
 - **Later protected policy:** legitimate participant, amendment, challenge and adjudication authority, guardian/minor eligibility, retention and consent remain unresolved. These abstract guards **do not authorize real-world action**.
 
 No event bus, synchronously coordinated write, transaction, account implementation, source schema, API, or UI is inferred.
+
+## 005-E chain and authority qualification
+
+[005-E adversarial audit](../../phases/005/005-e-treatflow-execution.md) confirms C-01 is an **optional** association composition, not a mandatory `Report → Associate → EstablishSubject` chain; valid reporting survives failed, disputed or absent standing. C-02 never infers amendment entitlement from Recognize/DetermineStanding, and C-03 never automatically converts attribution disputes into factual correction. No unconditional concept-to-concept trigger or protected-adjudicator impersonation is authorized. Denied or unavailable participants cannot be bypassed by implied operator action. 005-F/G retain independent sufficiency review.
