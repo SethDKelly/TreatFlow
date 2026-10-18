@@ -81,3 +81,7 @@ This is a **prospective safety invariant and guarded reassessment obligation**, 
 - **Before any real data collection or release:** establish privacy/consent/age policies, nonparticipant/child safeguards, reidentification controls, lawful actor authority, retention/withdrawal and scientific/operational validation. Those substantive questions are unresolved.
 
 No algorithm for anonymization, Poisson evaluation, storage/version migration, API, queue, transaction, implementation sequence or execution environment is specified.
+
+## 005-E chaining, denial and prospective scope qualification
+
+[005-E audit](../../phases/005/005-e-treatflow-execution.md) rejects unconditional `Amend → QualifyProvision → MakeAvailable` and `Decide → Provide` chains, as well as automatic global suspension following any challenge. D-01 is an **interpretation guard when information is legitimately available**, not a broadcast to historical copies. D-02 is **joint guarded availability**, not independently public actions or a promise that a researcher can access protected data. D-03 makes materially changed *future scope* unavailable under an insufficient previous decision; it **does not automatically initiate protected `Assess`, `Decide` or `SuspendFuture` on behalf of an unauthorized actor**. Past ExposureRecords remain intact. No unconditional reactive automation is presently approved.
