@@ -43,6 +43,8 @@ See [Canonical and Historical Knowledge Authority](../methodology/knowledge-auth
 
 - [Phase 003 specification exit and Phase 004 challenge scope](../phases/003/003-g-treatflow-exit-review.md) — current five provisional owners and boundary carry-forwards.
 
+- [Phase 004 modularity exit and Phase 005 handoff](../phases/004/004-f-treatflow-exit-review.md) — five current behavioral owners and composition questions.
+
 ## Navigation
 
 - [Bundle root](../)

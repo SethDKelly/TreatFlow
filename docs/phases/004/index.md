@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `004-A`; Ba
 
 - [004-D Controlled Disclosure & Research Provision modularity](004-d-treatflow-execution.md) — separate prospective protection and inquiry fitness; 004-D complete; 004-E record governs current handoff.
 
-- [004-E cross-candidate independence and re-specification](004-e-treatflow-execution.md) — independent peer-removal and genericity audit; 004-F next eligible after merge.
+- [004-E cross-candidate independence and re-specification](004-e-treatflow-execution.md) — independent peer-removal and genericity audit; 004-E complete; 004-F exit governs handoff.
+
+- [004-F modularity exit and Phase 005 handoff](004-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; 005-A next eligible after merge.
 
 ## Navigation
 
