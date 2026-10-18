@@ -8,7 +8,7 @@ tags: [treatflow, composition, phase-005, revision, research, disclosure]
 
 # Revision, Research Provision and Controlled Disclosure — Current Composition Semantics
 
-**Authority:** [005-D execution record](../../phases/005/005-d-treatflow-execution.md). These application-level composition decisions supplement—but do not alter—the independent [Revision](../concepts/revision.md), [Research Provision](../concepts/research-provision.md) and [Controlled Disclosure](../concepts/controlled-disclosure.md) contracts. [005-C](observation-stewardship-revision.md) owns observation-to-revision correspondence; [application action surface](application-action-surface.md) owns exposure classifications. These rules remain subject to 005-E chain/authority review and 005-F/G consolidation. **No real data release is authorized.**
+**Authority:** [005-D execution record](../../phases/005/005-d-treatflow-execution.md). These application-level composition decisions supplement—but do not alter—the independent [Revision](../concepts/revision.md), [Research Provision](../concepts/research-provision.md) and [Controlled Disclosure](../concepts/controlled-disclosure.md) contracts. [005-C](observation-stewardship-revision.md) owns observation-to-revision correspondence; [application action surface](application-action-surface.md) owns exposure classifications. Phase 005-G has exited with carry-forward; these guards remain subject to later independent integrity review and justified reopening. **No real data release is authorized.**
 
 ## Semantic correspondence and evidence availability
 
