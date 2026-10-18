@@ -15,6 +15,10 @@ Phase 002 explores materially different candidate concepts and conceptual decomp
 
 Project-specific substantive subphases remain dynamically derived by `002-A`; the Base template does not prescribe a fixed B–X sequence or candidate count.
 
+## TreatFlow execution
+
+- [002-A TreatFlow discovery start gate](002-a-treatflow-execution.md) — divergence and convergence strategy approved; 002-B next eligible after merge.
+
 ## Navigation
 
 - [Previous phase](../001/)
