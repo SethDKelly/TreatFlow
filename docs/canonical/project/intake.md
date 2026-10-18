@@ -41,6 +41,16 @@ These are **stakeholder categories, not authentication roles or software concept
 
 **Tensions to carry forward:** fine-grained timing versus household privacy; detailed geography versus re-identification risk; strong contributor uniqueness versus low participation friction; ease of reporting versus data quality; open downloads versus misuse and withdrawal expectations.
 
+## Observation and research distinctions (provisional, 000-C)
+
+The proposed dataset must distinguish **group encounters** from **individual visitors**, **event time** from **report submission time**, and **actively observed zero-arrival time** from unmonitored or missing time. The relevant observation unit, acceptable reporting accuracy and reporting mode remain undecided. Observation duration, pauses, delayed entries and timezones matter for interpreting arrivals.
+
+The Poisson-process question is exploratory, not an assumed result: a constant arrival rate is only one model candidate, alongside time-varying rates, group dependence, clustering and reporting distortion. A Poisson-distributed count does not by itself establish a Poisson process. Voluntary, nonrepresentative reporting also limits population inference.
+
+Contributor identity, location/context and dataset publication must be considered separately. Sparse geography combined with precise timing, stable pseudonyms or multiple releases can reveal participating households even without direct address data. No public-export granularity or safe anonymity level has been determined.
+
+See [000-C supporting evidence](../../phases/000/000-c-treatflow-execution.md).
+
 ## What is not established
 
 - A validated audience size, a public versus gated download policy, or a particular account architecture.
@@ -51,10 +61,10 @@ These are **stakeholder categories, not authentication roles or software concept
 
 ## Open intake destinations
 
-- **000-C:** establish distinctions between arrival, group, count, observation window, silence versus non-observation, self-report uncertainty, timing, and data sensitivity; preserve alternative scientific explanations.
+- **000-C:** completed intake distinctions and risk exploration; unresolved reporting units and data release policy carried forward.
 - **000-D:** bound initial participants, geography, privacy/consent obligations, user identity expectations, open access, misuse risk, operational responsibilities, non-goals and release restrictions.
 - **001 onward:** independently validate human purposes and discover concepts rather than assuming the initial interface or data model.
 
 ## Provenance and authority
 
-Derived from the sponsor's initial TreatFlow premise and the [000-A project-specific intake gate](../../phases/000/000-a-treatflow-execution.md). This is **provisional current intake knowledge**, refined by [000-B execution evidence](../../phases/000/000-b-treatflow-execution.md), not verified empirical research. Process rules remain under [methodology](../../methodology/). Inherited Base template completion records do not evidence TreatFlow product completion.
+Derived from the sponsor's initial TreatFlow premise and the [000-A project-specific intake gate](../../phases/000/000-a-treatflow-execution.md). This is **provisional current intake knowledge**, refined by [000-B evidence](../../phases/000/000-b-treatflow-execution.md) and [000-C evidence](../../phases/000/000-c-treatflow-execution.md), not verified empirical research. Process rules remain under [methodology](../../methodology/). Inherited Base template completion records do not evidence TreatFlow product completion.
