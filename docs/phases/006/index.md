@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `006-A`; Ba
 
 - [006-D product-family variants, adopted scope & exclusions](006-d-treatflow-execution.md) — integrated five-concept design adopted; 006-D complete; 006-E record governs current handoff.
 
-- [006-E variant-specific composition, action exposure and upstream defect review](006-e-treatflow-execution.md) — guarded experience paths verified, no blocking upstream defect; 006-F next after merge.
+- [006-E variant-specific composition, action exposure and upstream defect review](006-e-treatflow-execution.md) — guarded experience paths verified, no blocking upstream defect; 006-E complete; final 006-F exit governs handoff.
+
+- [006-F independent integrity exit and Phase 007 handoff](006-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 007-A next eligible.
 
 ## Navigation
 
