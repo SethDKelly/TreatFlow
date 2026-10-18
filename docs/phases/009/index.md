@@ -15,6 +15,10 @@ Phase 009 audits the mature composed concept system to verify that every retaine
 
 Project-specific substantive subphases remain dynamically derived by `009-A`; Base does not prescribe a fixed all-pairs matrix, integrity score, interference taxonomy as file structure, or B–X sequence.
 
+## TreatFlow execution
+
+- [009-A Integrity Scope, Interference Surfaces & Whole-System Planning](009-a-treatflow-execution.md) — READY TO BEGIN with limitations; 009-B–G planned, 009-B next after merge.
+
 ## Navigation
 
 - [Previous phase](../008/)
