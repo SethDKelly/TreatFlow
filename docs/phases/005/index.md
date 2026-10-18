@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `005-A`; Ba
 
 - [005-A composition and synchronization start gate](005-a-treatflow-execution.md) — five-concept baseline, candidate semantic seams, action exposure and 005-B–G plan; 005-A complete; subsequent records govern current handoff.
 
-- [005-B application action surface, direct exposure and non-exposure](005-b-treatflow-execution.md) — 29 actions classified, protected/non-public cases; 005-C next eligible after merge.
+- [005-B application action surface, direct exposure and non-exposure](005-b-treatflow-execution.md) — 29 actions classified, protected/non-public cases; 005-B complete; later record governs current handoff.
+
+- [005-C Observation, Stewardship & Revision synchronization](005-c-treatflow-execution.md) — guarded optional attribution and protected correction; 005-D next eligible after merge.
 
 ## Navigation
 
