@@ -23,7 +23,9 @@ Project-specific substantive subphases remain dynamically derived by `009-A`; Ba
 
 - [009-C Research Fitness, Disclosure Permission & Recipient Integrity](009-c-treatflow-execution.md) — directional R/D and D-01–D-03 integrity audit; 009-C complete; 009-D record governs handoff.
 
-- [009-D Cross-Concept Chains, Temporal State, Disputes & Authority Interference](009-d-treatflow-execution.md) — fourteen full-family adversarial chains; 009-E next after merge.
+- [009-D Cross-Concept Chains, Temporal State, Disputes & Authority Interference](009-d-treatflow-execution.md) — fourteen full-family adversarial chains; 009-D complete; 009-E record governs handoff.
+
+- [009-E Whole-Family Coverage, Scope/Mapping/Familiarity & Purpose Preservation](009-e-treatflow-execution.md) — five purposes, twenty directions, 29 actions and native scope; 009-F next after merge.
 
 ## Navigation
 
