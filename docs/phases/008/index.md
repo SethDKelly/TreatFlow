@@ -15,6 +15,10 @@ Phase 008 audits the mature mapped concept system for unnecessary conceptual nov
 
 Project-specific substantive subphases remain dynamically derived by `008-A`; Base does not prescribe a fixed familiarity score, precedent count, concept-catalog size, comparison matrix, or B–X sequence.
 
+## TreatFlow execution
+
+- [008-A Familiarity Baseline, Reuse Opportunities & Planning](008-a-treatflow-execution.md) — PASS with carry-forward; 008-B–G planned, 008-B next after merge.
+
 ## Navigation
 
 - [Previous phase](../007/)
