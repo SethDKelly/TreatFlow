@@ -51,3 +51,7 @@ An association may be established, contested, determined or relinquished. These 
 **Explicitly removed from intrinsic behavior:** Phase 003's `RequestControl` and `ResolveControl` general-purpose external requests. Their only promised effect was tracking acceptance, not satisfying a distinct responsibility purpose. Appropriate requests to correct, withdraw future disclosure or amend a claim belong to the concept that owns that requested **outcome**, or later authority/composition design; no generic request-manager is adopted by default.
 
 **Phase 004-E challenge:** determine whether protected standing remains a complete independent concept or can be represented as intrinsic source/provenance semantics in another coherent concept without erasing contested responsibility.
+
+## 004-E cross-candidate independence check
+
+**004-E independence clarification:** Responsibility standing is meaningful for a generic Item without Observation or Revision. DetermineStanding changes attribution standing only; it does not authorize factual amendment, approve disclosure, or establish real-world legal rights. A legitimate decision basis is an explicit unresolved input, not imported private state.

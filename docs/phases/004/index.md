@@ -23,7 +23,9 @@ Project-specific substantive subphases remain dynamically derived by `004-A`; Ba
 
 - [004-C Stewardship, Revision & correction authority](004-c-treatflow-execution.md) — reduce/refine stewardship and retain provisional independent Revision; 004-C complete; later records govern current handoff.
 
-- [004-D Controlled Disclosure & Research Provision modularity](004-d-treatflow-execution.md) — separate prospective protection and inquiry fitness; 004-E next eligible after merge.
+- [004-D Controlled Disclosure & Research Provision modularity](004-d-treatflow-execution.md) — separate prospective protection and inquiry fitness; 004-D complete; 004-E record governs current handoff.
+
+- [004-E cross-candidate independence and re-specification](004-e-treatflow-execution.md) — independent peer-removal and genericity audit; 004-F next eligible after merge.
 
 ## Navigation
 
