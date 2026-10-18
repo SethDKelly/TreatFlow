@@ -56,6 +56,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [005-D research/disclosure/revision composition](phases/005/005-d-treatflow-execution.md) — qualified research evidence and protected prospective sharing; 005-E next after merge.
 
+- [005-E chain, authority and automation audit](phases/005/005-e-treatflow-execution.md) — no automatic rights escalation; 005-F next eligible after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
