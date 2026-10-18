@@ -50,6 +50,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [005-A composition start gate](phases/005/005-a-treatflow-execution.md) — conceptual synchronization and application action planning only; 005-B next eligible after merge.
 
+- [005-B application action surface](phases/005/005-b-treatflow-execution.md) and [canonical classifications](canonical/composition/application-action-surface.md) — 005-C next eligible after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
