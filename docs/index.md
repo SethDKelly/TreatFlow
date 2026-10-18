@@ -106,6 +106,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [009-B Observation–Stewardship–Revision integrity audit](phases/009/009-b-treatflow-execution.md) — 009-C research/disclosure integrity next after merge.
 
+- [009-C research/disclosure/recipient integrity](phases/009/009-c-treatflow-execution.md) — 009-D cross-concept temporal chains next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

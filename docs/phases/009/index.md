@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `009-A`; Ba
 
 - [009-A Integrity Scope, Interference Surfaces & Whole-System Planning](009-a-treatflow-execution.md) — READY TO BEGIN with limitations; 009-B–G planned, 009-A complete; 009-B record governs handoff.
 
-- [009-B Observer Independence, Standing, Revision & Protected Authority Integrity](009-b-treatflow-execution.md) — directed O/S/V and C-01–C-03 integrity review; 009-C next after merge.
+- [009-B Observer Independence, Standing, Revision & Protected Authority Integrity](009-b-treatflow-execution.md) — directed O/S/V and C-01–C-03 integrity review; 009-B complete; 009-C record governs handoff.
+
+- [009-C Research Fitness, Disclosure Permission & Recipient Integrity](009-c-treatflow-execution.md) — directional R/D and D-01–D-03 integrity audit; 009-D next after merge.
 
 ## Navigation
 
