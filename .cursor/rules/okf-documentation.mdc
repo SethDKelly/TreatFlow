@@ -1,5 +1,5 @@
 ---
-description: "Apply when editing Base documentation, lifecycle governance, agent instructions, or OKF knowledge so Cursor preserves canonical authority, progressive disclosure, and anti-bloat rules."
+description: "Apply when editing TreatFlow documentation, lifecycle governance, agent instructions, or OKF knowledge so Cursor preserves canonical authority, progressive disclosure, and anti-bloat rules."
 globs: "docs/**/*.md,README.md,AGENTS.md,CLAUDE.md,.cursor/rules/*.mdc"
 alwaysApply: false
 ---

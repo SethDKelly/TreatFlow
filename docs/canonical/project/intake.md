@@ -77,8 +77,8 @@ See [000-D scope and question dispositions](../../phases/000/000-d-treatflow-exe
 
 - **000-C:** completed intake distinctions and risk exploration; unresolved reporting units and data release policy carried forward.
 - **000-D:** scope and uncertainty assessed; unresolved policy and design questions have downstream owners.
-- **000-E:** audit intake integrity and decide Phase 000 exit; explicitly address inherited Base identity/documentation carry-forward.
-- **001 onward:** independently validate human purposes and discover concepts rather than assuming the initial interface or data model.
+- **000-E:** [exit review and Phase 001 handoff](../../phases/000/000-e-treatflow-exit-review.md) records PASS WITH CARRY-FORWARD; Phase 000 closes on merge.
+- **001-A next:** independently validate human purposes and discover concepts rather than assuming the initial interface or data model.
 
 ## Provenance and authority
 

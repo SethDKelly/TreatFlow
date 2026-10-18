@@ -17,7 +17,9 @@ Phase 000 is the pre-methodology intake phase. It establishes a sufficiently gro
 
 - [TreatFlow 000-C execution](000-c-treatflow-execution.md) — observation science, hypothesis alternatives and data sensitivity assessed; 000-C completed; later execution records govern active status.
 
-- [TreatFlow 000-D execution](000-d-treatflow-execution.md) — scope, constraints, assumptions and questions dispositioned; 000-E next eligible after merge.
+- [TreatFlow 000-D execution](000-d-treatflow-execution.md) — scope, constraints, assumptions and questions dispositioned; 000-D complete; see 000-E for exit decision.
+
+- [TreatFlow 000-E exit and Phase 001 handoff](000-e-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; Phase 000 complete after merge; Phase 001-A next eligible.
 
 ## Navigation
 
