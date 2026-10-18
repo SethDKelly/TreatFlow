@@ -64,7 +64,9 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [006-A dependence, subset and product-family start gate](phases/006/006-a-treatflow-execution.md) — 006-B next eligible after merge; no dependency edges yet authorized.
 
-- [006-B contextual dependence tests](phases/006/006-b-treatflow-execution.md) — native contribution/correction edges provisional; 006-C next after merge.
+- [006-B contextual dependence tests](phases/006/006-b-treatflow-execution.md) — native contribution/correction edges provisional; 006-B complete; 006-C record governs handoff.
+
+- [006-C coherent subset and cycle audit](phases/006/006-c-treatflow-execution.md) — 006-D scope selection next after merge.
 
 ## Start here
 
