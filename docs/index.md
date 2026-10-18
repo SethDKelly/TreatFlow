@@ -98,6 +98,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [008-E reusable concept knowledge and catalog decisions](phases/008/008-e-treatflow-execution.md) — 008-F propagation and regression next after merge.
 
+- [008-F propagation and misfit regression](phases/008/008-f-treatflow-execution.md) — 008-G independent exit next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
