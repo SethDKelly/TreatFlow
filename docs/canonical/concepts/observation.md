@@ -99,3 +99,7 @@ Overlapping coverage assertions retain their source, extent and qualification; a
 **Independence:** even without other TreatFlow concepts, Observation can supply and inspect qualified evidence. Source/account identities are abstract; group/visitor units, known coverage, uncertain extents, and retrospective precision remain semantically important and must not be generalized away. Correction rights, revision history, research provision and disclosure are distinct prospective boundary challenges—not hidden prerequisites of the observed activity claim.
 
 **Boundary carry-forward:** [004-C](../../phases/004/004-a-treatflow-execution.md) must test whether post-closure factual correction belongs here or in independent Revision; [004-E](../../phases/004/004-a-treatflow-execution.md) independently verifies remaining modularity. An Exposure concept may be reconsidered only if new evidence shows a distinct meaningful user-facing purpose, not merely separate time fields or bookkeeping.
+
+## 004-E cross-candidate independence check
+
+**004-E independence clarification:** The abstract Observer/source records the origin of the observational claim, not verified identity, ownership standing or amendment authority. Reporting and qualification remain meaningful without Contribution Stewardship; the relation to separately contested contributor responsibility, if needed, is a future composition question.
