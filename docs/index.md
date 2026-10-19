@@ -116,6 +116,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [009-F misfit adjudication, canonical repair and regression](phases/009/009-f-treatflow-execution.md) — 009-G independent exit next after merge.
 
+- [010-A adversarial scenario-validation start gate](phases/010/010-a-treatflow-execution.md) — risk-weighted 010-B–H plan and 010-B next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

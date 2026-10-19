@@ -15,6 +15,10 @@ Phase 010 subjects the mature conceptual design to representative and risk-weigh
 
 Project-specific substantive subphases remain dynamically derived by `010-A`; Base does not prescribe a fixed scenario count, risk score, threat taxonomy, executable test notation, or B–X sequence.
 
+## TreatFlow execution
+
+- [010-A Validation Scope, Misfit Hypotheses, Risk Coverage & Planning](010-a-treatflow-execution.md) — PASS WITH CARRY-FORWARD; 010-B–H planned, 010-B next after merge.
+
 ## Navigation
 
 - [Previous phase](../009/)
