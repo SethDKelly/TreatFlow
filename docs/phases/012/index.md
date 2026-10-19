@@ -40,6 +40,8 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 - [012-C TreatFlow Semantic Staleness, Canonical Authority & Progressive Disclosure Audit](012-c-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, merged**; reconciles canonical navigation and four outdated provisional concept statuses. 012-D active.
 
+- [012-D TreatFlow Documentation Readiness, Agentic Governance & Tool Adapter Audit](012-d-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, pending merge**; shared policy stays in methodology, thin adapters retained, Phase 012 index template status disambiguated. 012-E next eligible after merge.
+
 ## Navigation
 
 - [Previous phase — Concept-design closure](../011/)
