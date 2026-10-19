@@ -38,11 +38,11 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 - [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PASS WITH EXPLICIT TOOLING LIMITATIONS and merged**: all 182 original main-tree Markdown blobs checked for frontmatter/key presence and local file references; four missing canonical directory indexes repaired and checked separately. 012-C subsequently merged; no engineering authorization.
 
-- [012-C TreatFlow Semantic Staleness, Canonical Authority & Progressive Disclosure Audit](012-c-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, merged**; reconciles canonical navigation and four outdated provisional concept statuses. 012-D active.
+- [012-C TreatFlow Semantic Staleness, Canonical Authority & Progressive Disclosure Audit](012-c-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, merged**; reconciles canonical navigation and four outdated provisional concept statuses.
 
 - [012-D TreatFlow Documentation Readiness, Agentic Governance & Tool Adapter Audit](012-d-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, merged**; shared policy stays in methodology, thin adapters retained, Phase 012 index template status disambiguated. 012-E handoff prepared.
 
-- [012-E TreatFlow Architecture-Neutral Engineering Obligations & Safety Handoff](012-e-treatflow-handoff.md) — **documentary PASS WITH EXPLICIT NON-OPERATIONAL GATES, pending merge**; carries forward R-P01–R-P06, independently protected authorization conditions and 012-F review criteria. 012-F next eligible after merge.
+- [012-E TreatFlow Architecture-Neutral Engineering Obligations & Safety Handoff](012-e-treatflow-handoff.md) — **documentary PASS WITH EXPLICIT NON-OPERATIONAL GATES, merged**; carries forward R-P01–R-P06 and protected authorization conditions. 012-F independent exit review active.
 
 ## Navigation
 
