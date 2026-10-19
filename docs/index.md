@@ -27,6 +27,8 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [012-A TreatFlow repository/OKF/agentic start gate](phases/012/012-a-treatflow-execution.md)
 - [012-B tracked-corpus OKF structural and reference audit](phases/012/012-b-treatflow-audit.md) — completed and merged with explicit parser/anchor limitations; 012-C next eligible.
 
+- [012-C semantic staleness and current authority reconciliation](phases/012/012-c-treatflow-audit.md) — targeted audit repairs current navigation/status claims; pending merge, 012-D subsequently eligible.
+
 ## Governance and limits
 
 - [Canonical versus historical authority](methodology/knowledge-authority.md)
