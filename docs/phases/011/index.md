@@ -25,6 +25,8 @@ Project-specific substantive subphases remain dynamically derived by `011-A`; Ba
 
 - [011-A — Methodology Completeness, Canonical Reconciliation & Closure Planning](011-a-treatflow-execution.md) — **start gate complete**; six-part audit plan, explicit index drift and safety obligations; 011-B next after merge. Phase 011 closure is not yet granted.
 
+- [011-B Lifecycle Purpose-to-Concept Traceability & Orphan Audit](011-b-treatflow-execution.md) — P-01–P-06 and five concepts/29 actions traced; canonical drift and operational blockers classified; 011-C next after merge.
+
 ## Navigation
 
 - [Previous phase](../010/)
