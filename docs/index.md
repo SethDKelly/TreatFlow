@@ -24,6 +24,8 @@ okf_version: "0.2"
 
 - [011-B purpose-to-concept traceability and orphan audit](phases/011/011-b-treatflow-execution.md) — 011-C integrity and validation sufficiency next after merge.
 
+- [011-C behavioral and compositional integrity audit](phases/011/011-c-treatflow-execution.md) — 011-D canonical status, authority and OKF repairs next after merge.
+
 # TreatFlow Knowledge Bundle
 
 This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-specific design and pre-implementation preparation. Inherited template execution records do not count as TreatFlow progress.

@@ -27,6 +27,8 @@ Project-specific substantive subphases remain dynamically derived by `011-A`; Ba
 
 - [011-B Lifecycle Purpose-to-Concept Traceability & Orphan Audit](011-b-treatflow-execution.md) — P-01–P-06 and five concepts/29 actions traced; canonical drift and operational blockers classified; 011-C next after merge.
 
+- [011-C Behavioral, Compositional Integrity, Methodology & Validation Sufficiency](011-c-treatflow-execution.md) — fifteen conceptual falsification traces; 011-D canonical/OKF repair next after merge. No empirical or operational authorization.
+
 ## Navigation
 
 - [Previous phase](../010/)
