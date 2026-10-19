@@ -1,3 +1,5 @@
+- [010-P independent observation-first Phase 010 exit](phases/010/010-p-treatflow-exit-review.md) — PASS with explicit limitations, Phase 011-A next after merge.
+
 - [010-L independent evidence-resolution exit gate](phases/010/010-l-treatflow-exit-gate.md) — HOLD; no further paper-only phase authorized without a material evidence delta.
 
 - [010-J independent Phase 010 exit reassessment](phases/010/010-j-treatflow-exit-reassessment.md) — HOLD reaffirmed; 010-K evidence/reentry next.

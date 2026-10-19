@@ -47,6 +47,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-O Experience Mapping, Dependency & Protection Regression](010-o-treatflow-execution.md) — Phase 007 mode/private review clarification and fifteen documentary regression traces; 010-P independent exit next after merge, HOLD maintained.
 
+- [010-P Independent Phase 010 Exit, Documentation Audit & Phase 011 Eligibility](010-p-treatflow-exit-review.md) — **PASS WITH EXPLICIT LIMITATIONS** under observation-first purpose; Phase 011-A next after merge. Operational safeguards still mandatory.
+
 ## Navigation
 
 - [Previous phase](../009/)
