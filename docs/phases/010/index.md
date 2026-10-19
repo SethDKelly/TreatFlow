@@ -25,7 +25,9 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-D Protected Disclosure, Minors, Nonparticipant Safety & Irreversible Exposure](010-d-treatflow-execution.md) — S04 protected withholding, hypothetical S05, sixteen M01/M02/M06 adverse cases, policy blockers; 010-D complete; 010-E record governs handoff.
 
-- [010-E Longitudinal Research, Stale Knowledge, Mapping & Scientific Misfit](010-e-treatflow-execution.md) — sixteen M03/M07/M08/M12 adversarial cases and unresolved scientific/privacy fit; 010-F next after merge.
+- [010-E Longitudinal Research, Stale Knowledge, Mapping & Scientific Misfit](010-e-treatflow-execution.md) — sixteen M03/M07/M08/M12 adversarial cases and unresolved scientific/privacy fit; 010-E complete; 010-F record governs handoff.
+
+- [010-F Strategic Misuse, Operational Limits, Exceptions & Conceptual Recovery](010-f-treatflow-execution.md) — eighteen M09–M12 adverse cases and material recovery/authority risks; 010-G next after merge.
 
 ## Navigation
 
