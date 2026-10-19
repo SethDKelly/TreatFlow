@@ -21,7 +21,9 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-B Representative Observation, Evidence Quality & Research Success/Failure Scenarios](010-b-treatflow-execution.md) — S01/S03 and twelve M03/M04 negative cases; 010-B complete; 010-C record governs handoff.
 
-- [010-C Contributor Identity, Mistakes, Contested Claims & Recovery Semantics](010-c-treatflow-execution.md) — S02, fourteen M02/M04/M05/M09/M11 scenarios and partial-outcome carry-forwards; 010-D next after merge.
+- [010-C Contributor Identity, Mistakes, Contested Claims & Recovery Semantics](010-c-treatflow-execution.md) — S02, fourteen M02/M04/M05/M09/M11 scenarios and partial-outcome carry-forwards; 010-C complete; 010-D record governs handoff.
+
+- [010-D Protected Disclosure, Minors, Nonparticipant Safety & Irreversible Exposure](010-d-treatflow-execution.md) — S04 protected withholding, hypothetical S05, sixteen M01/M02/M06 adverse cases, policy blockers; 010-E next after merge.
 
 ## Navigation
 
