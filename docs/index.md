@@ -32,6 +32,10 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [012-D documentation organization and agent adapters](phases/012/012-d-treatflow-audit.md) — merged with bounded coverage limits.
 - [012-E engineering and safety handoff](phases/012/012-e-treatflow-handoff.md) — merged with independent operational no-go obligations.
 
+## Next engineering-design lifecycle
+
+- [Phase 013 — AWS engineering foundation and MVP design](phases/013/) — new downstream **planning** start gate with cost, Route 53, private nonproduction, public production and independently gated MVP candidate. Coding and real-person operations remain separately unauthorized.
+
 ## Governance and limits
 
 - [Canonical versus historical authority](methodology/knowledge-authority.md)
