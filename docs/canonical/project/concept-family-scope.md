@@ -18,6 +18,8 @@ The adopted *design intent* is voluntary qualified Halloween observations, legit
 
 **Adopt as explicitly permitted restricted experience states within that family**, not separate supported products: reporting before any S/V association; no-delivery/insufficient-evidence research assessment; protected withholding/denial; protected historical correction with no past-copy repair. The presence of all five concepts at product-family level does not require all five to act on each occurrence.
 
+**Observation-first success clarification (010-N):** Personal O.Establish → O.Report → O.Inspect/InspectAfterClose is an **independently sufficient primary product experience** within the one adopted five-concept family, whether or not S, V, R or D ever act. This is not a second product/variant. Optional community reporting is secondary and exploratory research tertiary; neither may become an involuntary participation requirement. Protective authority and real collection/release prerequisites remain unchanged.
+
 ## Variant disposition (scope ≠ edge-validity ≠ launch)
 
 | Candidate variant | Coherence / accepted conceptual role | 006-D scope decision |
