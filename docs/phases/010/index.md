@@ -39,6 +39,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-K Targeted Evidence Acquisition & Purpose/Scope Reentry Decision](010-k-treatflow-execution.md) — external general-methodology guidance acquired; no Phase 001/006 reentry; HOLD retained and 010-L conditional on material evidence.
 
+- [010-L Evidence-Resolution Gate & Independent Phase 010 Exit Reassessment](010-l-treatflow-exit-gate.md) — **HOLD**: material TreatFlow-specific evidence absent; awaiting legitimate evidence or authorized purpose/scope reentry; Phase 011-A not eligible.
+
 ## Navigation
 
 - [Previous phase](../009/)
