@@ -22,6 +22,18 @@ tags: [treatflow, mapping, phase-007, actions, language, accessibility]
 
 The table inventories classifications; **specific actor, target and success/denial mappings remain in the three subject mapping owners**. "Direct" does not equal anonymous, globally available, or free of guard conditions. Protected action mapping must indicate the target and eligibility as far as legitimate scope allows. Unknown eligibility is not permission. Internal actions are not independently invocable just because they are meaningful in the concept. "Composed" is a **guarded application intention**, not a new universally exposed button or guaranteed automatic process.
 
+## Ambiguous outcome after an interrupted application action
+
+**Contextual correction (010-G):** The existing success/refusal feedback obligations apply **only when the action's actual outcome is established**. Where an observer, contributor, researcher or protected decision-maker loses the ability to learn whether an attempted action took effect, the application must not represent that attempt as **confirmed accepted**, **confirmed rejected**, or **safely reversible** without an entitled basis in conceptually inspectable state.
+
+- **Confirmed accepted:** the relevant concept's effect is known and the actor's legitimate scope permits acknowledgment of that effect. Reporting must distinguish the EvidenceItem or assertion affected, not equate the act of attempting with acceptance.
+- **Confirmed not effected:** evidence within legitimate scope establishes that the action did not occur. A timeout or lack of feedback alone does not prove nonacceptance.
+- **Unresolved outcome:** the actor cannot yet distinguish whether the action took effect. Communicate uncertainty without inventing success, failure, protected state or blanket entitlement.
+- **Repeat or recovery decision:** an identical-looking submission is not necessarily the same factual encounter or the same attempt. A repeated action cannot be described as safe, deduplicated, idempotent, or exactly once merely because the original outcome was unknown. Entitled inspection can clarify known state but does not prove a particular attempt's history when identity/trace evidence is lacking.
+- **Protected actions:** an ambiguous D.Decide, V.Amend or S determination never satisfies a subsequent protected guard merely because someone believes it probably completed. No D.MakeAvailable is authorized without an operative, legitimately established decision.
+
+This is a **representation and semantic-outcome boundary**, not a new intrinsic action, system-level attempt lifecycle, transaction model, retry protocol, storage requirement or technical acknowledgment design. If eventual context testing proves that users cannot distinguish action instances sufficiently to preserve P-01/P-05, reopen the relevant concept/composition owners rather than asserting this wording solved the practical problem.
+
 ## Semantic availability outcomes
 
 | Situation | Representation obligation |
