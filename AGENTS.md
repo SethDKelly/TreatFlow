@@ -4,13 +4,7 @@ These instructions apply to agents working on TreatFlow. TreatFlow inherits Base
 
 ## Start with repository authority
 
-Before making a substantive change, inspect the smallest relevant set of current repository knowledge:
-
-1. `README.md`
-2. `docs/index.md`
-3. the relevant current documents under `docs/canonical/`
-4. the active lifecycle/readiness state and relevant phase handoff
-5. `docs/methodology/agentic-development-governance.md`
+Use progressive disclosure: read `docs/index.md`, then only the relevant canonical owner(s), current phase state, and applicable methodology contracts. Consult phase history only for evidence or unresolved authority conflicts. `README.md` is orientation, not a competing specification. The durable shared rules live in `docs/methodology/agentic-development-governance.md`.
 
 Do not treat phase history as current truth when a canonical owner exists.
 
@@ -32,6 +26,7 @@ If a requested change conflicts materially with current design authority, surfac
 - Before successful Phase `011` closure, application implementation is not ready and must not begin.
 - Phase `012` is post-closure pre-implementation preparation: documentation/OKF audit, stale-document cleanup, README/rule maintenance, and engineering handoff preparation.
 - Phase `012` does not itself start feature implementation or authorize implementation execution.
+- **TreatFlow Phase 012 forbids application code, schemas, APIs, infrastructure/deployment, real participant data collection or processing, and disclosure.** Passing a documentation audit does not relax these prohibitions.
 - A separate downstream representation/architecture/engineering process must decide when implementation execution begins.
 
 ## OKF documentation rules
@@ -89,6 +84,8 @@ Implementation should preserve current conceptual obligations, including relevan
 If implementation work exposes a missing or contradictory design rule, update/reopen the natural design owner rather than making source code the only authority for new user-facing semantics.
 
 ## Agentic anti-bloat
+
+Before adding or moving documentation, inspect current natural owners and indexes. Prefer correcting, cross-linking or consolidating redundant navigational prose over creating parallel authority. Do not merge distinct concept specifications merely to reduce file count. Keep inherited Base template records explicitly separate from TreatFlow progress.
 
 - Make the smallest coherent change that satisfies the task.
 - Do not create documentation merely to narrate work already represented by code or phase evidence.
