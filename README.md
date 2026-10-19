@@ -2,7 +2,7 @@
 
 TreatFlow is a proposed community-driven Halloween observation application intended to collect voluntarily reported trick-or-treater timing and volume data for exploratory analysis, including whether arrivals resemble Poisson processes. Its design must balance interpretable observations, simple contributor identity and safe access to research data. **No app implementation has begun.**
 
-The repository inherits the Base concept-design template and its methodology; its **project-specific Phases 000–009 have exited with carry-forwards upon merger of the Phase 009-G exit PR; Phase 010-A is the next eligible design gate after that merge**. Start with [current TreatFlow intake](docs/canonical/project/intake.md), [current purposes](docs/canonical/purpose/purposes.md), [retained provisional candidates](docs/canonical/concepts/candidates.md) and [Phase 009 exit/handoff](docs/phases/009/009-g-treatflow-exit-review.md).
+The repository inherits the Base concept-design template and its methodology; its **project-specific Phases 000–009 have exited with carry-forwards; Phase 010-A–G scenario work has completed, but the Phase 010-H independent exit decision is **HOLD upon merger of its PR**. Targeted Phase 010-I validation is the next eligible design work; Phase 011-A is not yet eligible**. Start with [current TreatFlow intake](docs/canonical/project/intake.md), [current purposes](docs/canonical/purpose/purposes.md), [retained provisional candidates](docs/canonical/concepts/candidates.md) and [Phase 009 exit/handoff](docs/phases/009/009-g-treatflow-exit-review.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
@@ -41,7 +41,7 @@ Successful Phase 012 completion means **pre-implementation preparation is comple
 
 ## TreatFlow design workflow
 
-1. Begin from the [Phase 009 integrity handoff](docs/phases/009/009-g-treatflow-exit-review.md) and proceed to the [Phase 010 adversarial-validation start gate](docs/phases/010/010-a-start-gate.md).
+1. Follow the [Phase 010-H independent exit review](docs/phases/010/010-h-treatflow-exit-review.md) and its targeted Phase 010-I continuation before proposing Phase 011 closure.
 2. At each phase start gate (`NNN-A`), review incoming authority and derive only the dependency-safe subphases the project actually needs.
 3. Keep durable current design meaning in [`docs/canonical/`](docs/canonical/) and chronological reasoning/evidence in [`docs/phases/`](docs/phases/).
 4. Finish every phase with its consolidation/exit review and explicit handoff.

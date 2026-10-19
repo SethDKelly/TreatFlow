@@ -29,7 +29,9 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-F Strategic Misuse, Operational Limits, Exceptions & Conceptual Recovery](010-f-treatflow-execution.md) — eighteen M09–M12 adverse cases and material recovery/authority risks; 010-F complete; 010-G record governs handoff.
 
-- [010-G Misfit Adjudication, Upstream Repair, Regression & Risk Reconciliation](010-g-treatflow-execution.md) — mapping repair, fourteen regressions and material exit blockers; 010-H next after merge.
+- [010-G Misfit Adjudication, Upstream Repair, Regression & Risk Reconciliation](010-g-treatflow-execution.md) — mapping repair, fourteen regressions and material exit blockers; 010-G complete; 010-H exit decision governs continuation.
+
+- [010-H Independent Scenario-Validation Exit, Documentation Audit & Phase 011 Handoff](010-h-treatflow-exit-review.md) — **HOLD**; targeted 010-I continuation next after merge; Phase 011-A not eligible.
 
 ## Navigation
 
