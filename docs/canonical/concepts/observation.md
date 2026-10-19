@@ -13,6 +13,10 @@ tags: [treatflow, concept, observation, provisional, phase-003]
 
 Let an observer make and inspect *bounded, qualified claims of actually observed activity and attention*, so observed silence, missing attention, event/group counting and recollected uncertainty remain distinguishable without assuming continuous reporting.
 
+## Observation-first momentary and interval-total qualification (010-N)
+
+The existing `Measure`, `TimeExtent`, `EvidenceItem`, `Report`, `Inspect` and `InspectAfterClose` already admit both **one approximate near-present person-count report** and **one declared total across a bounded interval**. Neither needs a stream of independently timed arrivals. The interval's time extent identifies what period the *total pertains to*; it does not assert monitoring coverage or that all reported people visited at once. A claimed present report may reflect the user's action time or approximate event time; do not quietly substitute exact event timestamps for a submission gesture. Each report must retain its declared unit, provenance and justified uncertainty. An observer can inspect either report inside legitimate private scope while no Stewardship, Revision, Research or Disclosure action occurs. This clarification introduces **no new intrinsic action or mandatory input format**.
+
 ## Operational principle
 
 An observer watches the entrance from 18:00–18:20 and reports one arriving group containing five visitors at approximately 18:07. The observed interval includes quiet time before/after that encounter. From 18:20–18:35 they are away and **do not** claim a zero count. They later add a recalled estimate for 18:35–18:50 with explicitly reduced time precision and uncertain watching coverage. An interpreter can inspect the evidence and distinguish the reported group encounter, visitor count, coverage claim, gap and approximate recollection; they cannot legitimately deduce five independent interarrival events or silently fill the unattended interval with zeros.
