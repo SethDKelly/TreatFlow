@@ -35,6 +35,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-I Core Purpose Fitness, Protection Feasibility, Recovery Evidence & Re-review Preparation](010-i-treatflow-execution.md) — plausible bounded research contexts but no external validation; 010-J reassessment next after merge, Phase 011 not eligible.
 
+- [010-J Independent Exit Reassessment & Phase 011 Eligibility](010-j-treatflow-exit-reassessment.md) — **HOLD reaffirmed**; 010-K targeted evidence/reentry next after merge; Phase 011-A not eligible.
+
 ## Navigation
 
 - [Previous phase](../009/)
