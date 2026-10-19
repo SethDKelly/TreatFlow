@@ -1,13 +1,13 @@
 ---
 type: Concept Specification
-title: TreatFlow — Observation (Provisional Behavioral Specification)
-description: Abstract observation coverage, evidence unit, time and uncertainty semantics for Phase 003 review.
+title: TreatFlow — Observation (Current Behavioral Specification)
+description: Current qualified observation, coverage, count units, time and uncertainty semantics.
 tags: [treatflow, concept, observation, provisional, phase-003]
 ---
 
-# Observation — Provisional Behavioral Specification
+# Observation — Current Behavioral Specification
 
-**Status:** Specified provisionally in [003-C](../../phases/003/003-c-treatflow-execution.md); Phase 003/F and Phase 004 independence reviews pending. [Purposes P-01/P-02/P-03](../purpose/purposes.md). See [candidate history](candidates.md). This describes a single concept's behavior—not application composition, collection permissions, data-release policy, UI, event schema or implementation.
+**Status:** Current qualified concept after Phase 003–010 reviews, including [010-N observation-first clarification](../../phases/010/010-n-treatflow-execution.md). Empirical usability and operational collection permissions remain unverified. [Purposes P-01/P-02/P-03](../purpose/purposes.md). See [candidate history](candidates.md). This describes a single concept's behavior—not application composition, collection permissions, data-release policy, UI, event schema or implementation.
 
 ## Purpose
 

@@ -29,6 +29,8 @@ Project-specific substantive subphases remain dynamically derived by `011-A`; Ba
 
 - [011-C Behavioral, Compositional Integrity, Methodology & Validation Sufficiency](011-c-treatflow-execution.md) — fifteen conceptual falsification traces; 011-D canonical/OKF repair next after merge. No empirical or operational authorization.
 
+- [011-D Canonical Authority, Supersession, OKF Navigation & Documentation Repair](011-d-treatflow-execution.md) — corrected current authorities, root bundle navigation and README; 011-E residual risk and Phase 012 obligations next after merge.
+
 ## Navigation
 
 - [Previous phase](../010/)

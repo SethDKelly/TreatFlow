@@ -2,7 +2,7 @@
 okf_version: "0.2"
 type: Canonical Concept Dependence
 title: TreatFlow — Contextual Concept Inclusion Dependencies
-description: Current 006-B qualified extrinsic edges and rejected/unresolved dependencies, pending subset and scope testing.
+description: Current context-qualified native concept inclusion edges, rejected universal dependencies and adopted family scope.
 tags: [treatflow, phase-006, dependence, concept-family, provisional]
 ---
 
@@ -21,7 +21,7 @@ The currently analyzed family concerns voluntary Halloween **TreatFlow-native ob
 | **Contribution Stewardship → Observation** | **Only for the TreatFlow-native contribution-standing experience:** Stewardship is being included to let participants recognize/contest responsibility for *observations contributed to TreatFlow*. Without Observation, that **particular application role** has no contributed evidence objects to stand for. | Generic Stewardship.Item can independently represent an item in other applications. No `ObservationId` is embedded in Stewardship, and neither its actions nor reporting require a Stewardship action. |
 | **Revision → Observation** | **Only for the TreatFlow-native observational-correction experience:** Revision is being included to preserve historical factual standing of **TreatFlow-reported observations**. With no Observation, this specific project role has no observation assertion to correct. | Revision.Subject/Assertion remain abstract and Revision could independently manage other claims in another product family. No compulsory subject creation follows from including Observation. |
 
-These provisional edges hold within the **named native-evidence family**. They do **not** establish a universal relation over every coherent family using the five concepts, nor force any current product variant to include Stewardship or Revision. Phase 006-C must challenge them with subsets where the same concept takes an alternate legitimate role.
+These accepted context-qualified edges hold within the **named native-evidence family**. They do **not** establish a universal relation over every coherent family using the five concepts, nor force any current product variant to include Stewardship or Revision. Phase 006-C tested representative subsets and alternate roles; its historical test remains linked below.
 
 ## Rejected candidate edges
 
@@ -35,7 +35,7 @@ These provisional edges hold within the **named native-evidence family**. They d
 | **Controlled Disclosure → Research Provision** *(unqualified)* | Protected nonresearch prospective information availability can be meaningful without scientific inquiry qualification. |
 | **Any edge solely because C-01–C-03 or D-01–D-03 synchronizes two concepts** | Composition of included actions is not a proof that one must always be included with the other. |
 
-## Pending contextual edge questions
+## Historical contextual-edge questions (resolved for adopted native role)
 
 1. **Research Provision → Observation** in the native Halloween-evidence family may be justified when the intended role is evaluating TreatFlow-collected evidence. But generic Research Provision can assess externally supplied evidence references/metadata, including an **unavailable** result without Observation; Phase 006-C must test if native Observation is truly necessary for an independently valuable suitability-only variant.
 2. **Controlled Disclosure → Observation** may apply only to **observation-material release** variants, not protected nonresearch material. Phase 006-D must establish whether such a variant is in TreatFlow scope before promoting an edge.
@@ -51,7 +51,7 @@ These provisional edges hold within the **named native-evidence family**. They d
 - **Disclosure without Research Provision:** protected nonresearch availability is not conceptually excluded; its inclusion as a TreatFlow variant remains unresolved.
 - **Stewardship alone or Revision alone:** fails the **specific native-observation role** of the accepted conditional edges, but does not prove the generic concepts intrinsically incoherent.
 
-**Next:** 006-C computes representative subset validity and optionality **within explicit family context** and attempts to falsify both supported edges; 006-D selects scope. This document does not select a product tier, MVP or architecture.
+**Historical disposition:** 006-C tested subset validity and 006-D selected adopted family scope. This document does not select a product tier, MVP or architecture.
 
 **Limits:** actual minor/guardian consent, legal actor authority, protected release, retention, scientific methodology and operator feasibility must be established before real-world operation. Implementation is not authorized.
 

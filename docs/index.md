@@ -1,189 +1,34 @@
-- [010-P independent observation-first Phase 010 exit](phases/010/010-p-treatflow-exit-review.md) — PASS with explicit limitations, Phase 011-A next after merge.
-
-- [010-L independent evidence-resolution exit gate](phases/010/010-l-treatflow-exit-gate.md) — HOLD; no further paper-only phase authorized without a material evidence delta.
-
-- [010-J independent Phase 010 exit reassessment](phases/010/010-j-treatflow-exit-reassessment.md) — HOLD reaffirmed; 010-K evidence/reentry next.
-
-- [010-H independent validation exit HOLD and conditional handoff](phases/010/010-h-treatflow-exit-review.md) — 010-I next after merge, 011-A not eligible.
-
-- [009-G independent integrity exit and Phase 010 handoff](phases/009/009-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 010-A next eligible.
-
-- [Phase 008 exit and Phase 009 integrity handoff](phases/008/008-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 009-A next eligible.
-
-- [Phase 007 mapping exit and Phase 008 familiarity handoff](phases/007/007-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 008-A next eligible.
-
-- [Phase 006 dependence/scope exit and Phase 007 mapping handoff](phases/006/006-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 007-A next eligible.
-
-- [Phase 005 composition exit and Phase 006 handoff](phases/005/005-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 006-A next eligible.
-
 ---
 okf_version: "0.2"
 ---
 
-- [011-A methodology closure start gate](phases/011/011-a-treatflow-execution.md) — Phase 011 audit started; 011-B next after merge. Existing bundle-root navigation and frontmatter drift is registered for 011-D repair.
-
-- [011-B purpose-to-concept traceability and orphan audit](phases/011/011-b-treatflow-execution.md) — 011-C integrity and validation sufficiency next after merge.
-
-- [011-C behavioral and compositional integrity audit](phases/011/011-c-treatflow-execution.md) — 011-D canonical status, authority and OKF repairs next after merge.
-
 # TreatFlow Knowledge Bundle
 
-This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-specific design and pre-implementation preparation. Inherited template execution records do not count as TreatFlow progress.
+TreatFlow uses an observation-first concept design: **effortless private recording and review** is the independently sufficient primary success; optional protected community reporting and qualified exploratory research are secondary and tertiary. This is a **design-only** knowledge bundle: no real participant data collection, disclosure, implementation or launch is authorized.
 
-## TreatFlow current state
+## Current design authority
 
-- [TreatFlow project intake](canonical/project/intake.md) — provisional current product premise, affected parties and outcomes.
-- [Phase 000 execution](phases/000/) — Phase 000 PASS WITH CARRY-FORWARD; Phase 000 complete; its carry-forwards remain active. See the [exit decision and handoff](phases/000/000-e-treatflow-exit-review.md).
+- [Project intake and affected parties](canonical/project/intake.md)
+- [Current observation-first purposes and P-01–P-06](canonical/purpose/purposes.md)
+- [Adopted five-concept family and limits](canonical/project/concept-family-scope.md)
+- Concepts: [Observation](canonical/concepts/observation.md), [Contribution Stewardship](canonical/concepts/contribution-stewardship.md), [Revision](canonical/concepts/revision.md), [Research Provision](canonical/concepts/research-provision.md), [Controlled Disclosure](canonical/concepts/controlled-disclosure.md)
+- [Application action surface](canonical/composition/application-action-surface.md), [O/S/V composition](canonical/composition/observation-stewardship-revision.md), [V/R/D composition](canonical/composition/revision-research-disclosure.md), [native contextual dependence](canonical/dependencies/concept-dependence.md)
+- Experience: [Observation/private review](canonical/mapping/observation-representation.md), [standing/revision](canonical/mapping/standing-revision-history.md), [research/disclosure](canonical/mapping/research-disclosure-representation.md), [integrated action and unknown outcomes](canonical/mapping/integrated-action-language.md)
 
-## Completed purpose framing
+## Current lifecycle and evidence
 
-- [Current TreatFlow purpose and actor needs](canonical/purpose/purposes.md) — product purpose, P-01–P-06 obligations and success contexts, with explicit untested assumptions.
-- [Phase 001 exit and handoff](phases/001/001-e-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; Phase 001 complete; Phase 002 discovery executed.
+**Phases 000–010:** exited with documented carry-forwards; [010-P observation-first exit](phases/010/010-p-treatflow-exit-review.md) is the controlling Phase 010 decision. Earlier [010-H HOLD](phases/010/010-h-treatflow-exit-review.md), [010-J HOLD](phases/010/010-j-treatflow-exit-reassessment.md) and [010-L HOLD](phases/010/010-l-treatflow-exit-gate.md) are historical evidence before the sponsor-approved [010-M–P refinement](phases/010/index.md).
 
-## Phase 002 exit and Phase 003 entry
+**Phase 011:** concept-design closure **in progress**. Read the [Phase 011 index](phases/011/) and [011-A plan](phases/011/011-a-treatflow-execution.md), [011-B traceability/orphans](phases/011/011-b-treatflow-execution.md), [011-C integrity assessment](phases/011/011-c-treatflow-execution.md), and [011-D documentation reconciliation](phases/011/011-d-treatflow-execution.md). The next bounded obligation is **011-E residual-risk/Phase 012 handoff**, once 011-D is merged. Phase 011 has not exited.
 
-- [Phase 002 exit review](phases/002/002-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; 003-A next eligible after merge.
+- [All phases and historical rationale](phases/)
+- [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
+- [Phase 012 preparation definition](phases/012/phase-definition.md)
 
-- [Provisional retained candidates](canonical/concepts/candidates.md) — five working identities for Phase 003 specification, not finalized.
+## Governance and limits
 
-## Phase 003 exit and Phase 004 entry
+- [Canonical versus historical authority](methodology/knowledge-authority.md)
+- [OKF/documentation governance](methodology/documentation-governance.md)
+- [Design-only guardrails](methodology/design-only-guardrails.md)
 
-- [003-G specification exit](phases/003/003-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; 004-A next eligible after merge.
-
-- [003-B identity and OP challenge](phases/003/003-b-treatflow-execution.md) — characteristic behavioral stories and provisional candidate dispositions.
-
-- [Observation provisional specification](canonical/concepts/observation.md) — concept-level state, actions, exposure and time semantics; [003-C evidence](phases/003/003-c-treatflow-execution.md).
-
-- [003-D stewardship and revision qualification](phases/003/003-d-treatflow-execution.md) — conditional concept behavior and independence questions.
-
-- [003-E disclosure and research provision qualification](phases/003/003-e-treatflow-execution.md) — provisional protective and research behavior with conditional independence.
-
-## Phase 004 exit and Phase 005 entry
-
-- [004-F modularity exit](phases/004/004-f-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD; five current independent concepts; 005-A next eligible after merge.
-
-- [004-B Observation/Exposure boundary decision](phases/004/004-b-treatflow-execution.md) — integrated Observation retained; 004-C next eligible after merge.
-
-- [004-C stewardship/revision factoring](phases/004/004-c-treatflow-execution.md) — protected contribution standing separated from factual correction; 004-D next eligible after merge.
-
-- [004-D disclosure/research boundary review](phases/004/004-d-treatflow-execution.md) — protected release and research suitability compared; 004-E next eligible after merge.
-
-- [004-E cross-candidate independence audit](phases/004/004-e-treatflow-execution.md) — provisional five-concept factoring challenged; 004-F next eligible after merge.
-
-## Active Phase 005
-
-- [005-A composition start gate](phases/005/005-a-treatflow-execution.md) — conceptual synchronization and application action planning only; 005-B next eligible after merge.
-
-- [005-B application action surface](phases/005/005-b-treatflow-execution.md) and [canonical classifications](canonical/composition/application-action-surface.md) — 005-B complete; later record governs current handoff.
-
-- [005-C correction and stewardship composition](phases/005/005-c-treatflow-execution.md) — optional attribution and protected historical amendment; 005-D next eligible after merge.
-
-- [005-D research/disclosure/revision composition](phases/005/005-d-treatflow-execution.md) — qualified research evidence and protected prospective sharing; 005-E next after merge.
-
-- [005-E chain, authority and automation audit](phases/005/005-e-treatflow-execution.md) — no automatic rights escalation; 005-F next eligible after merge.
-
-- [005-F synergy and purpose consolidation](phases/005/005-f-treatflow-execution.md) — final independent Phase 005-G exit review next after merge.
-
-- [006-A dependence, subset and product-family start gate](phases/006/006-a-treatflow-execution.md) — 006-B next eligible after merge; no dependency edges yet authorized.
-
-- [006-B contextual dependence tests](phases/006/006-b-treatflow-execution.md) — native contribution/correction edges provisional; 006-B complete; 006-C record governs handoff.
-
-- [006-C coherent subset and cycle audit](phases/006/006-c-treatflow-execution.md) — 006-D scope selection next after merge.
-
-- [006-D conceptual product-family scope](phases/006/006-d-treatflow-execution.md) — integrated design, contextual R/D dependencies and deliberate exclusions; 006-D complete; 006-E record governs current handoff.
-
-- [006-E variant action and composition audit](phases/006/006-e-treatflow-execution.md) — Phase 006-F independent exit next after merge.
-
-- [007-A concept mapping start gate](phases/007/007-a-treatflow-execution.md) — mapping risk plan and 007-B–G sequence; 007-A complete; 007-B record governs current handoff.
-
-- [007-B observation and coverage mapping](phases/007/007-b-treatflow-execution.md) — 007-C contribution standing and revision mapping next after merge.
-
-- [007-C standing and correction-history mapping](phases/007/007-c-treatflow-execution.md) — 007-D research suitability/disclosure mapping next after merge.
-
-- [007-D research and protected disclosure mapping](phases/007/007-d-treatflow-execution.md) — 007-E integrated action/terminology audit next after merge.
-
-- [007-E integrated mapping audit](phases/007/007-e-treatflow-execution.md) — 007-F adversarial completeness review next after merge.
-
-- [007-F adversarial mapping completeness](phases/007/007-f-treatflow-execution.md) — Phase 007-G independent exit next after merge.
-
-- [008-A familiarity and reuse start gate](phases/008/008-a-treatflow-execution.md) — five-concept comparison baseline and 008-B–G plan; 008-A complete; 008-B record governs current handoff.
-
-- [008-B familiar precedent and behavioral fitness audit](phases/008/008-b-treatflow-execution.md) — 008-C false-familiarity terminology next after merge.
-
-- [008-C false-familiarity audit](phases/008/008-c-treatflow-execution.md) — high-consequence name collisions and 008-D handoff.
-
-- [008-D genericity and concept boundary audit](phases/008/008-d-treatflow-execution.md) — 008-E reusable knowledge/catalog decisions next after merge.
-
-- [008-E reusable concept knowledge and catalog decisions](phases/008/008-e-treatflow-execution.md) — 008-F propagation and regression next after merge.
-
-- [008-F propagation and misfit regression](phases/008/008-f-treatflow-execution.md) — 008-G independent exit next after merge.
-
-- [009-A whole-system integrity start gate](phases/009/009-a-treatflow-execution.md) — five-concept directional interference plan; 009-A complete; 009-B record governs handoff.
-
-- [009-B Observation–Stewardship–Revision integrity audit](phases/009/009-b-treatflow-execution.md) — 009-C research/disclosure integrity next after merge.
-
-- [009-C research/disclosure/recipient integrity](phases/009/009-c-treatflow-execution.md) — 009-D cross-concept temporal chains next after merge.
-
-- [009-D five-concept temporal and authority interference](phases/009/009-d-treatflow-execution.md) — 009-E whole-family coverage next after merge.
-
-- [009-E whole-family purpose preservation audit](phases/009/009-e-treatflow-execution.md) — 009-F adjudication and repair review next after merge.
-
-- [009-F misfit adjudication, canonical repair and regression](phases/009/009-f-treatflow-execution.md) — 009-G independent exit next after merge.
-
-- [010-A adversarial scenario-validation start gate](phases/010/010-a-treatflow-execution.md) — risk-weighted 010-B–H plan and 010-A complete; 010-B record governs handoff.
-
-- [010-B observation and research scenario validation](phases/010/010-b-treatflow-execution.md) — 010-C contributor/authority/mistake scenarios next after merge.
-
-- [010-C contributor identity, claims and recovery scenarios](phases/010/010-c-treatflow-execution.md) — 010-D nonparticipant disclosure safety next after merge.
-
-- [010-D protected disclosure and nonparticipant exposure validation](phases/010/010-d-treatflow-execution.md) — 010-E longitudinal evidence and mapping validation next after merge.
-
-- [010-E longitudinal research and mapping scenario validation](phases/010/010-e-treatflow-execution.md) — 010-F strategic misuse and operational limits next after merge.
-
-- [010-F strategic misuse and conceptual recovery validation](phases/010/010-f-treatflow-execution.md) — 010-G misfit adjudication and repairs next after merge.
-
-- [010-G misfit adjudication and mapping repair](phases/010/010-g-treatflow-execution.md) — 010-H independent exit next after merge; unresolved safeguards remain blockers.
-
-- [010-I core research/protection feasibility and recovery evidence](phases/010/010-i-treatflow-execution.md) — 010-J independent exit re-review next after merge.
-
-- [010-K targeted evidence and purpose/scope decision](phases/010/010-k-treatflow-execution.md) — general methodological evidence, no real-data permission, Phase 010 HOLD.
-
-- [010-M observation-first design change-control plan](phases/010/010-m-observation-first-change-plan.md) — 010-N purpose and observation alignment next after merge.
-
-- [010-N canonical observation-first purpose and mode alignment](phases/010/010-n-treatflow-execution.md) — 010-O mapping and protection regression follows merge.
-
-- [010-O observation-first mapping and protection regression](phases/010/010-o-treatflow-execution.md) — 010-P independent exit follows merge.
-
-## Start here
-
-- [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
-- [Lifecycle phases](phases/) — Phases 000–011 for concept design plus Phase 012 for post-closure pre-implementation preparation.
-- [Canonical knowledge](canonical/) — the compact current design truth produced by a cloned project.
-
-## Governing contracts
-
-- [Concept Design Methodology Authority](methodology/authority.md) — methodological authority and interpretation rules.
-- [Jackson-Aligned Concept Design Lifecycle](methodology/concept-design-lifecycle.md) — reviewed high-level concept-design lifecycle and its boundary with Phase 012.
-- [Phase Lifecycle Contract](methodology/phase-lifecycle.md) — mandatory start gate, dynamic subphase derivation, exit review, reopening, and handoff structure.
-- [Documentation Integrity & OKF Governance Contract](methodology/documentation-governance.md) — OKF conformance, progressive disclosure, freshness/staleness discipline, cross-linking, anti-duplication, and drift control.
-- [Canonical and Historical Knowledge Authority](methodology/knowledge-authority.md) — current truth versus phase evidence.
-- [Design-Only Guardrails](methodology/design-only-guardrails.md) — implementation prohibition and readiness/execution states.
-- [Agentic Development Governance](methodology/agentic-development-governance.md) — shared Claude/Cursor/Codex behavior for consuming and maintaining the OKF-grounded repository.
-
-## Knowledge model
-
-Durable current design meaning belongs under [canonical knowledge](canonical/). Chronological discovery, alternatives, reviews, validation, audits, and handoffs belong under [phase records](phases/). Phase records are evidence, not automatically current truth.
-
-Documents should link to existing authoritative knowledge rather than restating it. Directory indexes provide progressive disclosure; ordinary concept documents carry OKF frontmatter and form a traversable graph through standard Markdown links.
-
-## Lifecycle invariant
-
-Until successful Phase 011 concept-design closure:
-
-- **Implementation readiness:** not ready
-- **Implementation execution:** not started
-- **Implementation authorization:** not yet
-
-Successful Phase 011 closure may change readiness to **ready** while execution remains **not started**.
-
-Phase 012 then performs repository/OKF audit, stale-document reconciliation, README polish, agentic-rule preparation, and engineering-handoff hardening. Phase 012 does not itself begin feature implementation or grant implementation execution authorization.
+**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, and scientific appropriateness remain unverified. **Implementation readiness NOT READY; execution NOT STARTED; authorization NOT YET.**

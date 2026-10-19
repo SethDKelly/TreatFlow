@@ -1,7 +1,7 @@
 ---
 type: Purpose Knowledge
 title: TreatFlow — Product Purpose, Actor Needs and Success Context
-description: Provisional, need-focused purpose knowledge for relevant participants and affected nonparticipants.
+description: Current observation-first purpose, stakeholder needs, safeguards and explicitly unverified empirical assumptions.
 tags: [treatflow, purpose, needs, context, phase-001]
 ---
 
@@ -52,7 +52,7 @@ Examples: `NOW · TOTAL(4 people)` records a qualified near-present *person-coun
 
 **Enable willing participants to record and review their own Halloween activity effortlessly and intelligibly, with optional responsibly qualified community reporting and exploratory research, without unnecessarily exposing households or observed people.**
 
-The value is shared, qualified understanding rather than data volume, a particular interface, or proof that arrival patterns are Poisson. This purpose remains sponsor-derived and examined against illustrative 001-D success situations; empirical validation is still pending.
+The primary value is interpretable personal recording and private review; responsibly protected community understanding and qualified research are optional later uses, not prerequisites to primary success. This purpose remains sponsor-derived and examined against illustrative 001-D success situations; empirical validation is still pending.
 
 ## Distinct design-purpose obligations
 

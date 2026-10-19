@@ -1,12 +1,12 @@
 ---
 okf_version: "0.2"
 type: Canonical Application Action Surface
-title: TreatFlow — Provisional Application Action Surface
-description: Current Phase 005-B action exposure decisions, restrictions, and unresolved composition guards.
+title: TreatFlow — Current Qualified Application Action Surface
+description: Current qualified action exposure, classification and guarded composition boundaries following Phase 005/010 validation.
 tags: [treatflow, composition, application-actions, provisional]
 ---
 
-# TreatFlow — Provisional Application Action Surface
+# TreatFlow — Current Qualified Application Action Surface
 
 **Authority:** [005-B decision](../../phases/005/005-b-treatflow-execution.md). This is the **current qualified application-level action surface after Phase 005-G exit**, not an API or UI plan. C-01–C-03 and D-01–D-03 have separately specified guarded composition semantics in their canonical owners; 'candidate' classifications below do not create unconditional, independently exposed or production-authorized actions. The five [canonical concepts](../concepts/candidates.md) retain intrinsic action semantics independently.
 
