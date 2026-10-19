@@ -44,6 +44,8 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 - [012-E TreatFlow Architecture-Neutral Engineering Obligations & Safety Handoff](012-e-treatflow-handoff.md) — **documentary PASS WITH EXPLICIT NON-OPERATIONAL GATES, merged**; carries forward R-P01–R-P06 and protected authorization conditions. 012-F independent exit review active.
 
+- [012-F TreatFlow Independent Phase 012 Repository Readiness Exit](012-f-treatflow-exit-review.md) — **proposed PASS WITH BOUNDED CARRY-FORWARD, pending this PR merge and required checks**. Preparation is not formally complete until the corrected entry points and review are merged and verified; no implementation or data authorization.
+
 ## Navigation
 
 - [Previous phase — Concept-design closure](../011/)
