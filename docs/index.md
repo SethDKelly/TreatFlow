@@ -124,6 +124,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [010-D protected disclosure and nonparticipant exposure validation](phases/010/010-d-treatflow-execution.md) — 010-E longitudinal evidence and mapping validation next after merge.
 
+- [010-E longitudinal research and mapping scenario validation](phases/010/010-e-treatflow-execution.md) — 010-F strategic misuse and operational limits next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
