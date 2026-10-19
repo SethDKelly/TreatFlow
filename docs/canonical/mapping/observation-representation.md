@@ -25,6 +25,17 @@ tags: [treatflow, mapping, observation, phase-007]
 
 Derived summaries must retain the evidentiary unit, observation-coverage basis, and missingness. They may **not** silently fill gaps, merge group/person units or portray conflicting assertions as one unqualified truth.
 
+## Observation-first reporting and private review (010-O)
+
+A legitimate participant's **personal record and entitled inspection are complete primary-purpose outcomes** independent of Stewardship, Revision, Research Provision, community publication or Controlled Disclosure. Representation may minimize effort but must retain meaningful declared unit, asserted time extent, provenance and uncertainty; simplified entry is not permission to silently fabricate those qualifiers. No particular button, form or field layout is specified.
+
+- **Near-present count:** `NOW · TOTAL(4 people)` means a qualified claim of **four people** associated with an appropriately approximate claimed occurrence time. It does **not** establish four group encounters, four independent event times, or exact arrival/submission-time equality. If the relevant event time is unknown, preserve that unknown rather than treating the tap as proof of exact timing.
+- **Interval total:** `6 PM–10 PM · TOTAL(83 people)` means **one aggregate count covering a bounded claimed interval**; it does **not** assert 83 separately timed arrival events, uninterrupted four-hour watching, complete detection, or a population traffic rate. Monitoring `Coverage` and reporting completeness are separately assertable, and default to **unknown** where unasserted.
+- **Personal review:** `Inspect` / `InspectAfterClose` must distinguish the original count/unit, claimed time or interval, provenance, uncertainty, observed versus unknown coverage, and account lifecycle within authorized private scope. A personal total is not a research finding. Neither displaying a record nor closing it grants release rights or constitutes automatic S/V/R/D action.
+- **Action feedback:** confirmed recording is distinguishable from an unresolved interrupted attempt under [integrated outcome semantics](integrated-action-language.md). A repeated similar total is not presumed a deduplicated retry or a separate arrival without justification. Amendments after close, if permissible, remain separately protected Revision history.
+
+**Mapping judgment:** Both reports are supported by current `Observation.Report` / `Measure` / `TimeExtent`; this is an experience-meaning clarification, not a new action, identity requirement, mandatory coverage wizard, event schema or tested low-burden UI.
+
 ## One-action mapping and feedback obligations
 
 | Application-exposed action | What actor must understand before invoking | Meaningful positive feedback | Unavailable / refused result |
