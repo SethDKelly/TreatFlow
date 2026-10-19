@@ -34,9 +34,9 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 ## TreatFlow execution
 
-- [012-A Repository Audit Scope, OKF Baseline, Staleness Strategy & Agentic Preparation Planning](012-a-treatflow-execution.md) — **project-specific start gate PASS**, baseline tracked tree and existing agent adapters inventoried; 012-B audit next after merge. This is distinct from Base template self-audit.
+- [012-A Repository Audit Scope, OKF Baseline, Staleness Strategy & Agentic Preparation Planning](012-a-treatflow-execution.md) — **project-specific start gate PASS and merged**; baseline tracked tree and existing agent adapters inventoried. This is distinct from Base template self-audit.
 
-- [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PASS WITH EXPLICIT TOOLING LIMITATIONS**: all 182 main-tree Markdown blobs checked for frontmatter/key presence and local file references; four missing canonical directory indexes repaired; 012-C next after merge.
+- [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PASS WITH EXPLICIT TOOLING LIMITATIONS and merged**: all 182 original main-tree Markdown blobs checked for frontmatter/key presence and local file references; four missing canonical directory indexes repaired and checked separately. **012-C next eligible**; no engineering authorization.
 
 ## Navigation
 
