@@ -21,6 +21,10 @@ The next Base phase is [Phase 012 — Pre-Implementation Audit, OKF Hardening & 
 
 Project-specific substantive subphases remain dynamically derived by `011-A`; Base does not prescribe a fixed completeness matrix, handoff artifact, closure-document count, or B–X sequence.
 
+## TreatFlow execution
+
+- [011-A — Methodology Completeness, Canonical Reconciliation & Closure Planning](011-a-treatflow-execution.md) — **start gate complete**; six-part audit plan, explicit index drift and safety obligations; 011-B next after merge. Phase 011 closure is not yet granted.
+
 ## Navigation
 
 - [Previous phase](../010/)

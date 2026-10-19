@@ -20,6 +20,8 @@
 okf_version: "0.2"
 ---
 
+- [011-A methodology closure start gate](phases/011/011-a-treatflow-execution.md) — Phase 011 audit started; 011-B next after merge. Existing bundle-root navigation and frontmatter drift is registered for 011-D repair.
+
 # TreatFlow Knowledge Bundle
 
 This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-specific design and pre-implementation preparation. Inherited template execution records do not count as TreatFlow progress.
