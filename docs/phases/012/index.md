@@ -36,6 +36,8 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 - [012-A Repository Audit Scope, OKF Baseline, Staleness Strategy & Agentic Preparation Planning](012-a-treatflow-execution.md) — **project-specific start gate PASS**, baseline tracked tree and existing agent adapters inventoried; 012-B audit next after merge. This is distinct from Base template self-audit.
 
+- [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PARTIAL / INCOMPLETE**: complete tracked-path census and seven content/link spot-checks; exhaustive corpus validation still required before 012-C.
+
 ## Navigation
 
 - [Previous phase — Concept-design closure](../011/)
