@@ -1,3 +1,5 @@
+- [010-H independent validation exit HOLD and conditional handoff](phases/010/010-h-treatflow-exit-review.md) — 010-I next after merge, 011-A not eligible.
+
 - [009-G independent integrity exit and Phase 010 handoff](phases/009/009-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 010-A next eligible.
 
 - [Phase 008 exit and Phase 009 integrity handoff](phases/008/008-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 009-A next eligible.
