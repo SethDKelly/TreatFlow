@@ -45,6 +45,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-N Canonical Purpose & Observation-Mode Alignment](010-n-treatflow-execution.md) — current purpose/Observation/family scope updated for independently sufficient personal record/review; 010-O next after merge; HOLD retained.
 
+- [010-O Experience Mapping, Dependency & Protection Regression](010-o-treatflow-execution.md) — Phase 007 mode/private review clarification and fifteen documentary regression traces; 010-P independent exit next after merge, HOLD maintained.
+
 ## Navigation
 
 - [Previous phase](../009/)
