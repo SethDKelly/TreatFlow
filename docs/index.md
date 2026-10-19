@@ -120,6 +120,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [010-B observation and research scenario validation](phases/010/010-b-treatflow-execution.md) — 010-C contributor/authority/mistake scenarios next after merge.
 
+- [010-C contributor identity, claims and recovery scenarios](phases/010/010-c-treatflow-execution.md) — 010-D nonparticipant disclosure safety next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.
