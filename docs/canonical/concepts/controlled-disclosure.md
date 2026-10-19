@@ -7,7 +7,7 @@ tags: [treatflow, concept, provisional, disclosure, phase-003]
 
 # Controlled Disclosure — Provisional Behavioral Specification
 
-**Status:** Provisionally specified in [003-E](../../phases/003/003-e-treatflow-execution.md). Purpose and intrinsic behavior plausible; independence from [Research Provision](research-provision.md) remains subject to 003-F/Phase 004. Governed by [P-03/P-04/P-06](../purpose/purposes.md). No real data release is authorized.
+**Current status:** Retained independently from [Research Provision](research-provision.md) in the [adopted five-concept design family](../project/concept-family-scope.md) and [011-F qualified closure](../../phases/011/011-f-treatflow-exit-review.md). The earlier 003-E provisional specification and 003-F/004 independence test are **historical design provenance**, not a pending gate. Governed by [P-03/P-04/P-06](../purpose/purposes.md). No real data release is authorized.
 
 ## Purpose and operational principle
 
