@@ -19,13 +19,13 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 **Phases 000–010:** exited with documented carry-forwards; [010-P observation-first exit](phases/010/010-p-treatflow-exit-review.md) is the controlling Phase 010 decision. Earlier [010-H HOLD](phases/010/010-h-treatflow-exit-review.md), [010-J HOLD](phases/010/010-j-treatflow-exit-reassessment.md) and [010-L HOLD](phases/010/010-l-treatflow-exit-gate.md) are historical evidence before the sponsor-approved [010-M–P refinement](phases/010/index.md).
 
-**Phase 011:** [011-F final concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS, pending merge**. [011-E residual/safety obligations](phases/011/011-e-treatflow-execution.md) remain mandatory downstream. After merge, [Phase 012-A](phases/012/012-a-start-gate.md) is the next eligible pre-implementation preparation gate; neither application implementation nor real data collection/disclosure is authorized.
+**Phase 011:** [011-F final concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged. [011-E residual/safety obligations](phases/011/011-e-treatflow-execution.md) remain mandatory downstream. **Phase 012-A** passed and merged; **012-B** completed its tracked-corpus structural and local-file-reference audit with explicit tooling limitations and merged via [the audit record](phases/012/012-b-treatflow-audit.md). **012-C is next eligible**, but Phase 012 is not complete; neither application implementation nor real data collection/disclosure is authorized.
 
 - [All phases and historical rationale](phases/)
 - [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
 - [Phase 012 preparation definition](phases/012/phase-definition.md)
 - [012-A TreatFlow repository/OKF/agentic start gate](phases/012/012-a-treatflow-execution.md)
-- [012-B tracked-corpus OKF structural and reference audit](phases/012/012-b-treatflow-audit.md) — completed with explicit parser/anchor limitations; 012-C next after merge.
+- [012-B tracked-corpus OKF structural and reference audit](phases/012/012-b-treatflow-audit.md) — completed and merged with explicit parser/anchor limitations; 012-C next eligible.
 
 ## Governance and limits
 
