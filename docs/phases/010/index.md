@@ -33,6 +33,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-H Independent Scenario-Validation Exit, Documentation Audit & Phase 011 Handoff](010-h-treatflow-exit-review.md) — **HOLD**; targeted 010-I continuation next after merge; Phase 011-A not eligible.
 
+- [010-I Core Purpose Fitness, Protection Feasibility, Recovery Evidence & Re-review Preparation](010-i-treatflow-execution.md) — plausible bounded research contexts but no external validation; 010-J reassessment next after merge, Phase 011 not eligible.
+
 ## Navigation
 
 - [Previous phase](../009/)
