@@ -2,7 +2,7 @@
 
 TreatFlow is an observation-first Halloween application concept: effortless personal reporting and private review are its primary purpose; protected community summaries and qualified exploratory research are optional. **No app implementation has begun.**
 
-The repository follows the Base concept-design methodology. **Phases 000–010 exited with carry-forwards; Phase 011-F recorded concept-design PASS with explicit limitations. Phase 012-A and 012-B are merged; 012-B passed its declared tracked-corpus structural and local-file-reference audit with explicit tooling limitations. Phase 012-C is next eligible, not yet authorized by this status statement. Implementation execution and real-data operation remain unauthorized.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
+The repository follows the Base concept-design methodology. **Phases 000–010 exited with carry-forwards and Phase 011-F closed concept design with explicit limitations. Phase 012-A–E have merged with bounded audit qualifications; 012-F is the independent repository-preparation exit review. Completion of Phase 012, if independently accepted, does not authorize application implementation or real participant-data operations.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
@@ -41,7 +41,7 @@ Successful Phase 012 completion means **pre-implementation preparation is comple
 
 ## TreatFlow design workflow
 
-1. Follow the merged [Phase 011-F independent concept-design exit](docs/phases/011/011-f-treatflow-exit-review.md), [residual safety obligations](docs/phases/011/011-e-treatflow-execution.md), [Phase 012-A gate](docs/phases/012/012-a-treatflow-execution.md), and [Phase 012-B audit](docs/phases/012/012-b-treatflow-audit.md) into the next eligible 012-C preparation activity; never treat these results as collection, disclosure or coding authorization.
+1. Follow the merged [Phase 011-F independent concept-design exit](docs/phases/011/011-f-treatflow-exit-review.md), [residual safety obligations](docs/phases/011/011-e-treatflow-execution.md), [Phase 012-A gate](docs/phases/012/012-a-treatflow-execution.md), and [Phase 012-B audit](docs/phases/012/012-b-treatflow-audit.md) through [012-C authority reconciliation](docs/phases/012/012-c-treatflow-audit.md), [012-D agent governance](docs/phases/012/012-d-treatflow-audit.md), and [012-E engineering/safety handoff](docs/phases/012/012-e-treatflow-handoff.md) into the independent 012-F exit review; never treat these results as collection, disclosure or coding authorization.
 2. At each phase start gate (`NNN-A`), review incoming authority and derive only the dependency-safe subphases the project actually needs.
 3. Keep durable current design meaning in [`docs/canonical/`](docs/canonical/) and chronological reasoning/evidence in [`docs/phases/`](docs/phases/).
 4. Finish every phase with its consolidation/exit review and explicit handoff.
