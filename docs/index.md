@@ -1,3 +1,5 @@
+- [010-J independent Phase 010 exit reassessment](phases/010/010-j-treatflow-exit-reassessment.md) — HOLD reaffirmed; 010-K evidence/reentry next.
+
 - [010-H independent validation exit HOLD and conditional handoff](phases/010/010-h-treatflow-exit-review.md) — 010-I next after merge, 011-A not eligible.
 
 - [009-G independent integrity exit and Phase 010 handoff](phases/009/009-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 010-A next eligible.
