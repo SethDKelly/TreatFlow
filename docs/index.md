@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # TreatFlow Knowledge Bundle
 
-TreatFlow uses an observation-first concept design: **effortless private recording and review** is the independently sufficient primary success; optional protected community reporting and qualified exploratory research are secondary and tertiary. This is a **design-only** knowledge bundle: no real participant data collection, disclosure, implementation or launch is authorized.
+TreatFlow uses an observation-first concept design: **effortless private recording and review** is the independently sufficient primary success; optional protected community reporting and qualified exploratory research are secondary and tertiary. The repository is in **engineering design/readiness handoff**, not authorized implementation or operation: no application coding, AWS deployment, real participant data collection, protected disclosure or launch is authorized by this knowledge bundle.
 
 ## Current design authority
 
@@ -19,7 +19,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 **Phases 000–010:** exited with documented carry-forwards; [010-P observation-first exit](phases/010/010-p-treatflow-exit-review.md) is the controlling Phase 010 decision. Earlier [010-H HOLD](phases/010/010-h-treatflow-exit-review.md), [010-J HOLD](phases/010/010-j-treatflow-exit-reassessment.md) and [010-L HOLD](phases/010/010-l-treatflow-exit-gate.md) are historical evidence before the sponsor-approved [010-M–P refinement](phases/010/index.md).
 
-**Phase 011:** [011-F final concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged. [011-E residual/safety obligations](phases/011/011-e-treatflow-execution.md) remain mandatory downstream. **Phase 012-A** passed and merged; **012-B** completed its tracked-corpus structural and local-file-reference audit with explicit tooling limitations and merged via [the audit record](phases/012/012-b-treatflow-audit.md). **012-C, 012-D and 012-E are merged** with explicit qualifications. **012-F independent exit review is active**; Phase 012 is not yet closed and neither implementation nor real data collection/disclosure is authorized.
+**Phase 011:** [011-F independent concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged; [011-E safeguards](phases/011/011-e-treatflow-execution.md) remain mandatory. **Phase 012:** [012-F independent exit](phases/012/012-f-treatflow-exit-review.md) merged with bounded carry-forward. **Phase 013-A–G:** AWS engineering architecture, MVP contracts and delivery plan merged. **013-H** independent engineering-design exit [pending PR merge](phases/013/013-h-independent-exit-authorization.md): design PASS proposed with implementation/AWS-write HOLD; limited 014-A repository discovery next eligible after merge. No real collection/disclosure authority.
 
 - [All phases and historical rationale](phases/)
 - [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
@@ -32,9 +32,10 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [012-D documentation organization and agent adapters](phases/012/012-d-treatflow-audit.md) — merged with bounded coverage limits.
 - [012-E engineering and safety handoff](phases/012/012-e-treatflow-handoff.md) — merged with independent operational no-go obligations.
 
-## Next engineering-design lifecycle
+## Engineering design exit and next readiness gate
 
-- [Phase 013 — AWS engineering foundation and MVP design](phases/013/) — new downstream **planning** start gate with cost, Route 53, private nonproduction, public production and independently gated MVP candidate. Coding and real-person operations remain separately unauthorized.
+- [Phase 013 AWS architecture and MVP program](phases/013/) — merged engineering planning, [013-G conditional selection](phases/013/013-g-architecture-mvp-delivery-decision.md), and [013-H evidence-calibrated exit](phases/013/013-h-independent-exit-authorization.md) (pending merge).
+- [Phase 014-A documentary authority and environment inventory](phases/014/014-a-entry-inventory.md) — eligible after 013-H merges, without coding, AWS writes, DNS or real-data permissions.
 
 ## Governance and limits
 
@@ -42,4 +43,4 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [OKF/documentation governance](methodology/documentation-governance.md)
 - [Design-only guardrails](methodology/design-only-guardrails.md)
 
-**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, and scientific appropriateness remain unverified. **After 011-F merge: implementation readiness READY FOR PRE-IMPLEMENTATION PREPARATION; execution NOT STARTED; authorization NOT GRANTED.**
+**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, scientific appropriateness, AWS/DNS ownership, budgets and enforceable CI/cloud roles remain unverified. **As of the 013-H review: design ready for limited documentary 014-A inventory; application/cloud implementation HOLD; execution NOT STARTED; real participant collection or release NOT AUTHORIZED.**
