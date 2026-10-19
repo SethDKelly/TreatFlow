@@ -1,3 +1,5 @@
+- [010-L independent evidence-resolution exit gate](phases/010/010-l-treatflow-exit-gate.md) — HOLD; no further paper-only phase authorized without a material evidence delta.
+
 - [010-J independent Phase 010 exit reassessment](phases/010/010-j-treatflow-exit-reassessment.md) — HOLD reaffirmed; 010-K evidence/reentry next.
 
 - [010-H independent validation exit HOLD and conditional handoff](phases/010/010-h-treatflow-exit-review.md) — 010-I next after merge, 011-A not eligible.
