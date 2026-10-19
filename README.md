@@ -1,8 +1,8 @@
 # TreatFlow
 
-TreatFlow is a proposed community-driven Halloween observation application intended to collect voluntarily reported trick-or-treater timing and volume data for exploratory analysis, including whether arrivals resemble Poisson processes. Its design must balance interpretable observations, simple contributor identity and safe access to research data. **No app implementation has begun.**
+TreatFlow is an observation-first Halloween application concept: effortless personal reporting and private review are its primary purpose; protected community summaries and qualified exploratory research are optional. **No app implementation has begun.**
 
-The repository inherits the Base concept-design template and its methodology; its **project-specific Phases 000–009 have exited with carry-forwards; Phase 010-P has now passed the observation-first conceptual validation gate with explicit empirical, privacy, and operational limitations, pending merger of PR #79. Phase 011-A is next eligible after that merge.** Start with [current TreatFlow intake](docs/canonical/project/intake.md), [current purposes](docs/canonical/purpose/purposes.md), [retained provisional candidates](docs/canonical/concepts/candidates.md) and [Phase 009 exit/handoff](docs/phases/009/009-g-treatflow-exit-review.md).
+The repository follows the Base concept-design methodology. **Phases 000–010 exited with carry-forwards, most recently the observation-first 010-P decision. Phase 011 closure audit is in progress (011-D documentation repair); 011-E is next after merge. Phase 011 has not exited.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
