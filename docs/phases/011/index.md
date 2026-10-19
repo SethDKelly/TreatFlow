@@ -33,6 +33,8 @@ Project-specific substantive subphases remain dynamically derived by `011-A`; Ba
 
 - [011-E Open Items, Safety Boundaries, Implementation Contamination & Phase 012 Handoff](011-e-treatflow-execution.md) — R-P01–R-P06 classified; privacy/authority hard no-go conditions retained; 011-F independent final exit next after merge.
 
+- [011-F Independent Final Concept-Design Closure, Readiness Decision & Phase 012 Handoff](011-f-treatflow-exit-review.md) — **PASS WITH EXPLICIT LIMITATIONS** pending merge; Phase 012-A next eligible afterward, no execution or real-data authorization.
+
 ## Navigation
 
 - [Previous phase](../010/)
