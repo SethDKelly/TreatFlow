@@ -142,6 +142,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [010-M observation-first design change-control plan](phases/010/010-m-observation-first-change-plan.md) — 010-N purpose and observation alignment next after merge.
 
+- [010-N canonical observation-first purpose and mode alignment](phases/010/010-n-treatflow-execution.md) — 010-O mapping and protection regression follows merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

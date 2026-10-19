@@ -43,6 +43,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-M Observation-First Purpose Clarification & Bounded Revalidation Plan](010-m-observation-first-change-plan.md) — sponsor-approved private recording/review as primary success; 010-N purpose and observation alignment next after merge. Existing HOLD remains pending independent revalidation.
 
+- [010-N Canonical Purpose & Observation-Mode Alignment](010-n-treatflow-execution.md) — current purpose/Observation/family scope updated for independently sufficient personal record/review; 010-O next after merge; HOLD retained.
+
 ## Navigation
 
 - [Previous phase](../009/)

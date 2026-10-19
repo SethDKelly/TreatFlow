@@ -42,9 +42,15 @@ A participant may have several needs, and needs of different parties may conflic
 - Open exploratory access versus misuse, researcher misunderstanding and operator stewardship load.
 - Exciting public conclusions versus disciplined treatment of missingness, nonrandom sampling and rejected hypotheses.
 
+## Sponsor-confirmed observation-first priority (010-N)
+
+**Primary product success:** an eligible participant can effortlessly record and privately review their own Halloween activity, **even if no community summary or research provision ever follows**. This is an explicit sponsor decision documented in [010-M](../../phases/010/010-m-observation-first-change-plan.md), not empirical usability evidence. **Secondary:** optional, qualified community reporting when legitimately protected. **Tertiary:** exploratory research only insofar as observations and independently justified sharing support it. P-01–P-06 remain independently relevant obligations; their identifiers are not renumbered. P-01 and P-02 govern primary success, P-04–P-06 remain necessary protections, and P-03 is conditional rather than a prerequisite to personal recording or review.
+
+Examples: `NOW · TOTAL(4 people)` records a qualified near-present *person-count claim*, not four independent arrivals; `6 PM–10 PM · TOTAL(83 people)` records a *bounded interval total*, not an event-time series or implicit continuous monitoring. Both remain valuable privately. Unasserted coverage is unknown; neither report creates public identity, research entitlement, consent or disclosure approval. Actual participation and collection require independently established safeguards.
+
 ## Product-level purpose
 
-**Enable willing community observers to turn everyday Halloween arrival experiences into interpretable evidence that others can explore responsibly, without making contribution unduly burdensome or exposing participating households and observed people to avoidable harm.**
+**Enable willing participants to record and review their own Halloween activity effortlessly and intelligibly, with optional responsibly qualified community reporting and exploratory research, without unnecessarily exposing households or observed people.**
 
 The value is shared, qualified understanding rather than data volume, a particular interface, or proof that arrival patterns are Poisson. This purpose remains sponsor-derived and examined against illustrative 001-D success situations; empirical validation is still pending.
 
