@@ -1,76 +1,23 @@
 # Canonical Design Knowledge
 
-This directory contains the **current authoritative design state** for a project created from Base. Phase records explain how conclusions were reached; canonical documents state what the design currently means.
+This directory contains TreatFlow's **current design authority**. Phase records preserve chronology, discovery, earlier provisional states, and independent exit evidence; they do not override these canonical owners. The [bundle root](../index.md) provides the shortest current entry path.
 
-## Typical knowledge families
+## Read current design first
 
-A cloned project should create only the families its design actually needs. Common families may include:
+1. [Product purpose and P-01–P-06](purpose/purposes.md) — **effortless private recording and review** are independently sufficient primary success. Protected community use and research are optional.
+2. [Project intake](project/intake.md) and [adopted concept-family scope](project/concept-family-scope.md) — the five-concept **design family**, alternatives, exclusions, and non-operational boundaries.
+3. [Five behavioral concept owners](concepts/) — [Observation](concepts/observation.md), [Contribution Stewardship](concepts/contribution-stewardship.md), [Revision](concepts/revision.md), [Research Provision](concepts/research-provision.md), and [Controlled Disclosure](concepts/controlled-disclosure.md).
+4. [Application action surface](composition/application-action-surface.md) — current classification of the 29 intrinsic actions and composed exposure; [O/S/V composition](composition/observation-stewardship-revision.md) and [V/R/D composition](composition/revision-research-disclosure.md) define guarded cross-concept behavior.
+5. [Native contextual concept dependence](dependencies/concept-dependence.md) — scope-specific dependencies do not change intrinsic independence or authorize actions.
+6. [Current experience mappings](mapping/) — observation and private review, protected standing/revision, research/disclosure distinctions, and integrated action feedback.
 
-- `project/` — current intake definition, context, actors, boundaries, constraints, assumptions, and unresolved project questions;
-- `purpose/` — human purposes, needs, burdens, desired improvements, success framing, and purpose tensions;
-- `concepts/` — concept definitions, operational principles, state, actions, invariants, and independence boundaries;
-- `synchronizations/` — explicit cross-concept interactions;
-- `dependencies/` — concept inclusion dependencies and product-family relationships;
-- `authority/` — actors, protected decisions, authority seams, and non-substitutable responsibilities;
-- `experience/` — mappings from concepts into user-visible behavior and experience contracts;
-- `principles/` — project-specific design principles, accepted constraints, and durable policy;
-- `decisions/` — durable design decisions not naturally owned elsewhere;
-- `open-questions/` — unresolved design questions that remain current.
+## Interpretation and history
 
-These are suggested knowledge families, not a mandatory taxonomy.
+- [Phase 010-P exit](../phases/010/010-p-treatflow-exit-review.md) and [011-F independent concept-design closure](../phases/011/011-f-treatflow-exit-review.md) control the latest design lifecycle interpretation. Earlier 010-H/J/L HOLD decisions are **historical**, not current status.
+- [011-E residual safeguards](../phases/011/011-e-treatflow-execution.md) preserve unmet eligibility, privacy, disclosure, scientific, usability and operational obligations.
+- [Candidate discovery](concepts/candidates.md), Phase 003–007 provisional decisions and earlier handoffs explain the reasoning but do **not** constitute additional current specifications or active gates.
+- [Knowledge authority contract](../methodology/knowledge-authority.md), [documentation governance](../methodology/documentation-governance.md), and [phase history](../phases/) provide deeper process and evidence.
 
-## Authority and documentation discipline
+## Current lifecycle boundary
 
-When a conclusion becomes durable, promote its stable meaning here rather than forcing future readers to reconstruct current truth from phase history. Prefer updating an existing natural owner and linking to it over creating duplicative canonical documents.
-
-See [Canonical and Historical Knowledge Authority](../methodology/knowledge-authority.md) and [Documentation Integrity & OKF Governance](../methodology/documentation-governance.md).
-
-## TreatFlow current knowledge
-
-- [Project intake context](project/intake.md) — provisional current product premise, actors, outcomes, uncertainties and Phase 000 carry-forward.
-
-- [TreatFlow actor needs and participation context](purpose/purposes.md) — current Phase 001 purpose baseline (P-01–P-06 and success contexts), with carry-forwards; separate from project intake.
-
-- [TreatFlow provisional concept candidates](concepts/candidates.md) — five working candidates retained for specification, subject to Phase 002 exit and Phase 003 review.
-
-- [Observation provisional behavioral specification](concepts/observation.md) — current abstract coverage, measurement and temporal semantics, pending Phase 003/004 review.
-
-- [Contribution Stewardship](concepts/contribution-stewardship.md) — conditional contributor responsibility/control behavior; independence unresolved.
-- [Revision](concepts/revision.md) — conditional factual supersession and challenge-history behavior; independence unresolved.
-
-- [Controlled Disclosure](concepts/controlled-disclosure.md) — provisional protective sharing behavior, no approved release policy.
-- [Research Provision](concepts/research-provision.md) — conditional research-scope and evidence qualification behavior.
-
-- [Phase 003 specification exit and Phase 004 challenge scope](../phases/003/003-g-treatflow-exit-review.md) — current five provisional owners and boundary carry-forwards.
-
-- [Phase 004 modularity exit and Phase 005 handoff](../phases/004/004-f-treatflow-exit-review.md) — five current behavioral owners and composition questions.
-
-- [TreatFlow provisional application action surface](composition/application-action-surface.md) — current direct, protected, internal and composed-candidate classifications pending 005-C–G.
-
-- [Observation, Stewardship & Revision composition](composition/observation-stewardship-revision.md) — C-01–C-03 current guarded semantics; no automatic authority or mandatory registration.
-
-- [Revision, Research Provision & Controlled Disclosure composition](composition/revision-research-disclosure.md) — D-01–D-03 current guarded application semantics, historical exposure preserved.
-
-- [Phase 005 composition exit and Phase 006 handoff](../phases/005/005-g-treatflow-exit-review.md) — current action and C/D composition owner map; extrinsic inclusion remains for Phase 006.
-
-- [TreatFlow contextual concept dependence](dependencies/concept-dependence.md) — current 006-B conditional edges, rejected edges and unresolved roles; not adopted scope.
-
-- [Adopted TreatFlow concept-family scope](project/concept-family-scope.md) — integrated five-concept design and coherent-but-unadopted variants; no launch authorization.
-
-- [Phase 006 exit and Phase 007 handoff](../phases/006/006-f-treatflow-exit-review.md) — current native-family dependency and product-scope authority reconciliation.
-
-- [Observation state and action mapping](mapping/observation-representation.md) — current user-visible obligations for units, monitored extent, temporal uncertainty, lifecycle and reporting feedback.
-
-- [Protected standing, revision & history mapping](mapping/standing-revision-history.md) — current semantic representation of private responsibility, protected correction and contested factual history.
-
-- [Research suitability, controlled disclosure & protected recipient mapping](mapping/research-disclosure-representation.md) — qualification versus authorization, scoped availability and historical exposure representations.
-
-- [Integrated application action and representation integrity](mapping/integrated-action-language.md) — consolidated exposure, terminology, structural and accessibility obligations.
-
-- [Phase 007 mapping exit and Phase 008 handoff](../phases/007/007-g-treatflow-exit-review.md) — mapping-owner, concept, action and scope authority reconciliation.
-
-## Navigation
-
-- [Bundle root](../)
-- [Phase records](../phases/)
-- [Methodology](../methodology/)
+Phases 000–011 reached a concept-design closure **with explicit limitations**. Phase 012 is pre-implementation documentation preparation, not implementation authorization. Real participant data collection or processing, disclosure, feature coding and deployment remain unauthorized by this lifecycle. A documented conceptual contradiction requires reentry to the affected natural owner and Phase 011, not an opportunistic index rewrite.

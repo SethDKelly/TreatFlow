@@ -7,7 +7,7 @@ tags: [treatflow, concept, provisional, revision, phase-003]
 
 # Revision — Provisional Behavioral Specification
 
-**Status:** **Conditionally specified in [003-D](../../phases/003/003-d-treatflow-execution.md)**; may be absorbed into Observation after Phase 003-F/004 independence testing. See [purpose P-02/P-05/P-06](../purpose/purposes.md), [Observation](observation.md), and [candidate owner](candidates.md).
+**Current status:** Retained as an independent concept in the [adopted five-concept design family](../project/concept-family-scope.md), within [011-F qualified closure](../../phases/011/011-f-treatflow-exit-review.md). The conditional 003-D definition and potential Phase 003-F/004 absorption question below describe **historical design examination**, not a pending decision. See [purposes P-02/P-05/P-06](../purpose/purposes.md), [Observation](observation.md), and [candidate provenance](candidates.md). No real-world correction authority follows.
 
 ## Purpose and operational principle
 

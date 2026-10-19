@@ -7,7 +7,7 @@ tags: [treatflow, concept, provisional, research, phase-003]
 
 # Research Provision — Conditional Behavioral Specification
 
-**Status:** **Conditionally specified in [003-E](../../phases/003/003-e-treatflow-execution.md)**. Distinctness from [Controlled Disclosure](controlled-disclosure.md) remains unproved; 003-F/Phase 004 may merge/reframe/retire. Traceability: [P-02/P-03/P-04](../purpose/purposes.md).
+**Current status:** Retained as an independent concept in the [adopted five-concept design family](../project/concept-family-scope.md), subject to the [011-F qualified closure](../../phases/011/011-f-treatflow-exit-review.md); evidence fitness remains independent from protected disclosure/availability. The conditional 003-E specification and 003-F/004 independence question below are **historical design provenance**, not an outstanding Phase 004 gate. Traceability: [P-02/P-03/P-04](../purpose/purposes.md). No actual research provision or release is authorized.
 
 ## Purpose and operational principle
 

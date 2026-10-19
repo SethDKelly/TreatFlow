@@ -7,7 +7,7 @@ tags: [treatflow, concept, contribution, phase-004, provisional]
 
 # Contribution Stewardship — Refined Behavioral Specification
 
-**Status:** **RETAIN, REDUCE AND REFRAME** in [004-C](../../phases/004/004-c-treatflow-execution.md); Phase 004-E independent recheck pending. [Purposes P-04/P-05](../purpose/purposes.md). Supersedes the broader Phase 003 specification that treated general-purpose control requests as intrinsic. This concept is about **recognizable responsibility standing**, not authentication, public authorship, permission to edit or requests to every other concept.
+**Current status:** Retained with the **reduced, reframed responsibility-standing boundary** in the [adopted five-concept family](../project/concept-family-scope.md), under [011-F qualified closure](../../phases/011/011-f-treatflow-exit-review.md). The [004-C reduction](../../phases/004/004-c-treatflow-execution.md) and formerly pending 004-E recheck are historical provenance, **not an active unfinished gate**. [Purposes P-04/P-05](../purpose/purposes.md). This concept is about **recognizable responsibility standing**, not authentication, public authorship, permission to edit or requests to every other concept.
 
 ## Purpose and operational principle
 
