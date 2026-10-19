@@ -19,7 +19,9 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-A Validation Scope, Misfit Hypotheses, Risk Coverage & Planning](010-a-treatflow-execution.md) — PASS WITH CARRY-FORWARD; 010-B–H planned, 010-A complete; 010-B record governs handoff.
 
-- [010-B Representative Observation, Evidence Quality & Research Success/Failure Scenarios](010-b-treatflow-execution.md) — S01/S03 and twelve M03/M04 negative cases; 010-C next after merge.
+- [010-B Representative Observation, Evidence Quality & Research Success/Failure Scenarios](010-b-treatflow-execution.md) — S01/S03 and twelve M03/M04 negative cases; 010-B complete; 010-C record governs handoff.
+
+- [010-C Contributor Identity, Mistakes, Contested Claims & Recovery Semantics](010-c-treatflow-execution.md) — S02, fourteen M02/M04/M05/M09/M11 scenarios and partial-outcome carry-forwards; 010-D next after merge.
 
 ## Navigation
 
