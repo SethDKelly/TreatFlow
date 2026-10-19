@@ -2,7 +2,7 @@
 
 TreatFlow is an observation-first Halloween application concept: effortless personal reporting and private review are its primary purpose; protected community summaries and qualified exploratory research are optional. **No app implementation has begun.**
 
-The repository follows the Base concept-design methodology. **Phases 000–010 exited with carry-forwards. Phase 011-F has reached a documented concept-design PASS with explicit limitations, pending merge of its PR; Phase 012-A becomes eligible after merge. Implementation execution and real-data operation remain unauthorized.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
+The repository follows the Base concept-design methodology. **Phases 000–010 exited with carry-forwards. Phase 011-F has reached a documented concept-design PASS with explicit limitations, pending merge of its PR; Phase 012-A project-specific repository-audit start gate has passed, pending merge; Phase 012-B is next after that merge. Implementation execution and real-data operation remain unauthorized.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
