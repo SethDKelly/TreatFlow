@@ -19,7 +19,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 **Phases 000–010:** exited with documented carry-forwards; [010-P observation-first exit](phases/010/010-p-treatflow-exit-review.md) is the controlling Phase 010 decision. Earlier [010-H HOLD](phases/010/010-h-treatflow-exit-review.md), [010-J HOLD](phases/010/010-j-treatflow-exit-reassessment.md) and [010-L HOLD](phases/010/010-l-treatflow-exit-gate.md) are historical evidence before the sponsor-approved [010-M–P refinement](phases/010/index.md).
 
-**Phase 011:** concept-design closure **in progress**. Read the [Phase 011 index](phases/011/) and [011-A plan](phases/011/011-a-treatflow-execution.md), [011-B traceability/orphans](phases/011/011-b-treatflow-execution.md), [011-C integrity assessment](phases/011/011-c-treatflow-execution.md), and [011-D documentation reconciliation](phases/011/011-d-treatflow-execution.md). The next bounded obligation is **011-E residual-risk/Phase 012 handoff**, once 011-D is merged. Phase 011 has not exited.
+**Phase 011:** [011-F final concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS, pending merge**. [011-E residual/safety obligations](phases/011/011-e-treatflow-execution.md) remain mandatory downstream. After merge, [Phase 012-A](phases/012/012-a-start-gate.md) is the next eligible pre-implementation preparation gate; neither application implementation nor real data collection/disclosure is authorized.
 
 - [All phases and historical rationale](phases/)
 - [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
@@ -31,4 +31,4 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [OKF/documentation governance](methodology/documentation-governance.md)
 - [Design-only guardrails](methodology/design-only-guardrails.md)
 
-**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, and scientific appropriateness remain unverified. **Implementation readiness NOT READY; execution NOT STARTED; authorization NOT YET.**
+**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, and scientific appropriateness remain unverified. **After 011-F merge: implementation readiness READY FOR PRE-IMPLEMENTATION PREPARATION; execution NOT STARTED; authorization NOT GRANTED.**
