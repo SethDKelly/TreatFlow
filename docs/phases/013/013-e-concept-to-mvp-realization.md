@@ -19,7 +19,7 @@ sources:
 
 ## Entry, purpose and qualified decision
 
-**013-E CONTRACT DESIGN PASS WITH BLOCKING IDENTITY, CORRECTION AND OPERATION DECISIONS CARRIED TO 013-G/H; PENDING PR MERGE.** Phase 013-D merged on main at commit \`8aa55d6606139db85598dc0e809d981eb7c97e0a\`. Scope is **engineering realization contract definition**, not implementing a frontend, API, storage schema, authentication service or human-facing product.
+**013-E CONTRACT DESIGN PASS WITH BLOCKING IDENTITY, CORRECTION AND OPERATION DECISIONS CARRIED TO 013-G/H; PENDING PR MERGE.** Phase 013-D merged on main at commit `8aa55d6606139db85598dc0e809d981eb7c97e0a`. Scope is **engineering realization contract definition**, not implementing a frontend, API, storage schema, authentication service or human-facing product.
 
 This is a *downstream design translation*, not a new canonical concept. The binding design meanings remain [observation-first purpose](../../canonical/purpose/purposes.md), [adopted five-concept family and excluded mandatory identity registration](../../canonical/project/concept-family-scope.md), [Observation seven-action behavior](../../canonical/concepts/observation.md), [Observation representation](../../canonical/mapping/observation-representation.md), [29-action qualified surface](../../canonical/composition/application-action-surface.md), [integrated unknown outcomes](../../canonical/mapping/integrated-action-language.md), [optional contribution/correction composition](../../canonical/composition/observation-stewardship-revision.md) and [six residual safeguards](../012/012-e-treatflow-handoff.md). [013-B](013-b-aws-architecture-evaluation.md)–[013-D](013-d-aws-finops-operational-economics.md) provide AWS and cost hypotheses, not user-purpose authority.
 
@@ -54,7 +54,7 @@ A deferred concept does not become absent from the *concept family*, and no sepa
 Separate four notions:
 1. **Eligibility for real-person participation:** policy/age/guardian/household/consent constraints **not proven**; requires competent R-P02 decision independent of AWS credentials, before any real collection.
 2. **Technical principal or capability:** cryptographic mechanism that can safely authenticate a returning client for a permitted private account. May be pseudonymous and not require public naming or conventional registration; a valid token is not household ownership or guardian permission.
-3. **Entitlement to a particular Observation:** server-enforced relation between permitted technical principal/capability and that bounded Observation. Never infer from user-supplied IDs, shared geography, IP, email coincidence or a Cognito \`sub\` alone without an established binding.
+3. **Entitlement to a particular Observation:** server-enforced relation between permitted technical principal/capability and that bounded Observation. Never infer from user-supplied IDs, shared geography, IP, email coincidence or a Cognito `sub` alone without an established binding.
 4. **Contribution Stewardship Party / Revision authority:** distinct conceptual roles with separate guards. Technical ownership of an observation does **not** automatically create protected C-01 association, correction rights, release approval or another household member's standing.
 
 **Identity alternatives for 013-G choice:**
@@ -78,7 +78,7 @@ An engineering representation, whatever its eventual API/storage names, must pre
 
 | Conceptual field/category | Required meaning | Invalid coercion |
 |---|---|---|
-| Observation identity and lifecycle | Opaque account ID; legitimate source and context; \`open\` / \`closed\` | Identity of residence/person, lifetime public profile or automatic release |
+| Observation identity and lifecycle | Opaque account ID; legitimate source and context; `open` / `closed` | Identity of residence/person, lifetime public profile or automatic release |
 | EvidenceItem / Measure | Distinct reported item/reference, declared unit (e.g. people vs group encounters), nonnegative reported quantity or event claim with relevant uncertainty | Five people treated as five separate group encounters/event timestamps |
 | TimeExtent | Asserted approximate near-present occurrence or bounded period, time zone/offset and precision if relevant; separate server receipt/action time | Submission time converted into exact visit time; interval total expanded to timed arrivals |
 | Provenance | Whether contemporaneous or recalled; qualifier of uncertainty, how evidence was known | Recalled report represented as exact real-time observation |
@@ -88,14 +88,14 @@ An engineering representation, whatever its eventual API/storage names, must pre
 | Scope/owner binding | Entitled principal/capability to Observation; environment and ownership checked server-side | Supplied Observation ID or shared IP interpreted as sufficient owner authority |
 | Outcome/attempt | Accepted item/ref or known denial/no effect, or unknown pending reconciliation; a retry's attempt identity separate from evidence identity | Timeout shown as successful, failed, safely retryable or new activity without evidence |
 
-**Zero rule:** \`quantity=0\` alone does not establish watched quiet. A zero interpretable as *reported observed zero* requires explicit observed coverage over the relevant extent, complete-claimed reporting for the **same unit and extent**, and no unresolved contradictory activity. A new empty Observation is not a verified zero. A coverage claim by itself is not a new activity measure. Avoid cross-concept unit or identity collisions.
+**Zero rule:** `quantity=0` alone does not establish watched quiet. A zero interpretable as *reported observed zero* requires explicit observed coverage over the relevant extent, complete-claimed reporting for the **same unit and extent**, and no unresolved contradictory activity. A new empty Observation is not a verified zero. A coverage claim by itself is not a new activity measure. Avoid cross-concept unit or identity collisions.
 
 **Temporal examples to preserve:**
-- \`NOW · TOTAL(4 people)\`: **one** near-present qualified person-count assertion, *not* four independently timed events; monitoring coverage remains unasserted/unknown unless separately stated.
-- \`6 PM–10 PM · TOTAL(83 people)\`: **one** interval-total person-count assertion, *not* 83 event timestamps, a verified continuous four-hour observation, or an inferred rate.
-- \`18:00–18:20 observed, complete claimed, 0 groups\`: a reported zero for the declared group unit/extent when no contradiction; other units remain unknown.
-- \`18:20–18:35 not observed\`: not a zero; a later recalled total with low precision may coexist with unknown coverage without invented completeness.
-- \`6 PM–7 PM observed\` and overlapping \`6:30 PM–7:30 PM not observed\`: report conflict/contested overlap, not a normalized uninterrupted coverage block.
+- `NOW · TOTAL(4 people)`: **one** near-present qualified person-count assertion, *not* four independently timed events; monitoring coverage remains unasserted/unknown unless separately stated.
+- `6 PM–10 PM · TOTAL(83 people)`: **one** interval-total person-count assertion, *not* 83 event timestamps, a verified continuous four-hour observation, or an inferred rate.
+- `18:00–18:20 observed, complete claimed, 0 groups`: a reported zero for the declared group unit/extent when no contradiction; other units remain unknown.
+- `18:20–18:35 not observed`: not a zero; a later recalled total with low precision may coexist with unknown coverage without invented completeness.
+- `6 PM–7 PM observed` and overlapping `6:30 PM–7:30 PM not observed`: report conflict/contested overlap, not a normalized uninterrupted coverage block.
 
 **Persisting one count is not the same as preserving interpretation.** Data minimization is mandatory: do not add household geolocation, address, child/visitor identities, passive tracking, IP-derived observation coordinates or research export fields because the database can store them. Token/audit logs should avoid exposure of private contents.
 
@@ -103,13 +103,13 @@ An engineering representation, whatever its eventual API/storage names, must pre
 
 | O action | Successful behavior and guard | Required denied/negative result | Acceptance evidence |
 |---|---|---|---|
-| \`Establish\` | Eligible synthetic test source in approved dev session establishes **open** private Observation and receives opaque ID; no S, V, R or D enrollment | No unauthenticated/non-tester access; no implicit coverage or evidence; no public record | Creation plus scoped empty Inspect |
-| \`Report\` | Owner of open Observation asserts one qualified measure, extent, provenance and uncertainty, receiving evidence reference | Closed/foreign account, illegal unit/quantity or unauthorized real-data production intake denied; no auto-coverage | Near-present and interval synthetic fixture outputs |
-| \`AssertCoverage\` | Owner of open Observation adds explicit attention and completeness qualifiers with extent/precision | No synthetic person count, no inferred watched-zero; after-close denied | Coverage state view and observed-zero composite guard |
-| \`Qualify\` | Owner of open Observation adds/refines supported qualifiers with provenance | No factual count replacement, overlap erasure or hidden V.Amend; closed denied | Original retained and qualifiers inspectable |
-| \`Inspect\` | Entitled party reviews open account's qualified evidence/coverage, conflicts, lifecycle and outcomes | Foreign/deleted/no-entitlement token sees no private state; no CDN public cache | Owner A/B isolation and history/meaning |
-| \`Close\` | Legitimate owner transitions open to closed; previous items remain and \`InspectAfterClose\` works | Closed or unauthorized double close does not mutate; no implied deletion/release | Closure version and denial of new O additions |
-| \`InspectAfterClose\` | Entitled party reviews closed account without creating new evidence | Foreign/non-closed scope denied appropriately; no reopened account | Same assertion meanings remain visible |
+| `Establish` | Eligible synthetic test source in approved dev session establishes **open** private Observation and receives opaque ID; no S, V, R or D enrollment | No unauthenticated/non-tester access; no implicit coverage or evidence; no public record | Creation plus scoped empty Inspect |
+| `Report` | Owner of open Observation asserts one qualified measure, extent, provenance and uncertainty, receiving evidence reference | Closed/foreign account, illegal unit/quantity or unauthorized real-data production intake denied; no auto-coverage | Near-present and interval synthetic fixture outputs |
+| `AssertCoverage` | Owner of open Observation adds explicit attention and completeness qualifiers with extent/precision | No synthetic person count, no inferred watched-zero; after-close denied | Coverage state view and observed-zero composite guard |
+| `Qualify` | Owner of open Observation adds/refines supported qualifiers with provenance | No factual count replacement, overlap erasure or hidden V.Amend; closed denied | Original retained and qualifiers inspectable |
+| `Inspect` | Entitled party reviews open account's qualified evidence/coverage, conflicts, lifecycle and outcomes | Foreign/deleted/no-entitlement token sees no private state; no CDN public cache | Owner A/B isolation and history/meaning |
+| `Close` | Legitimate owner transitions open to closed; previous items remain and `InspectAfterClose` works | Closed or unauthorized double close does not mutate; no implied deletion/release | Closure version and denial of new O additions |
+| `InspectAfterClose` | Entitled party reviews closed account without creating new evidence | Foreign/non-closed scope denied appropriately; no reopened account | Same assertion meanings remain visible |
 
 No specified path, JSON fields, DynamoDB keys or route count is mandated by this **semantic matrix**. Concrete API operations will be defined in the subsequent implementation contract after architecture approval, with explicit route auth, input validation, error semantics and resource costs.
 
@@ -127,7 +127,7 @@ DynamoDB conditional writes and optimistic locking are **candidates** for preven
 
 **O.Qualify is not generic editing.** It adjusts qualifying information on an open Observation, does not silently change a fact from “five people” to “four”, and cannot overwrite an earlier reported total.
 
-If the user wants to replace a factual assertion (or correct one after Close), the canonical [Revision](../../canonical/concepts/revision.md) and [O/S/V composition](../../canonical/composition/observation-stewardship-revision.md) require legitimate authority and a historical successor, never an invisible \`UPDATE count\`. A V slice may be deferred for an observation-first **synthetic** candidate, but the resulting inability to amend a wrong amount must be clearly labeled and tested, not hidden as a successful correction flow. 013-G must decide whether this limitation undermines P-01/P-05 enough to include a **minimal properly authorized Revision realization** in the MVP candidate or seek explicit sponsor scope reentry; no developer improvisation.
+If the user wants to replace a factual assertion (or correct one after Close), the canonical [Revision](../../canonical/concepts/revision.md) and [O/S/V composition](../../canonical/composition/observation-stewardship-revision.md) require legitimate authority and a historical successor, never an invisible `UPDATE count`. A V slice may be deferred for an observation-first **synthetic** candidate, but the resulting inability to amend a wrong amount must be clearly labeled and tested, not hidden as a successful correction flow. 013-G must decide whether this limitation undermines P-01/P-05 enough to include a **minimal properly authorized Revision realization** in the MVP candidate or seek explicit sponsor scope reentry; no developer improvisation.
 
 Deletion, withdrawal, retention and restored-account policy are distinct from O.Close and S.Relinquish. Avoid promising permanent retention, physical deletion, recovery after token loss, automatic exported-data recall or silent revision. Account/device loss and duplicate attempts must be explicitly covered in MVP risk scorecard.
 
@@ -138,8 +138,8 @@ All test participants and records are **synthetic**, with arbitrary locations/no
 | ID | Scenario | Mandatory observable outcome |
 |---|---|---|
 | E-T01 | New entitled dev test participant, no S/V/R/D object | Creates/open and privately inspects a clean O account; no forced contribution registration |
-| E-T02 | \`NOW · TOTAL(4 people)\` with approximate claim | One person-count EvidenceItem; no four arrival timestamps, invented precision or monitoring |
-| E-T03 | \`6 PM–10 PM · TOTAL(83 people)\` recalled | One interval aggregate, provenance retained; unasserted watching remains unknown |
+| E-T02 | `NOW · TOTAL(4 people)` with approximate claim | One person-count EvidenceItem; no four arrival timestamps, invented precision or monitoring |
+| E-T03 | `6 PM–10 PM · TOTAL(83 people)` recalled | One interval aggregate, provenance retained; unasserted watching remains unknown |
 | E-T04 | Group encounter of five visitors | Group and person units distinguishable; no conversion to five independent events |
 | E-T05 | Empty session / interval with no coverage | **Unknown**, never watched zero |
 | E-T06 | Explicit zero without monitored coverage | Not interpreted as observed zero |
