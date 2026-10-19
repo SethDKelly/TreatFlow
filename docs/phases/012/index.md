@@ -38,6 +38,8 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 - [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PASS WITH EXPLICIT TOOLING LIMITATIONS and merged**: all 182 original main-tree Markdown blobs checked for frontmatter/key presence and local file references; four missing canonical directory indexes repaired and checked separately. **012-C next eligible**; no engineering authorization.
 
+- [012-C TreatFlow Semantic Staleness, Canonical Authority & Progressive Disclosure Audit](012-c-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, pending merge**; reconciles canonical navigation and four outdated provisional concept statuses. 012-D next eligible after merge.
+
 ## Navigation
 
 - [Previous phase — Concept-design closure](../011/)
