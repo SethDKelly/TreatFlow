@@ -71,6 +71,10 @@ The inherited methodology includes shared project instructions for common coding
 
 Agents are expected to inspect current canonical knowledge before making substantive changes, distinguish current truth from phase history, preserve OKF/documentation authority, avoid speculative repository bloat, and surface design contradictions rather than silently coding around them.
 
+## Next engineering-design phase
+
+[Phase 013 — AWS Engineering Foundation & MVP Program Design](docs/phases/013/) proposes AWS serverless/CDN-first options, cost guardrails, Route 53 subdomains, private nonproduction, public production and phased MVP qualification. This is **planning only**, not permission to start application implementation or real participant-data operations.
+
 ## Authority reminder
 
 Inherited Base phase definitions, including historical Base Phase 012 self-audit records, describe template methodology rather than TreatFlow project completion. Only the TreatFlow-specific phase execution records establish project progress.
