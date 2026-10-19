@@ -140,6 +140,8 @@ This OKF v0.2 bundle uses inherited Base methodology for TreatFlow's project-spe
 
 - [010-K targeted evidence and purpose/scope decision](phases/010/010-k-treatflow-execution.md) — general methodological evidence, no real-data permission, Phase 010 HOLD.
 
+- [010-M observation-first design change-control plan](phases/010/010-m-observation-first-change-plan.md) — 010-N purpose and observation alignment next after merge.
+
 ## Start here
 
 - [Methodology](methodology/) — design authority, lifecycle, documentation/knowledge governance, design-only guardrails, and agentic development governance.

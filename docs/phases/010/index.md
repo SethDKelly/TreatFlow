@@ -41,6 +41,8 @@ Project-specific substantive subphases remain dynamically derived by `010-A`; Ba
 
 - [010-L Evidence-Resolution Gate & Independent Phase 010 Exit Reassessment](010-l-treatflow-exit-gate.md) — **HOLD**: material TreatFlow-specific evidence absent; awaiting legitimate evidence or authorized purpose/scope reentry; Phase 011-A not eligible.
 
+- [010-M Observation-First Purpose Clarification & Bounded Revalidation Plan](010-m-observation-first-change-plan.md) — sponsor-approved private recording/review as primary success; 010-N purpose and observation alignment next after merge. Existing HOLD remains pending independent revalidation.
+
 ## Navigation
 
 - [Previous phase](../009/)
