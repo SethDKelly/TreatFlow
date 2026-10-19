@@ -19,7 +19,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 **Phases 000–010:** exited with documented carry-forwards; [010-P observation-first exit](phases/010/010-p-treatflow-exit-review.md) is the controlling Phase 010 decision. Earlier [010-H HOLD](phases/010/010-h-treatflow-exit-review.md), [010-J HOLD](phases/010/010-j-treatflow-exit-reassessment.md) and [010-L HOLD](phases/010/010-l-treatflow-exit-gate.md) are historical evidence before the sponsor-approved [010-M–P refinement](phases/010/index.md).
 
-**Phase 011:** [011-F independent concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged; [011-E safeguards](phases/011/011-e-treatflow-execution.md) remain mandatory. **Phase 012:** [012-F independent exit](phases/012/012-f-treatflow-exit-review.md) merged with bounded carry-forward. **Phase 013-A–G:** AWS engineering architecture, MVP contracts and delivery plan merged. **013-H** independent engineering-design exit [pending PR merge](phases/013/013-h-independent-exit-authorization.md): design PASS proposed with implementation/AWS-write HOLD; limited 014-A repository discovery next eligible after merge. No real collection/disclosure authority.
+**Phase 011:** [011-F independent concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged; [011-E safeguards](phases/011/011-e-treatflow-execution.md) remain mandatory. **Phase 012:** [012-F independent exit](phases/012/012-f-treatflow-exit-review.md) merged with bounded carry-forward. **Phase 013-A–H:** conditional AWS engineering design and [013-H independent exit](phases/013/013-h-independent-exit-authorization.md) merged: design PASS with implementation/AWS-write HOLD. **Phase 014-A:** [central AWS foundation and application boundary audit](phases/014/014-a-entry-inventory.md) documents the shared infrastructure dependency and qualified inventory findings, pending review/merge. **014-B execution HOLD** without scoped independent authorization. No real collection/disclosure authority.
 
 - [All phases and historical rationale](phases/)
 - [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
@@ -34,8 +34,8 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 ## Engineering design exit and next readiness gate
 
-- [Phase 013 AWS architecture and MVP program](phases/013/) — merged engineering planning, [013-G conditional selection](phases/013/013-g-architecture-mvp-delivery-decision.md), and [013-H evidence-calibrated exit](phases/013/013-h-independent-exit-authorization.md) (pending merge).
-- [Phase 014-A documentary authority and environment inventory](phases/014/014-a-entry-inventory.md) — eligible after 013-H merges, without coding, AWS writes, DNS or real-data permissions.
+- [Phase 013 AWS architecture and MVP program](phases/013/) — [013-G conditional selection](phases/013/013-g-architecture-mvp-delivery-decision.md) and merged [013-H evidence-calibrated exit](phases/013/013-h-independent-exit-authorization.md).
+- [Phase 014-A central/shared AWS inventory](phases/014/014-a-entry-inventory.md) — completed as a bounded **documentary audit for PR review**; central infrastructure ownership, security-risk handoff and 014-B evidence requirements. No code, AWS writes, DNS or real-data permissions.
 
 ## Governance and limits
 
