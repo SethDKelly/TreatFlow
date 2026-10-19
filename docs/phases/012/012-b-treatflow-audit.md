@@ -54,3 +54,18 @@ The [012-A plan](012-a-treatflow-execution.md) remains otherwise intact: **012-C
 No application code, product scaffolding, deployment, privacy approval, real-person data or release work was created.
 
 **012-B STATUS: INCOMPLETE PENDING EXHAUSTIVE CONTENT/REFERENCE VALIDATION. 012-C NOT ELIGIBLE. IMPLEMENTATION READINESS READY FOR PREPARATION ONLY; EXECUTION NOT STARTED; AUTHORIZATION NOT GRANTED.**
+
+
+## Completion addendum — exhaustive tracked-document structural and file-target pass
+
+**012-B COMPLETED FOR THE DECLARED TRACKED-corpus OKF structural and local-file-reference scope; 012-C ELIGIBLE AFTER THIS PR MERGES.** Supersedes the *partial audit status* at the beginning of this historical record without erasing that earlier evidence.
+
+**Frozen verification source:** GitHub `main` recursive tree, nontruncated, 211 tree entries at the start of this completion run; 182 tracked `docs/**/*.md` blobs, comprising 17 `index.md` and 165 other Markdown documents. Every one of the **182 original file blobs** was read by SHA in contiguous ordered batches. The earlier 181-document count was correct for a previous revision and is superseded. The added 4 canonical family indexes are verified separately on this branch and are **not incorrectly included in the original-tree denominator**.
+
+**All-file checks performed:** leading YAML-fence presence on ordinary documents; nonempty leading `type` key; root `okf_version: "0.2"`; absence of frontmatter on non-root indexes; inline and reference-definition local file/directory targets against the nontruncated Git tree. The check excludes Markdown footnote definitions such as `[^okf-v02]:` from link targets. **No missing individual-file destination or missing required header was found** in these checks. One first-pass apparent `Open` target was a false positive caused by footnote parsing.
+
+**Verified navigation defect:** seven historical links targeted otherwise populated canonical directories with no index in `docs/canonical/composition/`, `docs/canonical/concepts/`, or `docs/canonical/mapping/`. A fourth populated directory, `docs/canonical/project/`, likewise lacked its own navigation index. Rather than rewriting immutable Phase 007–010 evidence, this PR creates four concise frontmatter-free indexes at the natural directory owners; their 24 relative targets were separately confirmed against this branch's Git tree. All four formerly unindexed multi-document canonical directories now have a navigation entry point.
+
+**Evidence scope / non-claims:** these connector-driven checks are full-file coverage for header *placement/key presence* and standard local path existence, **not** a complete YAML-parser certification or Markdown parser/fragment-slug validation. Complex YAML syntax, reference usage within code fences, heading-anchor correctness, external URL liveness and deep semantic provenance quality were not exhaustively certified by a formal parser. Neither these residual tooling limitations nor Phase 012 preparation provide permission to implement, collect participant data or publish observations. Escalate any future confirmed semantic contradiction to the canonical owner and Phase 011 rather than labeling it a mere formatting defect.
+
+**Final disposition:** all tracked files were examined for the stated structural/key and local-file-target invariants; verified directory navigation gaps repaired and branch additions checked. **012-B PASS WITH EXPLICIT TOOLING LIMITATIONS. 012-C NEXT AFTER MERGE.** Phase 012 remains open; readiness is for preparation only, execution not started, authorization not granted.
