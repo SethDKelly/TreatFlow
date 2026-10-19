@@ -32,6 +32,10 @@ Base itself may execute Phase 012 as a template-maintenance audit under the expl
 
 Project-specific substantive subphases remain dynamically derived by `012-A`; Base does not prescribe a fixed audit checklist order, stale-document count, agent-rule count, or B–X sequence.
 
+## TreatFlow execution
+
+- [012-A Repository Audit Scope, OKF Baseline, Staleness Strategy & Agentic Preparation Planning](012-a-treatflow-execution.md) — **project-specific start gate PASS**, baseline tracked tree and existing agent adapters inventoried; 012-B audit next after merge. This is distinct from Base template self-audit.
+
 ## Navigation
 
 - [Previous phase — Concept-design closure](../011/)
