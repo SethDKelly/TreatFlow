@@ -24,6 +24,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [All phases and historical rationale](phases/)
 - [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
 - [Phase 012 preparation definition](phases/012/phase-definition.md)
+- [012-A TreatFlow repository/OKF/agentic start gate](phases/012/012-a-treatflow-execution.md) — next: 012-B structural and reference audit after merge.
 
 ## Governance and limits
 
