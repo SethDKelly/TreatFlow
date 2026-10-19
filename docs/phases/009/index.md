@@ -27,7 +27,9 @@ Project-specific substantive subphases remain dynamically derived by `009-A`; Ba
 
 - [009-E Whole-Family Coverage, Scope/Mapping/Familiarity & Purpose Preservation](009-e-treatflow-execution.md) — five purposes, twenty directions, 29 actions and native scope; 009-E complete; 009-F record governs handoff.
 
-- [009-F Misfit Adjudication, Upstream Repairs, Propagation & Regression](009-f-treatflow-execution.md) — five canonical status corrections, twelve conceptual regressions; 009-G next after merge.
+- [009-F Misfit Adjudication, Upstream Repairs, Propagation & Regression](009-f-treatflow-execution.md) — five canonical status corrections, twelve conceptual regressions; 009-F complete; 009-G exit governs handoff.
+
+- [009-G Independent Integrity Exit, Documentation Audit & Phase 010 Handoff](009-g-treatflow-exit-review.md) — PASS WITH CARRY-FORWARD upon merge; 010-A next eligible.
 
 ## Navigation
 
