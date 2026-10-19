@@ -31,6 +31,8 @@ Project-specific substantive subphases remain dynamically derived by `011-A`; Ba
 
 - [011-D Canonical Authority, Supersession, OKF Navigation & Documentation Repair](011-d-treatflow-execution.md) — corrected current authorities, root bundle navigation and README; 011-E residual risk and Phase 012 obligations next after merge.
 
+- [011-E Open Items, Safety Boundaries, Implementation Contamination & Phase 012 Handoff](011-e-treatflow-execution.md) — R-P01–R-P06 classified; privacy/authority hard no-go conditions retained; 011-F independent final exit next after merge.
+
 ## Navigation
 
 - [Previous phase](../010/)
