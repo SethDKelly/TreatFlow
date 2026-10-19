@@ -14,7 +14,7 @@ Phase 012 is the post-concept-design transition between successful Phase 011 clo
 - [012-A Base Template Execution](012-a-base-template-execution.md) — formal execution of the start gate against Base itself, including the template-maintenance prerequisite interpretation, initial audit risks, and the dynamically derived `012-B` through `012-G` work sequence.
 - [012-B Base Template OKF Structural Audit](012-b-base-template-okf-audit.md) — exhaustive structural trial confirming ordinary-document `type` frontmatter, reserved-index rules, bundle-root OKF declaration, provenance shape, and corpus-integrity boundaries.
 
-Current execution state: **012-B complete — ready for 012-C**.
+**Base template self-audit state (historical/template-specific):** 012-B complete — ready for 012-C in Base. This is not TreatFlow's current execution status.
 
 The Base self-audit does not claim a product-specific Phase 011 closure. The normal Phase 011 prerequisite remains mandatory for repositories cloned from Base.
 
@@ -36,9 +36,11 @@ Project-specific substantive subphases remain dynamically derived by `012-A`; Ba
 
 - [012-A Repository Audit Scope, OKF Baseline, Staleness Strategy & Agentic Preparation Planning](012-a-treatflow-execution.md) — **project-specific start gate PASS and merged**; baseline tracked tree and existing agent adapters inventoried. This is distinct from Base template self-audit.
 
-- [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PASS WITH EXPLICIT TOOLING LIMITATIONS and merged**: all 182 original main-tree Markdown blobs checked for frontmatter/key presence and local file references; four missing canonical directory indexes repaired and checked separately. **012-C next eligible**; no engineering authorization.
+- [012-B TreatFlow OKF Structural & Reference Integrity Audit](012-b-treatflow-audit.md) — **PASS WITH EXPLICIT TOOLING LIMITATIONS and merged**: all 182 original main-tree Markdown blobs checked for frontmatter/key presence and local file references; four missing canonical directory indexes repaired and checked separately. 012-C subsequently merged; no engineering authorization.
 
-- [012-C TreatFlow Semantic Staleness, Canonical Authority & Progressive Disclosure Audit](012-c-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, pending merge**; reconciles canonical navigation and four outdated provisional concept statuses. 012-D next eligible after merge.
+- [012-C TreatFlow Semantic Staleness, Canonical Authority & Progressive Disclosure Audit](012-c-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, merged**; reconciles canonical navigation and four outdated provisional concept statuses. 012-D active.
+
+- [012-D TreatFlow Documentation Readiness, Agentic Governance & Tool Adapter Audit](012-d-treatflow-audit.md) — **targeted PASS WITH BOUNDED COVERAGE LIMITATIONS, pending merge**; shared policy stays in methodology, thin adapters retained, Phase 012 index template status disambiguated. 012-E next eligible after merge.
 
 ## Navigation
 
