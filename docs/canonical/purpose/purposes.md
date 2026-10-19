@@ -50,7 +50,7 @@ Examples: `NOW · TOTAL(4 people)` records a qualified near-present *person-coun
 
 ## Product-level purpose
 
-**Enable willing community observers to turn everyday Halloween arrival experiences into interpretable evidence that others can explore responsibly, without making contribution unduly burdensome or exposing participating households and observed people to avoidable harm.**
+**Enable willing participants to record and review their own Halloween activity effortlessly and intelligibly, with optional responsibly qualified community reporting and exploratory research, without unnecessarily exposing households or observed people.**
 
 The value is shared, qualified understanding rather than data volume, a particular interface, or proof that arrival patterns are Poisson. This purpose remains sponsor-derived and examined against illustrative 001-D success situations; empirical validation is still pending.
 
