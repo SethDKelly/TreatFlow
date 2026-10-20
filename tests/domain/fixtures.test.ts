@@ -323,6 +323,53 @@ describe("L02 synthetic fixtures (013-E semantic owners)", () => {
     ).toBe(true);
   });
 
+  it("contests contradictory overnight coverage and blocks observed-zero", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const overnight = {
+      kind: "interval" as const,
+      startLabel: "23:50",
+      endLabel: "00:10",
+      precision: "bounded" as const,
+    };
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-overnight-observed",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: overnight,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-overnight-not-observed",
+        status: "not_observed",
+        completeness: "unknown",
+        unit: "groups",
+        timeExtent: overnight,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-overnight-zero",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 0, uncertainty: "none" },
+        timeExtent: overnight,
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    const viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage.length).toBeGreaterThan(0);
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+  });
+
   it("contests incompatible coverage with identical unparseable labels", () => {
     const store = createStore();
     const created = establish(store, SYNTHETIC_PRINCIPAL_A);

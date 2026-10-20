@@ -56,10 +56,15 @@ export function validateTimeExtent(extent: TimeExtent): string | null {
 
 export type OverlapRelation = "overlap" | "disjoint" | "unknown";
 
+/** Minutes in a calendar day — used to unwrap overnight clock intervals. */
+const DAY_MINUTES = 24 * 60;
+
 /**
  * Interval overlap for synthetic fixture labels.
  * Unparseable clocks are **unknown**, never proven disjoint — identical or
  * undecidable contradictory extents must not bypass contested/zero checks.
+ * Overnight windows (end ≤ start, e.g. 23:50–00:10) unwrap across midnight
+ * instead of being treated as empty/disjoint.
  */
 export function intervalOverlapRelation(
   a: TimeExtent,
@@ -69,7 +74,9 @@ export function intervalOverlapRelation(
   if (resolved === "unknown") return "unknown";
   if (resolved === "kind_mismatch") return "unknown";
   const { aStart, aEnd, bStart, bEnd } = resolved;
-  return aStart < bEnd && bStart < aEnd ? "overlap" : "disjoint";
+  return clockIntervalsOverlap(aStart, aEnd, bStart, bEnd)
+    ? "overlap"
+    : "disjoint";
 }
 
 /** True when overlap is proven or undecidable (conservative for conflict checks). */
@@ -98,9 +105,9 @@ export function extentsSemanticallyEqual(a: TimeExtent, b: TimeExtent): boolean 
   }
   const resolved = resolveIntervalBounds(a, b);
   if (resolved === "unknown" || resolved === "kind_mismatch") return false;
-  return (
-    resolved.aStart === resolved.bStart && resolved.aEnd === resolved.bEnd
-  );
+  const aEnd = normalizeOvernightEnd(resolved.aStart, resolved.aEnd);
+  const bEnd = normalizeOvernightEnd(resolved.bStart, resolved.bEnd);
+  return resolved.aStart === resolved.bStart && aEnd === bEnd;
 }
 
 /**
@@ -126,6 +133,39 @@ type ResolvedBounds =
     }
   | "unknown"
   | "kind_mismatch";
+
+/**
+ * When end is at or before start in minute-of-day, the interval crosses midnight
+ * (or is empty). Unwrap the end into the next day so geometry stays non-empty.
+ */
+export function normalizeOvernightEnd(start: number, end: number): number {
+  return end <= start ? end + DAY_MINUTES : end;
+}
+
+function linearOverlap(
+  aStart: number,
+  aEnd: number,
+  bStart: number,
+  bEnd: number,
+): boolean {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+/** Overlap on a 24h clock, including overnight unwrap and one-day shifts. */
+export function clockIntervalsOverlap(
+  aStart: number,
+  aEnd: number,
+  bStart: number,
+  bEnd: number,
+): boolean {
+  const ae = normalizeOvernightEnd(aStart, aEnd);
+  const be = normalizeOvernightEnd(bStart, bEnd);
+  return (
+    linearOverlap(aStart, ae, bStart, be) ||
+    linearOverlap(aStart, ae, bStart + DAY_MINUTES, be + DAY_MINUTES) ||
+    linearOverlap(aStart + DAY_MINUTES, ae + DAY_MINUTES, bStart, be)
+  );
+}
 
 function resolveIntervalBounds(a: TimeExtent, b: TimeExtent): ResolvedBounds {
   if (a.kind !== "interval" || b.kind !== "interval") {

@@ -100,4 +100,26 @@ describe("L02 validation primitives", () => {
     expect(activityConflictsWithExtent(contained, twentyFour)).toBe(true);
     expect(activityConflictsWithExtent(twelveHour, twentyFour)).toBe(true);
   });
+
+  it("treats overnight intervals as self-overlapping across midnight", () => {
+    const overnight = {
+      kind: "interval" as const,
+      startLabel: "23:50",
+      endLabel: "00:10",
+      precision: "bounded" as const,
+    };
+    expect(intervalOverlapRelation(overnight, overnight)).toBe("overlap");
+    expect(intervalsOverlap(overnight, overnight)).toBe(true);
+    expect(
+      activityConflictsWithExtent(
+        {
+          kind: "interval",
+          startLabel: "00:00",
+          endLabel: "00:05",
+          precision: "bounded",
+        },
+        overnight,
+      ),
+    ).toBe(true);
+  });
 });
