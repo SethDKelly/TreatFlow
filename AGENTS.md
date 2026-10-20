@@ -107,6 +107,31 @@ Once implementation execution is actually authorized:
 
 Do not create tests that only mirror implementation details without meaningful behavioral value.
 
+## Pull requests, Linear linkage, and defect intake
+
+Linear is the **work/dependency ledger** for the TreatFlow MVP; GitHub PRs, code, CI checks, and approved deployments provide engineering evidence. Neither an issue label nor a Linear status grants permission to bypass blocked dependencies, human decisions, AWS-write gates, or independent verification.
+
+- **Before implementation:** find the existing eligible Linear story (`S-<number>`), its blocking issues, current acceptance criteria, and authorized scope. Do not start blocked work merely because the agent can open a branch. If Linear is unreachable, disclose that limitation; do not invent an issue ID or silently mark dependencies resolved.
+- **Native PR linkage:** prefer Linear's copied branch name (containing `S-<number>`), and include the same ID in the PR title, e.g., `S-31: Validate PR linkage`. In the PR description use `References S-31` for a non-closing relationship. Do not use closing magic words such as `Fixes S-31` unless the maintainer intentionally wants Linear's merge-status automation to apply.
+- **PR handoff:** include the linked issue, scoped changes, canonical contracts/acceptance cases, exact verification run or commands, untested risks, and any protected approval needed. Request a separate code review after the implementation is ready; keep review findings and follow-up evidence on the PR rather than generating a parallel report file.
+- **Status discipline:** an opened PR is review work; a merged PR is not necessarily an independently accepted story. Use the team's configured review/verification statuses and move to Done only after required code review, meaningful tests, and any milestone-specific independent verification. These transitions require actual Linear integration configuration; instructions alone do not enforce them.
+- **New defects:** first check for an existing Linear story or linked GitHub issue. Put defects that must block the current PR in the PR review; create a distinct Linear `Bug` issue (with appropriate project/epic, reproduction, severity, and PR reference) only for independently trackable or deferred work. Avoid duplicate tickets and auto-filing stylistic nits. Use `S-NEW` in a PR description only when deliberately creating an unplanned new Linear issue through the configured integration, then triage its ownership, project, and dependencies.
+- **GitHub Issues:** native GitHub issue synchronization to Linear is a separate, explicit admin configuration. If enabled, use the synchronized issue rather than manually creating its duplicate; do not presume that tagging a GitHub issue automatically imports it. Keep secrets and restricted security details out of public issue/PR descriptions.
+
+## Code review — shared Cursor and Codex principles
+
+When acting as a **code reviewer**, use the same principles regardless of whether Cursor or Codex implemented the change:
+
+- Review the **exact PR diff against its current target branch**, relevant call sites, tests, linked Linear story acceptance criteria, and affected canonical contracts. Do not accept the implementer's description or passing tests as proof of correctness.
+- Report concrete, actionable findings with severity, file/line when available, realistic failure scenario, and evidence. Distinguish confirmed defects from plausible risks and **insufficient evidence**; avoid ungrounded findings and style-only noise already covered by CI.
+- Prioritize correctness, security, authorization, privacy, data integrity, recovery, and conceptual fidelity. For Observation changes, check people versus groups, near-present versus interval totals, reported versus receipt time, coverage/completeness, observed-zero claims, conflicting assertions, closure, and unresolved submission outcomes.
+- For API, persistence, authentication, IaC, or CI changes, inspect authorization boundaries, cross-record/environment access, replay and concurrent writes, secret handling, unexpected cost amplification, and protected approval bypasses as relevant to the diff.
+- Check the smallest meaningful negative cases and whether tests prove external behavior, not merely the implementation's assumptions. Identify critical missing verification without claiming tests were run when they were not.
+- Review from a separate bounded context where feasible; a second agent using the implementer's conclusions verbatim is not independent evidence. **Do not edit the implementer's branch, self-approve, self-merge, or deploy while serving as reviewer.**
+- Finish with **PASS**, **HOLD**, or **INSUFFICIENT EVIDENCE**, including unresolved findings, linked issue/PR references, and the scope of checks actually performed. This is an advisory review finding, not a substitute for GitHub protection, independent exit review, or human authorization.
+
+This section covers **ordinary code review only**. A separate adversarial-verification role, prompt, hidden test corpus, and enforcement mechanism will be established independently; do not present this code review as that distinct assessment. See [013-F independent verification design](docs/phases/013/013-f-agentic-independent-test-control.md) for the existing methodology and the [single MVP roadmap](docs/phases/013/mvp-roadmap.md) for package-specific gates.
+
 ## Protected authority and security
 
 Agent instructions are guidance, not a security boundary. Do not treat file-write capability as authorization to bypass protected human/organizational decisions, production controls, secrets handling, deployment approval, or other high-consequence authority established by the design.
