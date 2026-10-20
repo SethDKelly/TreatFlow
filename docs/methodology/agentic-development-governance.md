@@ -16,6 +16,9 @@ sources:
   - id: codex-agents
     resource: https://openai.com/business/guides-and-resources/how-openai-uses-codex/
     title: How OpenAI uses Codex — AGENTS.md guidance
+  - id: linear-github
+    resource: https://linear.app/docs/github
+    title: Linear — GitHub PR linking, magic words, status automation, and issue sync
 ---
 
 # Agentic Development Governance for OKF-Grounded Repositories
@@ -157,7 +160,7 @@ Do not manufacture tests that only mirror the implementation or repeatedly run b
 
 This methodology is the **durable shared policy** for Cursor, Codex, Claude, and other agents. The root [AGENTS.md](../../AGENTS.md) is its **portable, immediately executable repository adapter**: it contains short working instructions for agents that consume AGENTS.md directly. These two owners must remain consistent; changing shared review/workflow expectations requires updating this methodology and, when relevant, its root adapter. Do not proliferate tool-specific full policy copies.
 
-- **Work identity:** eligible implementation work traces to an existing, dependency-qualified Linear story such as `S-31`; include the identifier in the Git branch/PR title. Use non-closing `References S-31` when no merge-driven status transition is wanted; after the team explicitly configures and verifies **merge → Verification (not Done)**, a closing `Fixes S-31` reference can deliberately advance only to that verification stage. Do not enable closing references against an unverified merge→Done default. Linear is the work ledger; the actual PR diff, CI and authorized review are engineering evidence.
+- **Work identity:** eligible implementation work traces to an existing, dependency-qualified Linear story such as `S-31`; include its ID in the branch name when branch naming is under agent control, and always include it in the PR title. When Cursor cloud assigns its own branch name, retain that branch rather than opening a second branch solely for naming compliance; use the PR title and description for issue linkage. Use non-closing `References S-31` when no merge-driven status transition is wanted; after the team explicitly configures and verifies **merge → Verification (not Done)**, a closing `Fixes S-31` reference can deliberately advance only to that verification stage. Do not enable closing references against an unverified merge→Done default. Linear is the work ledger; the actual PR diff, CI and authorized review are engineering evidence.
 - **Status and defects:** an opened PR indicates review, and a merged PR **does not prove independent acceptance**. Linear may move to a verification status when configured; only separately verified evidence permits Done. First check for an existing defect; record blocking findings in the PR; create/link a distinct Linear Bug issue for independently actionable follow-up, and avoid automatic duplicate tickets. GitHub-to-Linear issue synchronization needs explicit integration setup.
 - **Review substance:** inspect actual head/base diff, adjacent call sites and behavior, tests, linked acceptance criteria and canonical concepts; prioritize justified, reproducible defects in correctness, authority, privacy, recovery and observation meaning. Check negative cases instead of relying solely on author-written tests. Record severity and evidence; avoid speculative/style-only noise.
 - **Review independence:** a reviewer does not edit the author branch, self-approve, merge or deploy, and cannot override a dependency, IAM/budget, real-person or disclosure gate. A different agent in the same inherited context is not inherently independent.
@@ -170,6 +173,7 @@ Base uses one shared instruction model with thin adapters:
 
 - `AGENTS.md` — portable root instructions for Codex and agents that support the convention; Cursor also supports this format.
 - `CLAUDE.md` — imports `AGENTS.md` and adds only Claude-specific behavior when necessary.
+- `.cursor/BUGBOT.md` — thin adapter for Cursor Bugbot's independent, findings-only PR review rules; keep it aligned with shared review policy.
 - `.cursor/rules/*.mdc` — focused Cursor rules for path- or task-specific concerns that are not efficiently expressed by the shared root instructions.
 
 Tool-specific adapters must not become independent copies of architecture, concept definitions, or workflow policy. When shared policy changes, update this contract and the smallest necessary adapters.
