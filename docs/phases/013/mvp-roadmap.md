@@ -49,7 +49,7 @@ For every implementation package, specify before work: **owner and review agent,
 | **016-A — Minimal private UI shell** | Accessible static-first frontend and safe state/outcome representation for test users | 014 protected dev and 015-A/C guarded API contracts; source asset publicly cached only if not private and permissioned |
 | **016-B — Core report and inspection** | O.Establish, near-present / bounded interval O.Report, O.Inspect, honest unit, reported time vs server time and uncertainty display | E-T01/02/03/04/09/10 plus independently varied counts and intervals |
 | **016-C — Coverage, qualification and lifecycle** | O.AssertCoverage, O.Qualify, O.Close and O.InspectAfterClose, completeness and contested overlap | E-T05–08/15/16; closed direct additions fail, watched zero requires all explicit qualifiers |
-| **016-D — Protected private factual correction slice (conditional)** | Sponsor choice recorded at [016-D product decision](../016/016-d-factual-correction-product-decision.md): Option A = legitimate V.EstablishSubject → V.Amend → V.InspectHistory with immutable predecessor + reason and entitled view; Option B = explicit noncorrecting candidate limitation (no destructive O edits) with recorded P-05 risk | **G-05 OPEN until sponsor checks Option A or B on that record.** Separate amendment authority tested if A; Track C may proceed under separate auth either way |
+| **016-D — Protected private factual correction slice (conditional)** | [016-D product decision](../016/016-d-factual-correction-product-decision.md): **Option B recorded** as bounded deferral for synthetic MVP (not final direction); Option A remains eventual fit. No destructive O edits; second report never repairs/supersedes a mistaken report; visible noncorrection language required before hosted 018 | G-05 closed for this synthetic path. Revisit Option A on T1 (personal-record / R-P02 intent) or T2 (Track C + 015-A + protected nonprod boundaries). Track C under separate auth |
 | **016-E — Behavioral exit** | E-T01–E-T22 mapped to actual code/UX results with independent semantic/authorization variants | Full O-only primary private recording/review works without S/R/D; no false success, research claims or exposure |
 
 **Not in MVP:** full S standing/contest lifecycle, R evidence provisioning, D public release, automatic research/statistics, household geolocation, child/visitor identities or mandatory signup. Absence of optional S does not invalidate a permitted Observation.
@@ -78,7 +78,7 @@ Later separate design and independent approval: validate SkellyHouse DNS, public
 
 ## Dependency and parallelism summary
 
-`013-H authorization → 014-A → 014-B → 014-C → 014-D/E → 015-A/B → 015-C/D → 016-A/B/C → [016-D only if approved] → 016-E → 017-A/B/C/D → 018-A/B/C/D`.
+`013-H authorization → 014-A → 014-B → 014-C → 014-D/E → 015-A/B → 015-C/D → 016-A/B/C → 016-D Option B recorded (V deferred; revisit T1/T2) → 016-E → 017-A/B/C/D → 018-A/B/C/D (hosted 018 requires visible noncorrection language)`.
 
 Permitted design overlap **after explicit authorization**: 015-A/B contract reasoning may run while 014 infrastructure work proceeds, and independently tested UI fixtures may be drafted before full backend integration. No 015-C deployment before protected 014 foundation; no 018 verdict before independently qualified 016 and 017; no public launch automatically from any phase.
 

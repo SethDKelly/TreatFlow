@@ -33,7 +33,7 @@ These are **TreatFlow-specific engineering phases**, not Base's refined 000–01
 
 - [013 — AWS Engineering Architecture & MVP Program Design](013/) — A–H merged; [013-H independent exit](013/013-h-independent-exit-authorization.md) grants design readiness but holds AWS/implementation execution.
 - [014 — AWS Foundation & Environment Readiness](014/) — [014-A](014/014-a-entry-inventory.md) merged; Track L L01–L04 merged; Track C / cloud writes remain unauthorized.
-- [016 — Observation-first behavior and bounded correction](016/) — local 016-B/C seven-action Observation surface merged; [016-D factual correction product decision](016/016-d-factual-correction-product-decision.md) awaiting sponsor choice (G-05); no Revision or cloud authorization from this index alone.
+- [016 — Observation-first behavior and bounded correction](016/) — local 016-B/C seven-action Observation surface merged; [016-D](016/016-d-factual-correction-product-decision.md) records Option B bounded deferral (G-05 closed for synthetic path; Option A eventual); no Revision or cloud authorization from this index alone.
 
 [The conditional MVP roadmap](013/mvp-roadmap.md) defines the later 015–019 implementation and qualification packages. No phase index is deployment authority.
 

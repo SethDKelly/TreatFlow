@@ -50,7 +50,7 @@ Use this table as the independent review surface. Mark PASS only with evidence; 
 | **D-05** | Time model is fixture clock labels + overnight unwrap; not timezone/DST/calendar dates | Matches synthetic fixture scope; avoids invented precision | Revisit when real calendars enter **015/016** contracts |
 | **D-06** | No GitHub Actions CI yet | Track C / repo-protection work separately gated; local commands are CI-independent by design | **014-B-C01** / maintainer CI design after approval |
 | **D-07** | Accessibility and divided-attention UX unproven | E-T20 / R-P01 remain empirical carry-forwards | **017-A** |
-| **D-08** | Revision / factual count correction absent (correctly) | Destructive O edits forbidden; V slice undecided | [016-D product decision](../016/016-d-factual-correction-product-decision.md) (Option A V slice or Option B noncorrecting limitation) |
+| **D-08** | Revision / factual count correction absent (correctly) | Destructive O edits forbidden; V deferred | [016-D](../016/016-d-factual-correction-product-decision.md) Option B bounded deferral (second report ≠ correction; revisit T1/T2) |
 
 ## L04 — 015/016 source-only handoff contract
 

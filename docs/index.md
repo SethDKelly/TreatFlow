@@ -36,7 +36,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 - [Phase 013 AWS architecture and MVP program](phases/013/) — [013-G conditional selection](phases/013/013-g-architecture-mvp-delivery-decision.md) and merged [013-H evidence-calibrated exit](phases/013/013-h-independent-exit-authorization.md).
 - [Phase 014-A central/shared AWS inventory](phases/014/014-a-entry-inventory.md) — merged documentary audit; [014-B Track L / Track C](phases/014/014-b-local-first-implementation-plan.md); [014-B-L04 local foundation exit](phases/014/014-b-l04-local-foundation-exit.md). Cloud infrastructure, DNS and real data remain separately unauthorized.
-- [Phase 016 Observation behavior](phases/016/) — local 016-B/C seven-action surface merged; [016-D factual correction product decision](phases/016/016-d-factual-correction-product-decision.md) awaits explicit sponsor choice (protected V slice vs noncorrecting limitation) before claiming correction or closing G-05.
+- [Phase 016 Observation behavior](phases/016/) — local 016-B/C seven-action surface merged; [016-D](phases/016/016-d-factual-correction-product-decision.md) records Option B as bounded synthetic deferral (visible noncorrection before hosted 018; second report ≠ correction; revisit toward Option A on T1/T2).
 
 ## Governance and limits
 
