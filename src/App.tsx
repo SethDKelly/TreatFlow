@@ -590,15 +590,28 @@ export function App() {
               <p className="meta">No coverage claims.</p>
             ) : (
               <ul className="evidence-list">
-                {view.coverage.map((item) => (
-                  <li key={item.id}>
-                    <strong>
-                      {item.id}: {item.status}
-                    </strong>{" "}
-                    · {item.completeness} · {item.unit} ·{" "}
-                    {formatExtent(item.timeExtent)}
-                  </li>
-                ))}
+                {view.coverage.map((item) => {
+                  const qualified = [...view.qualifications]
+                    .reverse()
+                    .find(
+                      (q) =>
+                        q.targetKind === "coverage" &&
+                        q.targetId === item.id &&
+                        q.appliedCompleteness !== undefined,
+                    );
+                  return (
+                    <li key={item.id}>
+                      <strong>
+                        {item.id}: {item.status}
+                      </strong>{" "}
+                      · asserted {item.completeness}
+                      {qualified?.appliedCompleteness
+                        ? ` · qualified ${qualified.appliedCompleteness}`
+                        : ""}{" "}
+                      · {item.unit} · {formatExtent(item.timeExtent)}
+                    </li>
+                  );
+                })}
               </ul>
             )}
             <h3>Qualifications</h3>

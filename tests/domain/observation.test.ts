@@ -200,6 +200,79 @@ describe("L03 Observation transitions", () => {
     expect(afterClose.value.evidence).toHaveLength(1);
   });
 
+  it("Qualify completeness cannot erase contested AssertCoverage claims", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const extent = {
+      kind: "interval" as const,
+      startLabel: "18:00",
+      endLabel: "18:20",
+      precision: "bounded" as const,
+    };
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-erase-complete",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-erase-zero",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 0, uncertainty: "none" },
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    const partial = assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+      attemptId: "qual-erase-partial",
+      status: "observed",
+      completeness: "partial",
+      unit: "groups",
+      timeExtent: extent,
+    });
+    expect(partial.outcome).toBe("confirmed_effected");
+    if (partial.outcome !== "confirmed_effected") return;
+
+    let viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage.length).toBeGreaterThan(0);
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+
+    expect(
+      qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-erase-upgrade",
+        targetKind: "coverage",
+        coverageId: partial.value.id,
+        completeness: "complete_claimed",
+        note: "attempted conflict resolution via Qualify",
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage.length).toBeGreaterThan(0);
+    const partialClaim = viewed.value.coverage.find(
+      (item) => item.id === partial.value.id,
+    );
+    expect(partialClaim?.completeness).toBe("partial");
+    expect(viewed.value.qualifications).toHaveLength(1);
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+  });
+
   it("E-T16: Qualify cannot replace factual counts (Revision boundary)", () => {
     const store = createStore();
     const created = establish(store, SYNTHETIC_PRINCIPAL_A);

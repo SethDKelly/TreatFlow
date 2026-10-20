@@ -5,10 +5,12 @@ import {
   intervalsOverlap,
 } from "./validation";
 import type {
+  CompletenessClaim,
   ContestedOverlap,
   CoverageClaim,
   EvidenceItem,
   ObservedZeroInterpretation,
+  QualificationRecord,
   TimeExtent,
 } from "./types";
 
@@ -20,14 +22,38 @@ export function monitoringWithoutCoverage(): "unknown" {
 }
 
 /**
+ * Latest Qualify completeness for a coverage claim, if any.
+ * AssertCoverage completeness remains on the claim and is used for contests;
+ * Qualify must not erase incompatible asserted claims (013-E).
+ */
+export function effectiveCompleteness(
+  claim: CoverageClaim,
+  qualifications: QualificationRecord[],
+): CompletenessClaim {
+  const applied = [...qualifications]
+    .reverse()
+    .find(
+      (item) =>
+        item.targetKind === "coverage" &&
+        item.targetId === claim.id &&
+        item.appliedCompleteness !== undefined,
+    );
+  return applied?.appliedCompleteness ?? claim.completeness;
+}
+
+/**
  * A Report of quantity 0 alone is not an observed zero (E-T06).
  * Reported observed zero requires observed coverage + complete_claimed for the
  * same unit/extent, with no contested coverage, no unresolved contradictory
  * activity evidence, and a matching zero evidence (E-T07).
+ *
+ * Contests use AssertCoverage-asserted completeness (not Qualify overwrites).
+ * Effective completeness may come from Qualify when no contest remains.
  */
 export function interpretObservedZeros(
   coverage: CoverageClaim[],
   evidence: EvidenceItem[],
+  qualifications: QualificationRecord[] = [],
 ): ObservedZeroInterpretation[] {
   const results: ObservedZeroInterpretation[] = [];
   const contested = findContestedCoverage(coverage);
@@ -35,7 +61,9 @@ export function interpretObservedZeros(
 
   for (const claim of coverage) {
     if (claim.status !== "observed") continue;
-    if (claim.completeness !== "complete_claimed") continue;
+    if (effectiveCompleteness(claim, qualifications) !== "complete_claimed") {
+      continue;
+    }
 
     const zeroEvidence = evidence.filter(
       (item) =>
@@ -83,7 +111,8 @@ export function interpretObservedZeros(
 }
 
 /**
- * Contested coverage:
+ * Contested coverage uses AssertCoverage-asserted fields only.
+ * O.Qualify must not erase unresolved overlaps by overwriting completeness.
  * - incompatible monitoring status over overlapping/undecidable extents contests
  *   regardless of unit (attention contradiction);
  * - completeness is compared only within the same declared measurement unit.
@@ -111,7 +140,7 @@ export function findContestedCoverage(
           ? relation === "unknown"
             ? "Incompatible monitoring status with undecidable overlap remains contested."
             : "Overlapping incompatible monitoring status remains contested; not last-write-wins."
-          : "Incompatible reporting-completeness claims for the same measurement unit remain contested.",
+          : "Incompatible AssertCoverage completeness claims for the same measurement unit remain contested; Qualify cannot erase the conflict.",
       });
     }
   }

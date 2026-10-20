@@ -140,6 +140,7 @@ function buildInspectView(account: ObservationAccount): InspectView {
     observedZeroInterpretations: interpretObservedZeros(
       account.coverage,
       account.evidence,
+      account.qualifications,
     ),
     closedAt: account.closedAt,
   };
@@ -392,10 +393,9 @@ export function qualify(
         reason: "Qualify requires a completeness refinement and/or note.",
       };
     }
+    // Do not mutate asserted AssertCoverage completeness — Qualify appends
+    // history only so contested overlaps cannot be erased (013-E / PR #106).
     const priorCompleteness = coverage.completeness;
-    if (input.completeness !== undefined) {
-      coverage.completeness = input.completeness;
-    }
     record = {
       id: `syn-qual-${store.nextQualification}`,
       targetKind: "coverage",
