@@ -2,7 +2,7 @@
 
 TreatFlow is an observation-first Halloween application concept: effortless personal reporting and private review are its primary purpose; protected community summaries and qualified exploratory research are optional. **No app implementation has begun.**
 
-The repository follows the Base concept-design methodology. **Phases 000–011 closed concept design with explicit limitations, and Phase 012 completed pre-implementation repository preparation with bounded carry-forward. Phase 013-A–G are merged; [013-H](docs/phases/013/013-h-independent-exit-authorization.md) records the independent engineering-design exit with blocking implementation prerequisites, pending review/merge. No application, AWS deployment, real participant-data operations or external material release is authorized by this documentation.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
+The repository follows the Base concept-design methodology. **Phases 000–011 closed concept design with explicit limitations, and Phase 012 completed pre-implementation repository preparation with bounded carry-forward. Phase 013-A–H are merged with an engineering-design PASS and blocking implementation prerequisites; [014-A](docs/phases/014/014-a-entry-inventory.md) is auditing AWS backbone integration and readiness, pending review/merge. No application, AWS deployment, real participant-data operations or external material release is authorized by this documentation.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
@@ -71,9 +71,9 @@ The inherited methodology includes shared project instructions for common coding
 
 Agents are expected to inspect current canonical knowledge before making substantive changes, distinguish current truth from phase history, preserve OKF/documentation authority, avoid speculative repository bloat, and surface design contradictions rather than silently coding around them.
 
-## Next engineering-design phase
+## Engineering entry and shared AWS integration
 
-[Phase 013 — AWS Engineering Foundation & MVP Program Design](docs/phases/013/) consolidates the conditional stack, environment and cost guardrails, private nonproduction, public production and phased MVP qualification. The proposed [013-H independent exit and limited authorization](docs/phases/013/013-h-independent-exit-authorization.md) allows only a future bounded [014-A documentary inventory](docs/phases/014/014-a-entry-inventory.md) after its PR merges. **Feature implementation, AWS writes, production launch, real-person intake and disclosure remain unauthorized.**
+[Phase 013](docs/phases/013/) exited engineering planning with qualified limits. [014-A central AWS foundation inventory](docs/phases/014/014-a-entry-inventory.md) documents the interface to an owner-controlled shared infrastructure repository, separating centrally managed AWS trust/policies from TreatFlow application stacks. Its audit records serious control/financial prerequisites for 014-B and a qualified documentary exit pending review. **Application and CI/CDK implementation, AWS writes, production launch, real-person intake and protected disclosure remain unauthorized.**
 
 ## Authority reminder
 
