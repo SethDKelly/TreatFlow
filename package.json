@@ -2,7 +2,7 @@
   "name": "treatflow",
   "version": "0.0.0",
   "private": true,
-  "description": "TreatFlow local-only synthetic Observation scaffold (014-B L01–L03). No cloud, real data, or deployment.",
+  "description": "TreatFlow local-only synthetic Observation app (014-B foundation + 016-B/C actions). No cloud, real data, or deployment.",
   "type": "module",
   "engines": {
     "node": "^22.12.0 || ^24.0.0 || >=26.0.0"

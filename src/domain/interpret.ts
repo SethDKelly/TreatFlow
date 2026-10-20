@@ -5,10 +5,12 @@ import {
   intervalsOverlap,
 } from "./validation";
 import type {
+  CompletenessClaim,
   ContestedOverlap,
   CoverageClaim,
   EvidenceItem,
   ObservedZeroInterpretation,
+  QualificationRecord,
   TimeExtent,
 } from "./types";
 
@@ -20,22 +22,48 @@ export function monitoringWithoutCoverage(): "unknown" {
 }
 
 /**
+ * Latest Qualify completeness for a coverage claim, if any.
+ * AssertCoverage completeness remains on the claim (immutable under Qualify).
+ */
+export function effectiveCompleteness(
+  claim: CoverageClaim,
+  qualifications: QualificationRecord[],
+): CompletenessClaim {
+  const applied = [...qualifications]
+    .reverse()
+    .find(
+      (item) =>
+        item.targetKind === "coverage" &&
+        item.targetId === claim.id &&
+        item.appliedCompleteness !== undefined,
+    );
+  return applied?.appliedCompleteness ?? claim.completeness;
+}
+
+/**
  * A Report of quantity 0 alone is not an observed zero (E-T06).
  * Reported observed zero requires observed coverage + complete_claimed for the
  * same unit/extent, with no contested coverage, no unresolved contradictory
  * activity evidence, and a matching zero evidence (E-T07).
+ *
+ * Contests consider AssertCoverage-asserted conflicts and sticky historical
+ * Qualify-effective conflicts (replayed), so later Qualify cannot erase either
+ * original or qualification-created contradictions (013-E).
  */
 export function interpretObservedZeros(
   coverage: CoverageClaim[],
   evidence: EvidenceItem[],
+  qualifications: QualificationRecord[] = [],
 ): ObservedZeroInterpretation[] {
   const results: ObservedZeroInterpretation[] = [];
-  const contested = findContestedCoverage(coverage);
+  const contested = findContestedCoverage(coverage, qualifications);
   const contestedIds = new Set(contested.flatMap((c) => [c.a, c.b]));
 
   for (const claim of coverage) {
     if (claim.status !== "observed") continue;
-    if (claim.completeness !== "complete_claimed") continue;
+    if (effectiveCompleteness(claim, qualifications) !== "complete_claimed") {
+      continue;
+    }
 
     const zeroEvidence = evidence.filter(
       (item) =>
@@ -82,15 +110,55 @@ export function interpretObservedZeros(
   return results;
 }
 
+function coveragePairKey(aId: string, bId: string): string {
+  return aId < bId ? `${aId}|${bId}` : `${bId}|${aId}`;
+}
+
 /**
  * Contested coverage:
  * - incompatible monitoring status over overlapping/undecidable extents contests
- *   regardless of unit (attention contradiction);
- * - completeness is compared only within the same declared measurement unit.
+ *   regardless of unit;
+ * - completeness conflicts within the same unit are sticky: AssertCoverage
+ *   conflicts seed the set, and any historical Qualify prefix that made
+ *   effective completeness disagree keeps the pair contested even if a later
+ *   Qualify realigns latest values (no authorized conflict resolution).
  */
 export function findContestedCoverage(
   coverage: CoverageClaim[],
+  qualifications: QualificationRecord[] = [],
 ): ContestedOverlap[] {
+  const stickyCompletenessPairs = new Set<string>();
+
+  for (let i = 0; i < coverage.length; i += 1) {
+    for (let j = i + 1; j < coverage.length; j += 1) {
+      const a = coverage[i];
+      const b = coverage[j];
+      if (!intervalsOverlap(a.timeExtent, b.timeExtent)) continue;
+      if (a.unit === b.unit && a.completeness !== b.completeness) {
+        stickyCompletenessPairs.add(coveragePairKey(a.id, b.id));
+      }
+    }
+  }
+
+  // Replay qualifications in order: once effective values conflict, stick.
+  for (let q = 0; q < qualifications.length; q += 1) {
+    const prefix = qualifications.slice(0, q + 1);
+    for (let i = 0; i < coverage.length; i += 1) {
+      for (let j = i + 1; j < coverage.length; j += 1) {
+        const a = coverage[i];
+        const b = coverage[j];
+        if (!intervalsOverlap(a.timeExtent, b.timeExtent)) continue;
+        if (a.unit !== b.unit) continue;
+        if (
+          effectiveCompleteness(a, prefix) !==
+          effectiveCompleteness(b, prefix)
+        ) {
+          stickyCompletenessPairs.add(coveragePairKey(a.id, b.id));
+        }
+      }
+    }
+  }
+
   const contested: ContestedOverlap[] = [];
   for (let i = 0; i < coverage.length; i += 1) {
     for (let j = i + 1; j < coverage.length; j += 1) {
@@ -99,9 +167,19 @@ export function findContestedCoverage(
       if (!intervalsOverlap(a.timeExtent, b.timeExtent)) continue;
 
       const statusConflict = a.status !== b.status;
-      const completenessConflict =
+      const assertedCompletenessConflict =
         a.unit === b.unit && a.completeness !== b.completeness;
-      if (!statusConflict && !completenessConflict) continue;
+      const stickyCompletenessConflict = stickyCompletenessPairs.has(
+        coveragePairKey(a.id, b.id),
+      );
+
+      if (
+        !statusConflict &&
+        !assertedCompletenessConflict &&
+        !stickyCompletenessConflict
+      ) {
+        continue;
+      }
 
       const relation = intervalOverlapRelation(a.timeExtent, b.timeExtent);
       contested.push({
@@ -111,7 +189,9 @@ export function findContestedCoverage(
           ? relation === "unknown"
             ? "Incompatible monitoring status with undecidable overlap remains contested."
             : "Overlapping incompatible monitoring status remains contested; not last-write-wins."
-          : "Incompatible reporting-completeness claims for the same measurement unit remain contested.",
+          : assertedCompletenessConflict
+            ? "Incompatible AssertCoverage completeness claims for the same measurement unit remain contested; Qualify cannot erase the conflict."
+            : "Qualification-created completeness conflict remains unresolved; subsequent Qualify cannot erase it.",
       });
     }
   }
