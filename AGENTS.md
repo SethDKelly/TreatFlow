@@ -121,6 +121,8 @@ Linear is the **work/dependency ledger** for the TreatFlow MVP; GitHub PRs, code
 
 ## Code review — shared Cursor and Codex principles
 
+These instructions are the execution-facing form of the [durable shared review policy](docs/methodology/agentic-development-governance.md). Cursor **cloud/IDE agents** and Codex agents use this root guidance; **Cursor Bugbot** consumes the minimal `.cursor/BUGBOT.md` adapter, and both native review integrations may constrain findings output.
+
 When acting as a **code reviewer**, use the same principles regardless of whether Cursor or Codex implemented the change:
 
 - Review the **exact PR diff against its current target branch**, relevant call sites, tests, linked Linear story acceptance criteria, and affected canonical contracts. Do not accept the implementer's description or passing tests as proof of correctness.
@@ -129,7 +131,7 @@ When acting as a **code reviewer**, use the same principles regardless of whethe
 - For API, persistence, authentication, IaC, or CI changes, inspect authorization boundaries, cross-record/environment access, replay and concurrent writes, secret handling, unexpected cost amplification, and protected approval bypasses as relevant to the diff.
 - Check the smallest meaningful negative cases and whether tests prove external behavior, not merely the implementation's assumptions. Identify critical missing verification without claiming tests were run when they were not.
 - Review from a separate bounded context where feasible; a second agent using the implementer's conclusions verbatim is not independent evidence. **Do not edit the implementer's branch, self-approve, self-merge, or deploy while serving as reviewer.**
-- Finish with **PASS**, **HOLD**, or **INSUFFICIENT EVIDENCE**, including unresolved findings, linked issue/PR references, and the scope of checks actually performed. This is an advisory review finding, not a substitute for GitHub protection, independent exit review, or human authorization.
+- **Respect the native review surface.** On Codex or Cursor Bugbot PR review interfaces that accept **findings only**, report supported actionable findings in that format; do not append incompatible PASS/HOLD prose. For a separate narrative/manual review that permits a summary, finish with **PASS**, **HOLD**, or **INSUFFICIENT EVIDENCE**, actual verification scope, and remaining risks. Neither output replaces protected checks, independent exit review, or human authorization.
 
 This section covers **ordinary code review only**. A separate adversarial-verification role, prompt, hidden test corpus, and enforcement mechanism will be established independently; do not present this code review as that distinct assessment. See [013-F independent verification design](docs/phases/013/013-f-agentic-independent-test-control.md) for the existing methodology and the [single MVP roadmap](docs/phases/013/mvp-roadmap.md) for package-specific gates.
 
