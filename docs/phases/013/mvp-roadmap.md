@@ -5,13 +5,13 @@ description: Single engineering-delivery owner for authorized 014–018 packages
 tags: [treatflow, aws, mvp, roadmap, engineering, implementation, critical-path, candidate]
 ---
 
-# Candidate MVP Implementation Roadmap — Subject to 013-H
+# Candidate MVP Implementation Roadmap — Local-First with Separately Gated AWS Integration
 
 ## Role, dependency and MVP meaning
 
 This is the **single natural owner** for the future staged delivery program. [013-G architecture decision](013-g-architecture-mvp-delivery-decision.md) owns architecture selection and its risk register; [013-F](013-f-agentic-independent-test-control.md) owns agentic/test-control methodology; [013-E](013-e-concept-to-mvp-realization.md) owns MVP behavior and negative-test obligations. None of these replaces [canonical Observation](../../canonical/concepts/observation.md) or [Phase 012-E six safety gates](../012/012-e-treatflow-handoff.md).
 
-**Only a separate, explicit 013-H decision can authorize the first bounded implementation work.** Merely planning a package or merging this roadmap does not permit cloud provisioning, feature coding, CI credential creation, public site launch or real participant data intake/disclosure.
+**013-H exited engineering design while holding general implementation and cloud writes.** [014-A](../014/014-a-entry-inventory.md) established backbone dependencies, and [014-B local-first implementation entry](../014/014-b-local-first-implementation-plan.md) proposes a **separately sponsor-authorized source-only starter track**. Merely merging this roadmap or design plan does not authorize coding or cloud provisioning. Track L (local synthetic source) can advance under explicit bounded permission while Track C (backbone/cloud) remains HOLD pending its own evidence and authorization.
 
 **MVP candidate = protected nonproduction with synthetic users and independently evidenced O-only private recording/review**, plus any authorized small protected V correction slice selected under 013-G/H. Reports preserve person-vs-group, near-present vs interval aggregate, coverage/uncertainty, provenance, closure and unknown submission outcomes. S/R/D are not prerequisites; protected R/D release and actual real-person collection are out of scope. The whole five-concept *design family* is still adopted; staged implementation is not a new one-concept product.
 
@@ -24,12 +24,12 @@ For every implementation package, specify before work: **owner and review agent,
 | Package | Bounded deliverable | Dependencies / independent exit criterion |
 |---|---|---|
 | **014-A — Entry inventory and authority** | Verify AWS account ownership and region, Route 53/SkellyHouse zone, hosted names/collisions, approved cost ceiling, GitHub protection/permissions and test principals; baseline repository and security decision record | **013-H scope-limited permission**; evidence of accessible identities, region/zone, budgets and blockers. **No deployment** if ownership/permissions absent |
-| **014-B — Single IaC owner and secure CI** | Selected CDK TypeScript stacks, exact environment separation, unprivileged PR checks, approved dev deploy role via OIDC, denial on prod assumption, budget/alerts and dry-run diff | Verified actual account/permissions, reproducible synth and negative role tests; production role not assumed by implementation agents |
+| **014-B — Local-first foundation and separate secure-cloud gate** | **Track L:** local-only React/TypeScript/Vite substrate, synthetic fixtures and first private Observation slice via [014-B start contract](../014/014-b-local-first-implementation-plan.md). **Track C:** centrally reviewed OIDC/CI, CDK boundary, protected dev roles and dry-run infrastructure | Local source tasks require **explicit sponsor-approved package scope** but not AWS credential readiness; cloud CI/IaC/AWS tasks require separate verified backbone role/security/budget permission. No prod access |
 | **014-C — Protected synthetic dev delivery** | Dev CloudFront/private S3 and secure viewer access, API Gateway REST API stage + regional WAFv2, Lambda health/auth stub with no real writes, synthetic-only isolated state and certificates where authorized | Anonymous dev SPA/asset and direct S3 denied; API custom/default domain both guarded; WAF stage attached; no public real-person intake, cross-account denial |
 | **014-D — Minimal observability and cost safeguards** | Redacted structured logs, bounded retention, rate controls, budget alerts, deployment provenance, synthetic health metrics and rollback procedure | Evidence of failures, safe rollback, alert destination and bounded abuse; no claim budgets enforce immediate hard caps |
 | **014-E — Foundation independent exit** | Reviewer checks exact deployed synthetic dev build/account/role, access denials, cloud resource inventory and operating-cost sample | PASS/HOLD with evidence; **production resources NOT launched merely because dev passed** |
 
-**Blocked dependency:** 014-C cannot proceed until authentic dev access and WAF ownership are approved; DNS changes separately require actual zone owner consent. Private nonprod viewer-side gate is mandatory independently of OAC. Any single-account fallback needs explicit risk exception, not a presumed equivalence.
+**Two-lane dependency:** after explicit sponsor-approved 014-B local package scope, deterministic domain/fixture and local UI source work may advance (as planned 015/016 work) without AWS credentials. **014-C remains HOLD** until authentic dev account/budget, CI trust, protected viewer access and WAF/API authority are approved; DNS changes separately require zone-owner consent. Private nonprod viewer-side gate is mandatory independently of OAC. A single-account fallback needs explicit risk acceptance.
 
 ## 015 — Identity, private state and bounded API contracts
 
