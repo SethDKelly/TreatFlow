@@ -1,4 +1,9 @@
-import { intervalOverlapRelation, intervalsOverlap } from "./validation";
+import {
+  activityConflictsWithExtent,
+  extentsSemanticallyEqual,
+  intervalOverlapRelation,
+  intervalsOverlap,
+} from "./validation";
 import type {
   ContestedOverlap,
   CoverageClaim,
@@ -36,7 +41,7 @@ export function interpretObservedZeros(
       (item) =>
         item.measure.unit === claim.unit &&
         item.measure.quantity === 0 &&
-        extentsAlign(item.timeExtent, claim.timeExtent),
+        extentsSemanticallyEqual(item.timeExtent, claim.timeExtent),
     );
 
     for (const item of zeroEvidence) {
@@ -77,6 +82,12 @@ export function interpretObservedZeros(
   return results;
 }
 
+/**
+ * Contested coverage:
+ * - incompatible monitoring status over overlapping/undecidable extents contests
+ *   regardless of unit (attention contradiction);
+ * - completeness is compared only within the same declared measurement unit.
+ */
 export function findContestedCoverage(
   coverage: CoverageClaim[],
 ): ContestedOverlap[] {
@@ -86,15 +97,21 @@ export function findContestedCoverage(
       const a = coverage[i];
       const b = coverage[j];
       if (!intervalsOverlap(a.timeExtent, b.timeExtent)) continue;
-      if (a.status === b.status && a.completeness === b.completeness) continue;
+
+      const statusConflict = a.status !== b.status;
+      const completenessConflict =
+        a.unit === b.unit && a.completeness !== b.completeness;
+      if (!statusConflict && !completenessConflict) continue;
+
       const relation = intervalOverlapRelation(a.timeExtent, b.timeExtent);
       contested.push({
         a: a.id,
         b: b.id,
-        note:
-          relation === "unknown"
-            ? "Incompatible coverage with undecidable/unparseable overlap remains contested; not treated as disjoint."
-            : "Overlapping incompatible coverage remains contested; not last-write-wins.",
+        note: statusConflict
+          ? relation === "unknown"
+            ? "Incompatible monitoring status with undecidable overlap remains contested."
+            : "Overlapping incompatible monitoring status remains contested; not last-write-wins."
+          : "Incompatible reporting-completeness claims for the same measurement unit remain contested.",
       });
     }
   }
@@ -113,20 +130,7 @@ function findContradictoryActivity(
         item.id !== zeroEvidenceId &&
         item.measure.unit === unit &&
         item.measure.quantity > 0 &&
-        extentsAlign(item.timeExtent, extent),
+        activityConflictsWithExtent(item.timeExtent, extent),
     )
     .map((item) => item.id);
-}
-
-function extentsAlign(a: TimeExtent, b: TimeExtent): boolean {
-  if (a.kind === "interval" && b.kind === "interval") {
-    return (
-      a.startLabel.trim() === b.startLabel.trim() &&
-      a.endLabel.trim() === b.endLabel.trim()
-    );
-  }
-  if (a.kind === "near_present" && b.kind === "near_present") {
-    return a.assertedLabel.trim() === b.assertedLabel.trim();
-  }
-  return false;
 }

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  activityConflictsWithExtent,
+  extentsSemanticallyEqual,
   intervalOverlapRelation,
   intervalsOverlap,
   isValidQuantity,
@@ -73,5 +75,29 @@ describe("L02 validation primitives", () => {
     };
     expect(intervalOverlapRelation(evening, other)).toBe("unknown");
     expect(intervalsOverlap(evening, other)).toBe(true);
+  });
+
+  it("equates equivalent clock labels and detects contained activity", () => {
+    const twentyFour = {
+      kind: "interval" as const,
+      startLabel: "18:00",
+      endLabel: "18:20",
+      precision: "bounded" as const,
+    };
+    const twelveHour = {
+      kind: "interval" as const,
+      startLabel: "6 PM",
+      endLabel: "6:20 PM",
+      precision: "bounded" as const,
+    };
+    const contained = {
+      kind: "interval" as const,
+      startLabel: "18:05",
+      endLabel: "18:10",
+      precision: "bounded" as const,
+    };
+    expect(extentsSemanticallyEqual(twentyFour, twelveHour)).toBe(true);
+    expect(activityConflictsWithExtent(contained, twentyFour)).toBe(true);
+    expect(activityConflictsWithExtent(twelveHour, twentyFour)).toBe(true);
   });
 });

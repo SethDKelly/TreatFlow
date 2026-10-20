@@ -146,6 +146,136 @@ describe("L02 synthetic fixtures (013-E semantic owners)", () => {
     ]);
   });
 
+  it("does not contest cross-unit completeness on the same interval", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const extent = {
+      kind: "interval" as const,
+      startLabel: "18:00",
+      endLabel: "18:20",
+      precision: "bounded" as const,
+    };
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-cross-unit-groups",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-cross-unit-people",
+        status: "observed",
+        completeness: "partial",
+        unit: "people",
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-cross-unit-zero",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 0, uncertainty: "none" },
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    const viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage).toHaveLength(0);
+    expect(viewed.value.observedZeroInterpretations).toEqual([
+      expect.objectContaining({
+        interpretableAsReportedObservedZero: true,
+      }),
+    ]);
+  });
+
+  it("blocks observed-zero when contained or equivalently labeled activity contradicts it", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    expect(
+      assertCoverage(
+        store,
+        created.value.id,
+        SYNTHETIC_PRINCIPAL_A,
+        observedCompleteZeroCoverage,
+      ).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(
+        store,
+        created.value.id,
+        SYNTHETIC_PRINCIPAL_A,
+        observedCompleteZeroReport,
+      ).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-contained-positive",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 3, uncertainty: "none" },
+        timeExtent: {
+          kind: "interval",
+          startLabel: "18:05",
+          endLabel: "18:10",
+          precision: "bounded",
+        },
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    let viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+
+    const storeB = createStore();
+    const createdB = establish(storeB, SYNTHETIC_PRINCIPAL_A);
+    if (createdB.outcome !== "confirmed_effected") return;
+    expect(
+      assertCoverage(
+        storeB,
+        createdB.value.id,
+        SYNTHETIC_PRINCIPAL_A,
+        observedCompleteZeroCoverage,
+      ).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(
+        storeB,
+        createdB.value.id,
+        SYNTHETIC_PRINCIPAL_A,
+        observedCompleteZeroReport,
+      ).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(storeB, createdB.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-equivalent-clock",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 3, uncertainty: "none" },
+        timeExtent: {
+          kind: "interval",
+          startLabel: "6 PM",
+          endLabel: "6:20 PM",
+          precision: "bounded",
+        },
+      }).outcome,
+    ).toBe("confirmed_effected");
+    viewed = inspect(storeB, createdB.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+  });
+
   it("blocks observed-zero when positive evidence contradicts the zero", () => {
     const store = createStore();
     const created = establish(store, SYNTHETIC_PRINCIPAL_A);

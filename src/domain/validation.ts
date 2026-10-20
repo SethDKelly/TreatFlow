@@ -65,14 +65,83 @@ export function intervalOverlapRelation(
   a: TimeExtent,
   b: TimeExtent,
 ): OverlapRelation {
+  const resolved = resolveIntervalBounds(a, b);
+  if (resolved === "unknown") return "unknown";
+  if (resolved === "kind_mismatch") return "unknown";
+  const { aStart, aEnd, bStart, bEnd } = resolved;
+  return aStart < bEnd && bStart < aEnd ? "overlap" : "disjoint";
+}
+
+/** True when overlap is proven or undecidable (conservative for conflict checks). */
+export function intervalsOverlap(a: TimeExtent, b: TimeExtent): boolean {
+  const relation = intervalOverlapRelation(a, b);
+  return relation === "overlap" || relation === "unknown";
+}
+
+/**
+ * Semantic equality of extents: identical labels, or equivalent parseable clocks
+ * (e.g. 18:00–18:20 equals 6 PM–6:20 PM).
+ */
+export function extentsSemanticallyEqual(a: TimeExtent, b: TimeExtent): boolean {
+  if (a.kind === "near_present" && b.kind === "near_present") {
+    if (a.assertedLabel.trim() === b.assertedLabel.trim()) return true;
+    const aClock = parseFixtureClock(a.assertedLabel);
+    const bClock = parseFixtureClock(b.assertedLabel);
+    return aClock !== null && bClock !== null && aClock === bClock;
+  }
+  if (a.kind !== "interval" || b.kind !== "interval") return false;
+  if (
+    a.startLabel.trim() === b.startLabel.trim() &&
+    a.endLabel.trim() === b.endLabel.trim()
+  ) {
+    return true;
+  }
+  const resolved = resolveIntervalBounds(a, b);
+  if (resolved === "unknown" || resolved === "kind_mismatch") return false;
+  return (
+    resolved.aStart === resolved.bStart && resolved.aEnd === resolved.bEnd
+  );
+}
+
+/**
+ * Whether activity extent A conflicts with zero/coverage extent Z.
+ * Contained, equal, overlapping, or undecidable temporal relations conflict;
+ * proven disjoint does not.
+ */
+export function activityConflictsWithExtent(
+  activity: TimeExtent,
+  zeroExtent: TimeExtent,
+): boolean {
+  if (extentsSemanticallyEqual(activity, zeroExtent)) return true;
+  const relation = intervalOverlapRelation(activity, zeroExtent);
+  return relation === "overlap" || relation === "unknown";
+}
+
+type ResolvedBounds =
+  | {
+      aStart: number;
+      aEnd: number;
+      bStart: number;
+      bEnd: number;
+    }
+  | "unknown"
+  | "kind_mismatch";
+
+function resolveIntervalBounds(a: TimeExtent, b: TimeExtent): ResolvedBounds {
   if (a.kind !== "interval" || b.kind !== "interval") {
-    return "unknown";
+    return "kind_mismatch";
   }
   if (
     a.startLabel.trim() === b.startLabel.trim() &&
     a.endLabel.trim() === b.endLabel.trim()
   ) {
-    return "overlap";
+    const start = parseFixtureClock(a.startLabel);
+    const end = parseFixtureClock(a.endLabel);
+    if (start !== null && end !== null) {
+      return { aStart: start, aEnd: end, bStart: start, bEnd: end };
+    }
+    // Identical unparseable labels: treat as overlapping equal windows.
+    return { aStart: 0, aEnd: 1, bStart: 0, bEnd: 1 };
   }
   const aStart = parseFixtureClock(a.startLabel);
   const aEnd = parseFixtureClock(a.endLabel);
@@ -86,13 +155,7 @@ export function intervalOverlapRelation(
   ) {
     return "unknown";
   }
-  return aStart < bEnd && bStart < aEnd ? "overlap" : "disjoint";
-}
-
-/** True when overlap is proven or undecidable (conservative for conflict checks). */
-export function intervalsOverlap(a: TimeExtent, b: TimeExtent): boolean {
-  const relation = intervalOverlapRelation(a, b);
-  return relation === "overlap" || relation === "unknown";
+  return { aStart, aEnd, bStart, bEnd };
 }
 
 /** Accepts fixture labels like "18:00", "6 PM", "6:30 PM". */
