@@ -4,7 +4,7 @@ These instructions apply to agents working on TreatFlow. TreatFlow inherits Base
 
 ## Start with repository authority
 
-Use progressive disclosure: read `docs/index.md`, then only the relevant canonical owner(s), current phase state, and applicable methodology contracts. Consult phase history only for evidence or unresolved authority conflicts. `README.md` is orientation, not a competing specification. The durable shared rules live in `docs/methodology/agentic-development-governance.md`.
+Use progressive disclosure: read `docs/index.md`, then only the relevant canonical owner(s), current phase state, and applicable methodology contracts. For MVP implementation sequencing and milestone-triggered gates, use the single [cloud-first execution program](docs/phases/013/mvp-roadmap.md), not parallel plans. Consult phase history only for evidence or unresolved authority conflicts. `README.md` is orientation, not a competing specification. The durable shared rules live in `docs/methodology/agentic-development-governance.md`.
 
 Do not treat phase history as current truth when a canonical owner exists.
 
