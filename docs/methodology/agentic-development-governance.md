@@ -153,6 +153,17 @@ Before finishing substantive implementation work, when implementation is authori
 
 Do not manufacture tests that only mirror the implementation or repeatedly run broad suites without a reason.
 
+## Pull-request traceability and ordinary review authority
+
+This methodology is the **durable shared policy** for Cursor, Codex, Claude, and other agents. The root [AGENTS.md](../../AGENTS.md) is its **portable, immediately executable repository adapter**: it contains short working instructions for agents that consume AGENTS.md directly. These two owners must remain consistent; changing shared review/workflow expectations requires updating this methodology and, when relevant, its root adapter. Do not proliferate tool-specific full policy copies.
+
+- **Work identity:** eligible implementation work traces to an existing, dependency-qualified Linear story such as `S-31`; include the identifier in the Git branch/PR title and use non-closing `References S-31` when issue completion remains subject to independent verification. Linear is the work ledger; the actual PR diff, CI and authorized review are engineering evidence.
+- **Status and defects:** an opened PR indicates review, and a merged PR **does not prove independent acceptance**. Linear may move to a verification status when configured; only separately verified evidence permits Done. First check for an existing defect; record blocking findings in the PR; create/link a distinct Linear Bug issue for independently actionable follow-up, and avoid automatic duplicate tickets. GitHub-to-Linear issue synchronization needs explicit integration setup.
+- **Review substance:** inspect actual head/base diff, adjacent call sites and behavior, tests, linked acceptance criteria and canonical concepts; prioritize justified, reproducible defects in correctness, authority, privacy, recovery and observation meaning. Check negative cases instead of relying solely on author-written tests. Record severity and evidence; avoid speculative/style-only noise.
+- **Review independence:** a reviewer does not edit the author branch, self-approve, merge or deploy, and cannot override a dependency, IAM/budget, real-person or disclosure gate. A different agent in the same inherited context is not inherently independent.
+- **Output-surface compatibility:** native Codex and Cursor Bugbot PR review integrations can constrain output to findings/comments. Comply with those host formats and **do not require an extra PASS/HOLD footer they cannot emit**. A separate narrative review may report `PASS`, `HOLD` or `INSUFFICIENT EVIDENCE` with actual checks performed. No native bot review alone is an independently accepted milestone or required human approval.
+- **Role separation:** ordinary code review is not the future deliberately adversarial/holdout evaluation. Keep adversarial prompts, secrets and protected outcomes in separately controlled review/evaluation mechanisms under [013-F](../phases/013/013-f-agentic-independent-test-control.md).
+
 ## Tool-specific adapter policy
 
 Base uses one shared instruction model with thin adapters:
