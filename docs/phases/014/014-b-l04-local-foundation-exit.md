@@ -48,7 +48,7 @@ Use this table as the independent review surface. Mark PASS only with evidence; 
 | **D-03** | Principal switching is simulated entitlement, not cryptographic session security | Stated in UI and 014-B; prevents false security claims | **015-A** entitlement design |
 | **D-04** | Attempt/interrupt model is local mock; no reconciliation window or sealed holdouts | Sufficient for unresolved-outcome honesty in L03 | **015-B**, **017-B**, **018** holdouts |
 | **D-05** | Time model is fixture clock labels + overnight unwrap; not timezone/DST/calendar dates | Matches synthetic fixture scope; avoids invented precision | Revisit when real calendars enter **015/016** contracts |
-| **D-06** | No GitHub Actions CI yet | Track C / repo-protection work separately gated; local commands are CI-independent by design | **014-B-C01** / maintainer CI design after approval |
+| **D-06** | No GitHub Actions CI yet | Track C / repo-protection work separately gated; local commands are CI-independent by design | **014-B-C01** unprivileged `ci.yml` (no AWS assume) |
 | **D-07** | Accessibility and divided-attention UX unproven | E-T20 / R-P01 remain empirical carry-forwards | **017-A** |
 | **D-08** | Revision / factual count correction absent (correctly) | Destructive O edits forbidden; V deferred | [016-D](../016/016-d-factual-correction-product-decision.md) Option B bounded deferral (second report ≠ correction; revisit T1/T2) |
 
