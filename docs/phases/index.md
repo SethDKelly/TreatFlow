@@ -32,7 +32,7 @@ Phase 012 is a Base transition phase, not part of Jackson's concept-design metho
 These are **TreatFlow-specific engineering phases**, not Base's refined 000–012 template or official Daniel Jackson phases:
 
 - [013 — AWS Engineering Architecture & MVP Program Design](013/) — A–H merged; [013-H independent exit](013/013-h-independent-exit-authorization.md) grants design readiness but holds AWS/implementation execution.
-- [014 — AWS Foundation & Environment Readiness](014/) — [014-A central AWS backbone inventory](014/014-a-entry-inventory.md) documentary audit proposed PASS pending merge with protected 014-B work HOLD; cloud writes, executable setup and app implementation remain unauthorized.
+- [014 — AWS Foundation & Environment Readiness](014/) — [014-A](014/014-a-entry-inventory.md) merged; Track L L01–L03 merged; [014-B-L04 local foundation exit](014/014-b-l04-local-foundation-exit.md) proposed; Track C / cloud writes remain unauthorized.
 
 [The conditional MVP roadmap](013/mvp-roadmap.md) defines the later 015–019 implementation and qualification packages. No phase index is deployment authority.
 
