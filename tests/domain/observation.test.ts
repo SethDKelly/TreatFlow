@@ -266,6 +266,31 @@ describe("L03 Observation transitions", () => {
         (item) => !item.interpretableAsReportedObservedZero,
       ),
     ).toBe(true);
+
+    // Step 3: Qualify back to complete_claimed must not erase the sticky contest.
+    expect(
+      qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-intro-recomplete",
+        targetKind: "coverage",
+        coverageId: first.value.id,
+        completeness: "complete_claimed",
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage.length).toBeGreaterThan(0);
+    expect(
+      viewed.value.contestedCoverage.some((item) =>
+        item.note.includes("Qualification-created"),
+      ),
+    ).toBe(true);
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
   });
 
   it("repeated Qualify records priorCompleteness from preceding effective value", () => {
