@@ -58,6 +58,17 @@ describe("L02 validation primitives", () => {
     expect(parseFixtureClock("not-a-time")).toBeNull();
   });
 
+  it("keeps midnight and noon distinct in synthetic 12-hour labels", () => {
+    expect(parseFixtureClock("12 AM")).toBe(0);
+    expect(parseFixtureClock("12:01 AM")).toBe(1);
+    expect(parseFixtureClock("12 PM")).toBe(12 * 60);
+    expect(parseFixtureClock("12:59 PM")).toBe(12 * 60 + 59);
+
+    expect(parseFixtureClock("00:15 PM")).toBeNull();
+    expect(parseFixtureClock("13 PM")).toBeNull();
+    expect(parseFixtureClock("24:00")).toBeNull();
+  });
+
   it("treats unparseable identical extents as overlap, not proven disjoint", () => {
     const evening = {
       kind: "interval" as const,
