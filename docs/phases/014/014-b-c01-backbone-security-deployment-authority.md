@@ -1,7 +1,7 @@
 ---
 type: Engineering Implementation Package
 title: TreatFlow 014-B-C01 — Backbone Security and Deployment Authority
-description: Track C first package exit evidence — narrow TreatFlow OIDC deploy principal, main-ref-only bootstrap trust, unprivileged CI; isolation sims pending; does not authorize C02 deploy.
+description: Track C first package exit evidence — narrow TreatFlow OIDC deploy principal, main-ref-only bootstrap trust, unprivileged CI; C01-K requires live assumed-role verification (policy sims are supporting only).
 tags: [treatflow, phase-014, track-c, c01, aws-backbone, oidc, iam, ci, authorization]
 ---
 
@@ -9,7 +9,7 @@ tags: [treatflow, phase-014, track-c, c01, aws-backbone, oidc, iam, ci, authoriz
 
 ## Purpose and authorization
 
-**STATUS: APPLY EVIDENCE RECORDED. A-01 PASS (live trust). C01-02 ISOLATION SIMS PENDING ON BACKBONE. NOT AUTHORIZATION FOR 014-B-C02 DEPLOY, CDK BOOTSTRAP, OR PAID AWS APPLICATION RESOURCES.**
+**STATUS: APPLY EVIDENCE RECORDED. A-01 PASS (live trust). C01-K HOLD — requires live assumed-role verification (policy simulations are supporting only). NOT AUTHORIZATION FOR 014-B-C02 DEPLOY, CDK BOOTSTRAP, OR PAID AWS APPLICATION RESOURCES.**
 
 Opens Track C per [014-B](014-b-local-first-implementation-plan.md). Companion: private `aws-backbone` `docs/treatflow-014-b-c01.md`.
 
@@ -20,7 +20,7 @@ Opens Track C per [014-B](014-b-local-first-implementation-plan.md). Companion: 
 | ID | Deliverable | Evidence |
 |---|---|---|
 | **C01-01** | Dedicated TreatFlow deploy role | Live `treatflow-dev-github-deploy`; OIDC exact `environment:dev` |
-| **C01-02** | Permission isolation beyond OIDC | Source + no PowerUser on apply; **N-C02 sims pending** (`TreatFlow C01 negative sims` workflow) |
+| **C01-02** | Permission isolation beyond OIDC | Source + no PowerUser on apply; **C01-K = live assume gate** (sims supporting only) |
 | **C01-03** | CDK bootstrap ownership | Central/privileged; TreatFlow must not bootstrap |
 | **C01-04** | Untrusted-PR denial (TreatFlow) | Environment `dev` required for deploy assume; PR CI has no AWS |
 | **C01-05** | Unprivileged TreatFlow CI | `.github/workflows/ci.yml` |
@@ -39,17 +39,19 @@ Opens Track C per [014-B](014-b-local-first-implementation-plan.md). Companion: 
 | **C01-G** No app AWS resources in C01 | **PASS** |
 | **C01-H** Budget + DNS attestation | **HOLD → C02** |
 | **C01-I** Broader live drift inventory | **HOLD → C02** |
-| **C01-J** A-01 main-ref-only bootstrap | **PASS** — live trust main-ref-only; PR Environment subjects not trusted (entailed) |
-| **C01-K** C01-02 isolation negative sims | **PENDING** — run backbone `TreatFlow C01 negative sims` on `main`; then re-record PASS |
+| **C01-J** A-01 main-ref-only bootstrap | **PASS** — live trust main-ref-only |
+| **C01-K** Live assumed-role isolation verification | **HOLD** — must **assume** `treatflow-dev-github-deploy` and run Layer L API checks (companion). Backbone **policy sims are supporting only** and **cannot** alone set this to PASS ([IAM simulator caveats](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_testing-policies.html)). |
+| **C01-K-S** Policy simulations (optional) | **OPTIONAL** — backbone `TreatFlow C01 policy sims`; record URL as supporting evidence only |
 
 ## Exit decision
 
-**C01 authority work is applied.** Full C01 exit for closing A-02/A-03 requires **C01-K PASS**.
+**C01 authority work is applied.** Closing A-02/A-03 for TreatFlow requires **C01-K PASS** (Layer L live assume), not simulator success alone.
 
-**Next:** [014-B-C02 entry](014-b-c02-aws-dev-iac-access-gate.md) — design/selection package. **C02 resource deploy** requires separate sponsor authorization after C01-K and C02 gates (cost, viewer gate, API/WAF).
+**Next:** [014-B-C02 entry](014-b-c02-aws-dev-iac-access-gate.md). **C02 resource deploy** requires C01-K (live), C02 ledger, and separate sponsor deploy authorization.
 
 ## Explicit non-goals
 
-- No TreatFlow deploy workflow merge
-- No CDK bootstrap / paid app stacks from this record
+- No TreatFlow deploy workflow merge from this record
+- No CDK bootstrap / paid app stacks
+- No treating SimulatePrincipalPolicy as live permission proof
 - No R-P02/R-P03; 016-D Option B deferral stands
