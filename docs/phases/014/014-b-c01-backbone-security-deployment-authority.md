@@ -39,7 +39,7 @@ Opens Track C per [014-B](014-b-local-first-implementation-plan.md) and addresse
 | **C01-G** No TreatFlow app AWS resources / CDK bootstrap in this package | **PASS** by scope |
 | **C01-H** Budget ceiling + DNS owner attestation | **HOLD → C02** (A-04/A-05) |
 | **C01-I** Live AWS read-only drift vs Terraform `main` | **HOLD → C02** |
-| **C01-J** A-01 privileged backbone PR execution controlled | **HOLD** — source control landed in companion PR (validate-only PR CI; no `pull_request` OIDC on bootstrap; Environment-gated privileged plan). **Not PASS until N-A01-* live verifies** in private companion. Trust expansion / C01 exit blocked meanwhile. |
+| **C01-J** A-01 privileged backbone PR execution controlled | **HOLD** — companion uses validate-only PR CI and **main-ref-only** bootstrap OIDC (no `:pull_request`; no unprotected `environment:` subjects — PR jobs requesting privileged Environments cannot assume). **Not PASS until N-A01-* live verifies**. Trust expansion / C01 exit blocked meanwhile. |
 | **C01-K** C01-02 isolation negative tests | **HOLD** — source control landed (see companion). **Not PASS until N-C02-* live verifies**. Do not close A-02/A-03 for TreatFlow before this. |
 
 ## Application vs shared contract (binding)
