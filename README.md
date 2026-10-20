@@ -84,7 +84,7 @@ npm run build
 npm run dev
 ```
 
-`npm run dev` serves an in-memory synthetic Establish → Report → Inspect UI on `127.0.0.1` only. Synthetic fixtures are not real households; simulated principals are not authentication.
+`npm run dev` serves an in-memory synthetic Observation UI on `127.0.0.1` only (Establish, Report, AssertCoverage, Qualify, Inspect, Close, InspectAfterClose). Synthetic fixtures are not real households; simulated principals are not authentication.
 
 ## Engineering entry and shared AWS integration
 

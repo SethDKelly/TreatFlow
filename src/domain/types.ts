@@ -1,11 +1,13 @@
 /**
- * Pure Observation domain types for local synthetic work (014-B L02/L03).
+ * Pure Observation domain types for local synthetic work
+ * (014-B L01–L04 foundation + 016-B/C seven-action local slice).
  * These are conceptual values, not API/DTO or persistence schemas.
  */
 
 export type ObservationId = string;
 export type EvidenceId = string;
 export type CoverageId = string;
+export type QualificationId = string;
 export type AttemptId = string;
 
 /** Simulated local principal — not authentication or security enforcement. */
@@ -64,13 +66,31 @@ export interface CoverageClaim {
   receiptAt: string;
 }
 
+/**
+ * Semantic qualifier history. Qualifiers refine meaning; they never replace
+ * factual measure quantity/unit (Revision boundary).
+ */
+export interface QualificationRecord {
+  id: QualificationId;
+  targetKind: "evidence" | "coverage";
+  targetId: EvidenceId | CoverageId;
+  note?: string;
+  priorUncertainty?: Measure["uncertainty"];
+  appliedUncertainty?: Measure["uncertainty"];
+  priorCompleteness?: CompletenessClaim;
+  appliedCompleteness?: CompletenessClaim;
+  receiptAt: string;
+}
+
 export interface ObservationAccount {
   id: ObservationId;
   ownerPrincipalId: SyntheticPrincipalId;
   status: LifecycleStatus;
   evidence: EvidenceItem[];
   coverage: CoverageClaim[];
+  qualifications: QualificationRecord[];
   establishedAt: string;
+  closedAt?: string;
 }
 
 export type ActionResult<T> =
@@ -83,10 +103,12 @@ export interface InspectView {
   status: LifecycleStatus;
   evidence: EvidenceItem[];
   coverage: CoverageClaim[];
+  qualifications: QualificationRecord[];
   /** Monitoring without coverage remains unknown — never inferred as watched zero. */
   unassertedMonitoring: "unknown";
   contestedCoverage: ContestedOverlap[];
   observedZeroInterpretations: ObservedZeroInterpretation[];
+  closedAt?: string;
 }
 
 export interface ContestedOverlap {
@@ -119,3 +141,27 @@ export interface CoverageInput {
   unit: MeasureUnit;
   attemptId: AttemptId;
 }
+
+export type QualifyInput = {
+  attemptId: AttemptId;
+} & (
+  | {
+      targetKind: "evidence";
+      evidenceId: EvidenceId;
+      /** Refine uncertainty only — quantity/unit are immutable under O.Qualify. */
+      uncertainty?: Measure["uncertainty"];
+      note?: string;
+      /**
+       * If present, always denied: documents the Revision boundary (E-T16).
+       * Callers must not use this to change counts.
+       */
+      forbiddenQuantityChange?: number;
+    }
+  | {
+      targetKind: "coverage";
+      coverageId: CoverageId;
+      completeness?: CompletenessClaim;
+      note?: string;
+      forbiddenQuantityChange?: number;
+    }
+);

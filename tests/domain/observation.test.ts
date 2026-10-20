@@ -10,8 +10,10 @@ import {
   equalCountSecondAttempt,
   establish,
   inspect,
+  inspectAfterClose,
   invalidNegativeQuantity,
   nearPresentPeopleFour,
+  qualify,
   recalledUncertainTime,
   report,
 } from "../../src/domain";
@@ -138,20 +140,105 @@ describe("L03 Observation transitions", () => {
     expect(changed.outcome).toBe("confirmed_not_effected");
   });
 
-  it("E-T15: close denies further Report additions", () => {
+  it("E-T15: close denies Report/AssertCoverage/Qualify; InspectAfterClose preserved", () => {
     const store = createStore();
     const created = establish(store, SYNTHETIC_PRINCIPAL_A);
     if (created.outcome !== "confirmed_effected") return;
-    expect(
-      close(store, created.value.id, SYNTHETIC_PRINCIPAL_A).outcome,
-    ).toBe("confirmed_effected");
-    const denied = report(
+    const reported = report(
       store,
       created.value.id,
       SYNTHETIC_PRINCIPAL_A,
       nearPresentPeopleFour,
     );
+    expect(reported.outcome).toBe("confirmed_effected");
+    expect(
+      close(store, created.value.id, SYNTHETIC_PRINCIPAL_A).outcome,
+    ).toBe("confirmed_effected");
+
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        ...nearPresentPeopleFour,
+        attemptId: "after-close-report",
+      }).outcome,
+    ).toBe("confirmed_not_effected");
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "after-close-cov",
+        status: "observed",
+        completeness: "unknown",
+        unit: "people",
+        timeExtent: {
+          kind: "interval",
+          startLabel: "18:00",
+          endLabel: "18:20",
+          precision: "bounded",
+        },
+      }).outcome,
+    ).toBe("confirmed_not_effected");
+    if (reported.outcome === "confirmed_effected") {
+      expect(
+        qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+          attemptId: "after-close-qual",
+          targetKind: "evidence",
+          evidenceId: reported.value.id,
+          uncertainty: "high",
+        }).outcome,
+      ).toBe("confirmed_not_effected");
+    }
+
+    expect(
+      inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A).outcome,
+    ).toBe("confirmed_not_effected");
+    const afterClose = inspectAfterClose(
+      store,
+      created.value.id,
+      SYNTHETIC_PRINCIPAL_A,
+    );
+    expect(afterClose.outcome).toBe("confirmed_effected");
+    if (afterClose.outcome !== "confirmed_effected") return;
+    expect(afterClose.value.status).toBe("closed");
+    expect(afterClose.value.evidence).toHaveLength(1);
+  });
+
+  it("E-T16: Qualify cannot replace factual counts (Revision boundary)", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const reported = report(
+      store,
+      created.value.id,
+      SYNTHETIC_PRINCIPAL_A,
+      nearPresentPeopleFour,
+    );
+    expect(reported.outcome).toBe("confirmed_effected");
+    if (reported.outcome !== "confirmed_effected") return;
+
+    const denied = qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+      attemptId: "attempt-et16-rewrite",
+      targetKind: "evidence",
+      evidenceId: reported.value.id,
+      uncertainty: "high",
+      forbiddenQuantityChange: 99,
+    });
     expect(denied.outcome).toBe("confirmed_not_effected");
+    if (denied.outcome === "confirmed_not_effected") {
+      expect(denied.reason).toMatch(/Revision/i);
+    }
+
+    const refined = qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+      attemptId: "attempt-et16-qualify",
+      targetKind: "evidence",
+      evidenceId: reported.value.id,
+      uncertainty: "high",
+      note: "recalled precision reduced",
+    });
+    expect(refined.outcome).toBe("confirmed_effected");
+    const viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.evidence[0]?.measure.quantity).toBe(4);
+    expect(viewed.value.evidence[0]?.measure.uncertainty).toBe("high");
+    expect(viewed.value.qualifications).toHaveLength(1);
   });
 
   it("rejects invalid quantity/unit reports", () => {
