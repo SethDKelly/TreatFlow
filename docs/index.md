@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # TreatFlow Knowledge Bundle
 
-TreatFlow uses an observation-first concept design: **effortless private recording and review** is the independently sufficient primary success; optional protected community reporting and qualified exploratory research are secondary and tertiary. The repository is in **engineering design/readiness handoff**, not authorized implementation or operation: no application coding, AWS deployment, real participant data collection, protected disclosure or launch is authorized by this knowledge bundle.
+TreatFlow uses an observation-first concept design: **effortless private recording and review** is the independently sufficient primary success; optional protected community reporting and qualified exploratory research are secondary and tertiary. The repository may contain **sponsor-authorized local-only synthetic Track L source** under [014-B](phases/014/014-b-local-first-implementation-plan.md). AWS deployment, CI/cloud writes, real participant data collection, protected disclosure and launch remain unauthorized.
 
 ## Current design authority
 
@@ -19,7 +19,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 
 **Phases 000–010:** exited with documented carry-forwards; [010-P observation-first exit](phases/010/010-p-treatflow-exit-review.md) is the controlling Phase 010 decision. Earlier [010-H HOLD](phases/010/010-h-treatflow-exit-review.md), [010-J HOLD](phases/010/010-j-treatflow-exit-reassessment.md) and [010-L HOLD](phases/010/010-l-treatflow-exit-gate.md) are historical evidence before the sponsor-approved [010-M–P refinement](phases/010/index.md).
 
-**Phase 011:** [011-F independent concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged; [011-E safeguards](phases/011/011-e-treatflow-execution.md) remain mandatory. **Phase 012:** [012-F independent exit](phases/012/012-f-treatflow-exit-review.md) merged with bounded carry-forward. **Phase 013-A–H:** conditional AWS engineering design and [013-H independent exit](phases/013/013-h-independent-exit-authorization.md) merged: design PASS with implementation/AWS-write HOLD. **Phase 014-A:** [central AWS backbone inventory](phases/014/014-a-entry-inventory.md) merged with blocking cloud/permission dependencies. **014-B:** [local-first implementation start contract](phases/014/014-b-local-first-implementation-plan.md) proposes source-only packages for explicit human approval while the central AWS/CI/deployment track remains HOLD. No real collection/disclosure authority.
+**Phase 011:** [011-F independent concept-design exit](phases/011/011-f-treatflow-exit-review.md) **PASS WITH EXPLICIT LIMITATIONS**, merged; [011-E safeguards](phases/011/011-e-treatflow-execution.md) remain mandatory. **Phase 012:** [012-F independent exit](phases/012/012-f-treatflow-exit-review.md) merged with bounded carry-forward. **Phase 013-A–H:** conditional AWS engineering design and [013-H independent exit](phases/013/013-h-independent-exit-authorization.md) merged: design PASS with implementation/AWS-write HOLD. **Phase 014-A:** [central AWS backbone inventory](phases/014/014-a-entry-inventory.md) merged with blocking cloud/permission dependencies. **014-B:** [local-first implementation start contract](phases/014/014-b-local-first-implementation-plan.md) defines Track L (local source-only L01–L03) and Track C (cloud HOLD). Local synthetic scaffolding may proceed under explicit sponsor authorization; central AWS/CI/deployment remains HOLD. No real collection/disclosure authority.
 
 - [All phases and historical rationale](phases/)
 - [Phase 011 closure contract](phases/011/concept-design-closure-contract.md)
@@ -35,7 +35,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 ## Engineering design exit and next readiness gate
 
 - [Phase 013 AWS architecture and MVP program](phases/013/) — [013-G conditional selection](phases/013/013-g-architecture-mvp-delivery-decision.md) and merged [013-H evidence-calibrated exit](phases/013/013-h-independent-exit-authorization.md).
-- [Phase 014-A central/shared AWS inventory](phases/014/014-a-entry-inventory.md) — merged documentary audit; [014-B local-first source-package design](phases/014/014-b-local-first-implementation-plan.md) awaits explicit sponsor approval. Cloud infrastructure, DNS and real data remain separately unauthorized.
+- [Phase 014-A central/shared AWS inventory](phases/014/014-a-entry-inventory.md) — merged documentary audit; [014-B local-first Track L / cloud-gated Track C](phases/014/014-b-local-first-implementation-plan.md). Cloud infrastructure, DNS and real data remain separately unauthorized.
 
 ## Governance and limits
 
@@ -43,4 +43,4 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 - [OKF/documentation governance](methodology/documentation-governance.md)
 - [Design-only guardrails](methodology/design-only-guardrails.md)
 
-**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, scientific appropriateness, AWS/DNS ownership, budgets and enforceable CI/cloud roles remain unverified. **As of the 013-H review: design ready for limited documentary 014-A inventory; application/cloud implementation HOLD; execution NOT STARTED; real participant collection or release NOT AUTHORIZED.**
+**Non-operational prerequisites:** real participant/guardian/household safeguards, privacy and disclosure authority, usability/recovery evidence, scientific appropriateness, AWS/DNS ownership, budgets and enforceable CI/cloud roles remain unverified. **Local Track L may run synthetic localhost scaffolding when sponsor-authorized; cloud implementation HOLD; real participant collection or release NOT AUTHORIZED.**
