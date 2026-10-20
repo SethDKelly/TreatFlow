@@ -6,6 +6,7 @@ import {
   createStore,
   establish,
   inspect,
+  parseQuantityInput,
   report,
   type ActionResult,
   type InspectView,
@@ -82,14 +83,18 @@ export function App() {
       });
       return;
     }
-    const qty = Number(quantity);
+    const parsed = parseQuantityInput(quantity);
+    if (!parsed.ok) {
+      setStatus({ tone: "bad", text: parsed.reason });
+      return;
+    }
     const result = report(store, observationId, principalId, {
       attemptId,
       simulateInterrupt: interrupt,
       provenance,
       measure: {
         unit,
-        quantity: Number.isFinite(qty) ? qty : Number.NaN,
+        quantity: parsed.quantity,
         uncertainty: provenance === "recalled" ? "high" : "low",
       },
       timeExtent:
@@ -136,7 +141,7 @@ export function App() {
       });
       return;
     }
-    assertCoverage(store, observationId, principalId, {
+    const coverageResult = assertCoverage(store, observationId, principalId, {
       attemptId: `ui-cov-${Date.now()}`,
       status: "observed",
       completeness: "complete_claimed",
@@ -148,7 +153,13 @@ export function App() {
         precision: "bounded",
       },
     });
-    report(store, observationId, principalId, {
+    if (coverageResult.outcome !== "confirmed_effected") {
+      setStatus(describeResult(coverageResult));
+      refreshInspect(observationId);
+      return;
+    }
+
+    const reportResult = report(store, observationId, principalId, {
       attemptId: `ui-zero-${Date.now()}`,
       provenance: "contemporaneous",
       measure: { unit: "groups", quantity: 0, uncertainty: "none" },
@@ -160,6 +171,16 @@ export function App() {
       },
     });
     refreshInspect(observationId);
+    if (reportResult.outcome !== "confirmed_effected") {
+      setStatus({
+        tone: reportResult.outcome === "unresolved" ? "unknown" : "bad",
+        text:
+          reportResult.outcome === "confirmed_not_effected"
+            ? `Coverage was added, but zero report did not take effect: ${reportResult.reason}`
+            : `Coverage was added, but zero report is unresolved: ${reportResult.reason}`,
+      });
+      return;
+    }
     setStatus({
       tone: "ok",
       text: "Added observed + complete_claimed coverage with a zero groups report (local demo).",

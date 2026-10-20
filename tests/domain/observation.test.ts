@@ -166,4 +166,44 @@ describe("L03 Observation transitions", () => {
     );
     expect(denied.outcome).toBe("confirmed_not_effected");
   });
+
+  it("does not announce demo success when unentitled mutations are denied", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const coverageDenied = assertCoverage(
+      store,
+      created.value.id,
+      SYNTHETIC_PRINCIPAL_B,
+      {
+        attemptId: "demo-denied-cov",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: {
+          kind: "interval",
+          startLabel: "18:00",
+          endLabel: "18:20",
+          precision: "bounded",
+        },
+      },
+    );
+    expect(coverageDenied.outcome).toBe("confirmed_not_effected");
+    const reportDenied = report(store, created.value.id, SYNTHETIC_PRINCIPAL_B, {
+      attemptId: "demo-denied-report",
+      provenance: "contemporaneous",
+      measure: { unit: "groups", quantity: 0, uncertainty: "none" },
+      timeExtent: {
+        kind: "interval",
+        startLabel: "18:00",
+        endLabel: "18:20",
+        precision: "bounded",
+      },
+    });
+    expect(reportDenied.outcome).toBe("confirmed_not_effected");
+    const ownedView = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (ownedView.outcome !== "confirmed_effected") return;
+    expect(ownedView.value.coverage).toHaveLength(0);
+    expect(ownedView.value.evidence).toHaveLength(0);
+  });
 });

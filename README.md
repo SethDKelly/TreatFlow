@@ -73,7 +73,7 @@ Agents are expected to inspect current canonical knowledge before making substan
 
 ## Local development (014-B Track L)
 
-Requires Node.js **20+**. Commands stay on the developer machine; there is no deploy workflow, backend, or cloud credential use in this scaffold.
+Requires Node.js **^22.12** or **≥24** (aligned with locked Vitest 5 / Vite tooling). Commands stay on the developer machine; there is no deploy workflow, backend, or cloud credential use in this scaffold.
 
 ```bash
 npm ci

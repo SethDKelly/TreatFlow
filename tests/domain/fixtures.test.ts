@@ -146,6 +146,100 @@ describe("L02 synthetic fixtures (013-E semantic owners)", () => {
     ]);
   });
 
+  it("blocks observed-zero when positive evidence contradicts the zero", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    expect(
+      assertCoverage(
+        store,
+        created.value.id,
+        SYNTHETIC_PRINCIPAL_A,
+        observedCompleteZeroCoverage,
+      ).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(
+        store,
+        created.value.id,
+        SYNTHETIC_PRINCIPAL_A,
+        observedCompleteZeroReport,
+      ).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-contradict-positive",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 3, uncertainty: "none" },
+        timeExtent: {
+          kind: "interval",
+          startLabel: "18:00",
+          endLabel: "18:20",
+          precision: "bounded",
+        },
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    const viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (viewed.outcome !== "confirmed_effected") return;
+    const zeroViews = viewed.value.observedZeroInterpretations.filter(
+      (item) => item.interpretableAsReportedObservedZero,
+    );
+    expect(zeroViews).toHaveLength(0);
+    expect(
+      viewed.value.observedZeroInterpretations.some((item) =>
+        item.note.includes("contradictory activity"),
+      ),
+    ).toBe(true);
+  });
+
+  it("contests incompatible coverage with identical unparseable labels", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const extent = {
+      kind: "interval" as const,
+      startLabel: "evening",
+      endLabel: "later",
+      precision: "approximate" as const,
+    };
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-nonclock-a",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-nonclock-b",
+        status: "not_observed",
+        completeness: "unknown",
+        unit: "groups",
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "attempt-nonclock-zero",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 0, uncertainty: "none" },
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    const viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage.length).toBeGreaterThan(0);
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+  });
+
   it("keeps synthetic principals distinct from real household identity", () => {
     expect(SYNTHETIC_PRINCIPAL_A.startsWith("syn-")).toBe(true);
     expect(SYNTHETIC_PRINCIPAL_B.startsWith("syn-")).toBe(true);

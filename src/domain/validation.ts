@@ -4,6 +4,29 @@ export function isValidQuantity(quantity: number): boolean {
   return Number.isInteger(quantity) && quantity >= 0 && Number.isFinite(quantity);
 }
 
+/**
+ * Distinguishes omitted UI input from an explicit zero.
+ * Blank/whitespace is not a quantity; domain validation never sees fabricated 0.
+ */
+export function parseQuantityInput(raw: string):
+  | { ok: true; quantity: number }
+  | { ok: false; reason: string } {
+  if (raw.trim() === "") {
+    return {
+      ok: false,
+      reason: "Quantity is required; blank input is not an explicit zero count.",
+    };
+  }
+  const quantity = Number(raw.trim());
+  if (!isValidQuantity(quantity)) {
+    return {
+      ok: false,
+      reason: "Quantity must be a nonnegative integer; precision is not invented.",
+    };
+  }
+  return { ok: true, quantity };
+}
+
 export function isValidUnit(unit: string): unit is MeasureUnit {
   return unit === "people" || unit === "groups";
 }
@@ -31,16 +54,25 @@ export function validateTimeExtent(extent: TimeExtent): string | null {
   return null;
 }
 
+export type OverlapRelation = "overlap" | "disjoint" | "unknown";
+
 /**
- * Coarse overlap heuristic for synthetic labels used in fixtures/tests.
- * Does not invent calendar precision beyond the declared fixture windows.
+ * Interval overlap for synthetic fixture labels.
+ * Unparseable clocks are **unknown**, never proven disjoint — identical or
+ * undecidable contradictory extents must not bypass contested/zero checks.
  */
-export function intervalsOverlap(
+export function intervalOverlapRelation(
   a: TimeExtent,
   b: TimeExtent,
-): boolean {
+): OverlapRelation {
   if (a.kind !== "interval" || b.kind !== "interval") {
-    return false;
+    return "unknown";
+  }
+  if (
+    a.startLabel.trim() === b.startLabel.trim() &&
+    a.endLabel.trim() === b.endLabel.trim()
+  ) {
+    return "overlap";
   }
   const aStart = parseFixtureClock(a.startLabel);
   const aEnd = parseFixtureClock(a.endLabel);
@@ -52,9 +84,15 @@ export function intervalsOverlap(
     bStart === null ||
     bEnd === null
   ) {
-    return false;
+    return "unknown";
   }
-  return aStart < bEnd && bStart < aEnd;
+  return aStart < bEnd && bStart < aEnd ? "overlap" : "disjoint";
+}
+
+/** True when overlap is proven or undecidable (conservative for conflict checks). */
+export function intervalsOverlap(a: TimeExtent, b: TimeExtent): boolean {
+  const relation = intervalOverlapRelation(a, b);
+  return relation === "overlap" || relation === "unknown";
 }
 
 /** Accepts fixture labels like "18:00", "6 PM", "6:30 PM". */
