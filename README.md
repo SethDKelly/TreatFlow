@@ -88,7 +88,7 @@ npm run dev
 
 ## Engineering entry and shared AWS integration
 
-[Phase 013](docs/phases/013/) exited engineering planning with qualified limits. [014-A central AWS foundation inventory](docs/phases/014/014-a-entry-inventory.md) documents the interface to an owner-controlled shared infrastructure repository, separating centrally managed AWS trust/policies from TreatFlow application stacks. **Track C (AWS/CI/CDK), production launch, real-person intake and protected disclosure remain unauthorized** until separately approved.
+[Phase 013](docs/phases/013/) exited engineering planning with qualified limits. [014-A central AWS foundation inventory](docs/phases/014/014-a-entry-inventory.md) documents the interface to an owner-controlled shared infrastructure repository, separating centrally managed AWS trust/policies from TreatFlow application stacks. **Track C has begun with a centrally applied TreatFlow development role and unprivileged CI; C01 live permission-isolation tests and C02 cloud deployment decisions remain gated.** [The single cloud-first MVP execution program](docs/phases/013/mvp-roadmap.md) defines the remaining agent-ready packages. Production launch, real-person intake and protected disclosure remain separately unauthorized.
 
 ## Authority reminder
 
