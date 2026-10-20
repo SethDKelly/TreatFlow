@@ -29,6 +29,7 @@ If a requested change conflicts materially with current design authority, surfac
 - **TreatFlow Phase 012 forbids application code, schemas, APIs, infrastructure/deployment, real participant data collection or processing, and disclosure.** Passing a documentation audit does not relax these prohibitions.
 - A separate downstream representation/architecture/engineering process must decide when implementation execution begins.
 - **TreatFlow Phase 013-A–G is engineering design, not implementation authorization; 013-H must independently authorize specifically bounded future implementation.** When authorized, follow the scoped [013-F agentic/test-control design](docs/phases/013/013-f-agentic-independent-test-control.md); neither agent instructions nor successful CI confer production or real-person collection/disclosure permission.
+- **After Phase 013-H:** work may proceed only within currently approved bounded packages. Earlier Phase 012 design-only restrictions describe that historical phase, not a blanket prohibition on later authorized code. Source changes, cloud reads/writes, deployment, and protected real-person operations have distinct authorization gates; check the active phase, Linear dependencies, and approval evidence rather than guessing from chronology.
 
 ## OKF documentation rules
 
