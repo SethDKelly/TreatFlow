@@ -200,6 +200,130 @@ describe("L03 Observation transitions", () => {
     expect(afterClose.value.evidence).toHaveLength(1);
   });
 
+  it("Qualify-introduced completeness conflict contests and blocks observed-zero", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const extent = {
+      kind: "interval" as const,
+      startLabel: "18:00",
+      endLabel: "18:20",
+      precision: "bounded" as const,
+    };
+    const first = assertCoverage(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+      attemptId: "qual-intro-a",
+      status: "observed",
+      completeness: "complete_claimed",
+      unit: "groups",
+      timeExtent: extent,
+    });
+    const second = assertCoverage(
+      store,
+      created.value.id,
+      SYNTHETIC_PRINCIPAL_A,
+      {
+        attemptId: "qual-intro-b",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: extent,
+      },
+    );
+    expect(first.outcome).toBe("confirmed_effected");
+    expect(second.outcome).toBe("confirmed_effected");
+    if (first.outcome !== "confirmed_effected") return;
+    if (second.outcome !== "confirmed_effected") return;
+
+    expect(
+      report(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-intro-zero",
+        provenance: "contemporaneous",
+        measure: { unit: "groups", quantity: 0, uncertainty: "none" },
+        timeExtent: extent,
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    let viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage).toHaveLength(0);
+
+    expect(
+      qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-intro-partial",
+        targetKind: "coverage",
+        coverageId: first.value.id,
+        completeness: "partial",
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.contestedCoverage.length).toBeGreaterThan(0);
+    expect(
+      viewed.value.observedZeroInterpretations.every(
+        (item) => !item.interpretableAsReportedObservedZero,
+      ),
+    ).toBe(true);
+  });
+
+  it("repeated Qualify records priorCompleteness from preceding effective value", () => {
+    const store = createStore();
+    const created = establish(store, SYNTHETIC_PRINCIPAL_A);
+    if (created.outcome !== "confirmed_effected") return;
+    const coverage = assertCoverage(
+      store,
+      created.value.id,
+      SYNTHETIC_PRINCIPAL_A,
+      {
+        attemptId: "qual-hist-assert",
+        status: "observed",
+        completeness: "complete_claimed",
+        unit: "groups",
+        timeExtent: {
+          kind: "interval",
+          startLabel: "18:00",
+          endLabel: "18:20",
+          precision: "bounded",
+        },
+      },
+    );
+    expect(coverage.outcome).toBe("confirmed_effected");
+    if (coverage.outcome !== "confirmed_effected") return;
+
+    expect(
+      qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-hist-1",
+        targetKind: "coverage",
+        coverageId: coverage.value.id,
+        completeness: "partial",
+      }).outcome,
+    ).toBe("confirmed_effected");
+    expect(
+      qualify(store, created.value.id, SYNTHETIC_PRINCIPAL_A, {
+        attemptId: "qual-hist-2",
+        targetKind: "coverage",
+        coverageId: coverage.value.id,
+        completeness: "unknown",
+      }).outcome,
+    ).toBe("confirmed_effected");
+
+    const viewed = inspect(store, created.value.id, SYNTHETIC_PRINCIPAL_A);
+    expect(viewed.outcome).toBe("confirmed_effected");
+    if (viewed.outcome !== "confirmed_effected") return;
+    expect(viewed.value.coverage[0]?.completeness).toBe("complete_claimed");
+    expect(viewed.value.qualifications).toHaveLength(2);
+    expect(viewed.value.qualifications[0]).toMatchObject({
+      priorCompleteness: "complete_claimed",
+      appliedCompleteness: "partial",
+    });
+    expect(viewed.value.qualifications[1]).toMatchObject({
+      priorCompleteness: "partial",
+      appliedCompleteness: "unknown",
+    });
+  });
+
   it("Qualify completeness cannot erase contested AssertCoverage claims", () => {
     const store = createStore();
     const created = establish(store, SYNTHETIC_PRINCIPAL_A);

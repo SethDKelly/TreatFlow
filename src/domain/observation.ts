@@ -1,4 +1,5 @@
 import {
+  effectiveCompleteness,
   findContestedCoverage,
   interpretObservedZeros,
   monitoringWithoutCoverage,
@@ -136,7 +137,10 @@ function buildInspectView(account: ObservationAccount): InspectView {
     coverage: structuredClone(account.coverage),
     qualifications: structuredClone(account.qualifications),
     unassertedMonitoring: monitoringWithoutCoverage(),
-    contestedCoverage: findContestedCoverage(account.coverage),
+    contestedCoverage: findContestedCoverage(
+      account.coverage,
+      account.qualifications,
+    ),
     observedZeroInterpretations: interpretObservedZeros(
       account.coverage,
       account.evidence,
@@ -395,7 +399,11 @@ export function qualify(
     }
     // Do not mutate asserted AssertCoverage completeness — Qualify appends
     // history only so contested overlaps cannot be erased (013-E / PR #106).
-    const priorCompleteness = coverage.completeness;
+    // priorCompleteness is the preceding *effective* value (may itself be from Qualify).
+    const priorCompleteness = effectiveCompleteness(
+      coverage,
+      account.qualifications,
+    );
     record = {
       id: `syn-qual-${store.nextQualification}`,
       targetKind: "coverage",
