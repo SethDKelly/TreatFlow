@@ -34,8 +34,8 @@ Closes the Track C entry gate defined in [014-B](014-b-local-first-implementatio
 | **C01-B** Narrow TreatFlow role + exact environment subject merged/applied in aws-backbone | **PENDING** — aws-backbone PR; apply on merge to backbone `main` |
 | **C01-C** Shared role trust excludes TreatFlow; apply verify step asserts exclusion | **PENDING** — same backbone PR |
 | **C01-D** TreatFlow unprivileged CI present; no `id-token` AWS assume on PR | **PASS** on merge of this package’s CI workflow |
-| **C01-E** Main branch protection enabled (PR required) | **PASS** when maintainer settings applied with this package |
-| **C01-F** GitHub Environment `dev` created with protection (reviewers; limited branches) | **PASS** when Environment exists; required before C02 deploy workflow |
+| **C01-E** Main branch protection enabled (PR required) | **PASS** — `main` requires PR + status check `Verify` (applied 2026-10-19) |
+| **C01-F** GitHub Environment `dev` created with protection (reviewers; limited branches) | **PASS** — Environment `dev` with required reviewer + `main`-only deployment branch policy (applied 2026-10-19); still required before any C02 deploy workflow |
 | **C01-G** No TreatFlow CDK/Terraform app stack, no AWS resource provisioning in this package | **PASS** by scope |
 | **C01-H** Budget ceiling + DNS owner attestation recorded | **HOLD → C02** (A-04/A-05) |
 | **C01-I** Live AWS read-only drift vs Terraform `main` | **HOLD → C02** |
