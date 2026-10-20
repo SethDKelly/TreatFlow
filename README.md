@@ -1,8 +1,8 @@
 # TreatFlow
 
-TreatFlow is an observation-first Halloween application concept: effortless personal reporting and private review are its primary purpose; protected community summaries and qualified exploratory research are optional. **No app implementation has begun.**
+TreatFlow is an observation-first Halloween application concept: effortless personal reporting and private review are its primary purpose; protected community summaries and qualified exploratory research are optional.
 
-The repository follows the Base concept-design methodology. **Phases 000–011 closed concept design with explicit limitations, and Phase 012 completed pre-implementation repository preparation with bounded carry-forward. Phase 013-A–H are merged with an engineering-design PASS and blocking implementation prerequisites; [014-A](docs/phases/014/014-a-entry-inventory.md) completed the shared AWS backbone integration inventory; [014-B](docs/phases/014/014-b-local-first-implementation-plan.md) proposes the first bounded **local-only Cursor/Codex implementation packages**, pending explicit sponsor approval. No application, AWS deployment, real participant-data operations or external material release is authorized by this documentation.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
+The repository follows the Base concept-design methodology. **Phases 000–011 closed concept design with explicit limitations, and Phase 012 completed pre-implementation repository preparation with bounded carry-forward. Phase 013-A–H are merged with an engineering-design PASS and blocking implementation prerequisites; [014-A](docs/phases/014/014-a-entry-inventory.md) completed the shared AWS backbone integration inventory; [014-B](docs/phases/014/014-b-local-first-implementation-plan.md) defines the local-first Track L packages. A **local-only** React/TypeScript synthetic Observation scaffold (L01–L03) may exist in-repo for localhost review — it is not AWS deployment, real participant-data operations, or external material release.** Start with [current intake](docs/canonical/project/intake.md), [purposes](docs/canonical/purpose/purposes.md), [adopted concept family](docs/canonical/project/concept-family-scope.md) and the [current knowledge bundle](docs/index.md).
 
 The concept-design method is grounded in Daniel Jackson's software concept design methodology from *The Essence of Software*. The documentation corpus under [`docs/`](docs/index.md) is organized as an Open Knowledge Format (OKF) v0.2 knowledge bundle.
 
@@ -71,9 +71,24 @@ The inherited methodology includes shared project instructions for common coding
 
 Agents are expected to inspect current canonical knowledge before making substantive changes, distinguish current truth from phase history, preserve OKF/documentation authority, avoid speculative repository bloat, and surface design contradictions rather than silently coding around them.
 
+## Local development (014-B Track L)
+
+Requires Node.js **^22.12**, **^24**, or **≥26** (aligned with locked Vitest 5; Node 25 is not supported). Commands stay on the developer machine; there is no deploy workflow, backend, or cloud credential use in this scaffold.
+
+```bash
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run dev
+```
+
+`npm run dev` serves an in-memory synthetic Establish → Report → Inspect UI on `127.0.0.1` only. Synthetic fixtures are not real households; simulated principals are not authentication.
+
 ## Engineering entry and shared AWS integration
 
-[Phase 013](docs/phases/013/) exited engineering planning with qualified limits. [014-A central AWS foundation inventory](docs/phases/014/014-a-entry-inventory.md) documents the interface to an owner-controlled shared infrastructure repository, separating centrally managed AWS trust/policies from TreatFlow application stacks. Its audit records serious control/financial prerequisites for 014-B and a qualified documentary exit pending review. **Application and CI/CDK implementation, AWS writes, production launch, real-person intake and protected disclosure remain unauthorized.**
+[Phase 013](docs/phases/013/) exited engineering planning with qualified limits. [014-A central AWS foundation inventory](docs/phases/014/014-a-entry-inventory.md) documents the interface to an owner-controlled shared infrastructure repository, separating centrally managed AWS trust/policies from TreatFlow application stacks. **Track C (AWS/CI/CDK), production launch, real-person intake and protected disclosure remain unauthorized** until separately approved.
 
 ## Authority reminder
 
