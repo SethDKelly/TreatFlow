@@ -1095,3 +1095,16 @@ test("S-74: mutated push cannot rewrite copied evidence", () => {
     assert.equal(result.canApprove, false);
   } finally { Array.prototype.push = original; }
 });
+
+test("S-74: inherited numeric setter cannot drop copied unresolved evidence", () => {
+  const original = Object.getOwnPropertyDescriptor(Array.prototype, "0");
+  try {
+    Object.defineProperty(Array.prototype, "0", { configurable: true, set() {} });
+    const result = decide((f) => { f.observations.unresolvedThreads = [{ id: 99 }]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally {
+    if (original) Object.defineProperty(Array.prototype, "0", original);
+    else delete Array.prototype[0];
+  }
+});
