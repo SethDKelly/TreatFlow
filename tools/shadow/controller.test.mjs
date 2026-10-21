@@ -484,6 +484,8 @@ test("workflow provenance accepts only direct .yml/.yaml workflow files", () => 
   assert.equal(code((f) => {
     f.policy.workflowPath = ".github/workflows/verify.yaml";
     f.observations.checks[0].workflowPath = ".github/workflows/verify.yaml";
+    f.capture.reads[1].checkRuns[0].workflowPath = ".github/workflows/verify.yaml";
+    f.capture.reads[4].checkRuns[0].workflowPath = ".github/workflows/verify.yaml";
   }), "SIMULATED_PREREQUISITES_ONLY");
 });
 test("array-wrapped hashes and digests cannot pass string validation", () => {
