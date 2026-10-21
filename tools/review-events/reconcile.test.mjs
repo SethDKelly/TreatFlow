@@ -268,3 +268,41 @@ test("mutated RegExp.test cannot qualify invalid SHA provenance", () => {
     checkSafe(got);
   } finally { RegExp.prototype.test = original; }
 });
+
+test("post-import descriptor tampering cannot clear real review findings", () => {
+  const original = Object.getOwnPropertyDescriptor;
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  fixture.observed.reviews[0].unresolvedFindings = true;
+  try {
+    Object.getOwnPropertyDescriptor = function(target, key) {
+      const descriptor = Reflect.apply(original, Object, [target, key]);
+      return descriptor && (key === "hasFindings" || key === "unresolvedFindings")
+        ? { ...descriptor, value: false } : descriptor;
+    };
+    const got = reconcileOffline(fixture);
+    assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(got);
+  } finally { Object.getOwnPropertyDescriptor = original; }
+});
+
+test("post-import numeric setter cannot change detached finding flags", () => {
+  const previous = Object.getOwnPropertyDescriptor(Array.prototype, "0");
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  fixture.observed.reviews[0].unresolvedFindings = true;
+  try {
+    Object.defineProperty(Array.prototype, "0", { configurable: true, set(value) {
+      if (value && value.hasFindings === true) {
+        value.hasFindings = false;
+        value.unresolvedFindings = false;
+      }
+    } });
+    const got = reconcileOffline(fixture);
+    assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(got);
+  } finally {
+    if (previous) Object.defineProperty(Array.prototype, "0", previous);
+    else delete Array.prototype[0];
+  }
+});
