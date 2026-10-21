@@ -182,6 +182,29 @@ test("rename provenance and duplicate landed paths are conservatively checked", 
     f.observations.integratedChange.files = [file("src/one.ts"), file("src/one.ts")];
   }), "INCOMPLETE_OR_WRONG_DIFF");
 });
+test("Verify tool configs and TypeScript project variants require a separate pre-merge gate", () => {
+  for (const path of [
+    "vite.config.ts", "vitest.config.ts", "eslint.config.js",
+    "tsconfig.json", "tsconfig.node.json", "tsconfig.build.json",
+    "nested/vite.config.ts", "packages/app/eslint.config.mjs",
+    "packages/app/tsconfig.test.json", ".eslintrc", "nested/.eslintrc.json",
+    "postcss.config.cjs", "playwright.config.ts",
+  ]) {
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [file(path)];
+      f.observations.integratedChange.files = [file(path)];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [{
+        ...file("src/moved.ts"), status: "renamed", previousPath: path,
+      }];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  }
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [file("src/component.test.ts")];
+    f.observations.integratedChange.files = [file("src/component.test.ts")];
+  }), "SIMULATED_PREREQUISITES_ONLY");
+});
 test("CI package scripts and script entry points require protected review", () => {
   for (const path of [
     "package.json", "packages/secondary/package.json", "package-lock.json",

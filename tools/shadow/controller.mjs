@@ -9,7 +9,7 @@ const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.te
 // The check's execution policy includes package scripts/locks and runnable
 // scripts, not only the workflow YAML itself. Fail closed on changes to any
 // of these inputs until the separate pre-merge security gate is attested.
-const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/|tools\/shadow\/|scripts\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:(?:AGENTS|CLAUDE)\.md|package(?:-lock)?\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|yarn\.lock)$/i;
+const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/|tools\/shadow\/|scripts\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:(?:AGENTS|CLAUDE)\.md|package(?:-lock)?\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|yarn\.lock|tsconfig(?:\.[^/]+)?\.json|(?:vite|vitest|eslint|rollup|webpack|jest|babel|postcss|tailwind|playwright|cypress|prettier|biome)\.config\.[^/]+|\.eslintrc(?:\.[^/]+)?)$/i;
 const MAX_INPUT_NODES = 4096;
 const MAX_ENVELOPE_NODES = 8192;
 const MAX_EVIDENCE_BYTES = 1048576;
