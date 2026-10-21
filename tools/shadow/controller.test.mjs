@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateOffline, evidenceDigest, reviewWithMock } from "./controller.mjs";
+import { types } from "node:util";
 
 const sha = (c) => c.repeat(40);
 const digest = (c) => c.repeat(64);
@@ -714,6 +715,88 @@ test("independently discovered P2: Proxy cannot execute reflective traps", () =>
     verdict: "PASS",
   })).state, "SHADOW_HOLD");
   assert.equal(traps, 0);
+});
+
+
+test("S-74 P2: monkey-patched shared util.types.isProxy cannot open proxy traps", () => {
+  const original = types.isProxy;
+  let traps = 0;
+  const malicious = (target) => new Proxy(target, {
+    getPrototypeOf(inner) { traps++; return Reflect.getPrototypeOf(inner); },
+    ownKeys(inner) { traps++; return Reflect.ownKeys(inner); },
+    getOwnPropertyDescriptor(inner, key) {
+      traps++;
+      return Reflect.getOwnPropertyDescriptor(inner, key);
+    },
+  });
+  try {
+    types.isProxy = () => false;
+    assert.throws(() => evidenceDigest(malicious({ x: "safe-looking" })), TypeError);
+    assert.equal(evaluateOffline(malicious(fixture())).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    const nested = fixture();
+    nested.capture.reads[4].checkRuns[0] = malicious(nested.capture.reads[4].checkRuns[0]);
+    assert.equal(evaluateOffline(nested).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(reviewWithMock(malicious(evaluateOffline(fixture())), {
+      verdict: "PASS",
+    }).state, "SHADOW_HOLD");
+    assert.equal(reviewWithMock(evaluateOffline(fixture()), malicious({
+      verdict: "PASS",
+    })).state, "SHADOW_HOLD");
+    const revoked = Proxy.revocable({ present: true }, {});
+    revoked.revoke();
+    assert.throws(() => evidenceDigest(revoked.proxy), TypeError);
+    assert.equal(traps, 0);
+  } finally {
+    types.isProxy = original;
+  }
+});
+
+test("S-74 P2: duplicate or conflicting complete check executions cannot claim ready", () => {
+  const additional = {
+    name: "Auxiliary", sha: sha("2"), appId: 15368, runId: 601,
+    attempt: 1, workflowRevision: sha("6"),
+    workflowPath: ".github/workflows/optional.yml",
+    status: "completed", conclusion: "failure",
+  };
+  const withExtra = (f, records) => {
+    for (const run of records) {
+      f.observations.checks.push(clone(run));
+      f.capture.reads[1].checkRuns.push(clone(run));
+      f.capture.reads[4].checkRuns.push(clone(run));
+    }
+    f.capture.reads[4].checkRunCount = f.observations.checks.length;
+  };
+  assert.equal(code((f) => withExtra(f, [additional])), "SIMULATED_PREREQUISITES_ONLY");
+  for (const edit of [
+    (x) => x,
+    (x) => ({ ...x, conclusion: "success" }),
+    (x) => ({ ...x, name: "auxiliary" }), // normalized case is not a new execution
+    (x) => ({ ...x, sha: sha("9") }), // changed claimed SHA is not a new run
+    (x) => ({ ...x, workflowPath: ".github/workflows/other.yml" }),
+  ]) {
+    const result = decide((f) => {
+      withExtra(f, [additional, edit(additional)]);
+    });
+    assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canDispatch, false);
+    assert.equal(result.canWrite, false);
+  }
+  for (const records of [
+    [{...additional,runId:602},additional],
+    [{...additional,attempt:2},additional],
+    [{...additional,name:"Different job"},additional],
+  ]) {
+    assert.equal(decide((f) => withExtra(f, records)).state,
+      "SHADOW_EVIDENCE_READY");
+  }
+  // Duplicated required Verify run must also be rejected; the existing
+  // required-check policy may already reject this, but the scan guard does too.
+  assert.equal(decide((f) => {
+    const required = clone(f.observations.checks[0]);
+    withExtra(f, [required]);
+  }).state, "SHADOW_INSUFFICIENT_EVIDENCE");
 });
 
 test("unattested source and malformed inputs fail closed", () => {
