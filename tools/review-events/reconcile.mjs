@@ -25,7 +25,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }
   if (keys.length > 256 + (array ? 1 : 0)) return false;
   if (array && keys.length !== value.length + 1) return false;
   for (const key of keys) {
-    if (typeof key !== "string" || (array && key === "length")) continue;
+    if (array && key === "length") continue;
     if (typeof key !== "string") return false;
     budget.bytes += Buffer.byteLength(key, "utf8");
     if (budget.bytes > 786432) return false;
