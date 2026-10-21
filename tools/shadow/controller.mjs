@@ -4,13 +4,22 @@ import { createHash } from "node:crypto";
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
 const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
-const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/agentic-development-governance\.md$|(?:infra|terraform|security)\/)|(?:^|\/)AGENTS\.md$/i;
+const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/013\/|tools\/shadow\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:AGENTS|CLAUDE)\.md$/i;
 
 // Capture one detached, inert snapshot BEFORE validation and hashing.
 // Reject accessors, sparse arrays, exotic objects, cycles and oversized inputs.
-function inertCopy(value, seen = new WeakSet(), depth = 0) {
-  if (depth > 40) throw new TypeError("Evidence nesting too deep");
-  if (value === null || typeof value === "string" || typeof value === "boolean") return value;
+function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40 }) {
+  // Count every copied node, including duplicated references in a DAG. A
+  // WeakSet of active ancestors alone catches cycles but not exponential
+  // expansion from many shared subtrees.
+  if (++budget.nodes > 8192 || depth > budget.maxDepth)
+    throw new TypeError("Evidence node/depth budget exceeded");
+  if (typeof value === "string") {
+    budget.bytes += value.length;
+    if (budget.bytes > 1048576) throw new TypeError("Evidence size budget exceeded");
+    return value;
+  }
+  if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value !== "object" || seen.has(value)) throw new TypeError("Invalid or cyclic evidence");
   seen.add(value);
@@ -21,7 +30,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0) {
     for (let index = 0; index < value.length; index++) {
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
       if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
-      output.push(inertCopy(descriptor.value, seen, depth + 1));
+      output.push(inertCopy(descriptor.value, seen, depth + 1, budget));
     }
     seen.delete(value);
     return output;
@@ -36,7 +45,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0) {
       throw new TypeError("Non-inert evidence field");
     Object.defineProperty(output, key, {
       enumerable: true, configurable: true, writable: true,
-      value: inertCopy(descriptor.value, seen, depth + 1),
+      value: inertCopy(descriptor.value, seen, depth + 1, budget),
     });
   }
   seen.delete(value);
@@ -108,7 +117,7 @@ function workKeyFor(manifest, manifestDigest) {
 export function evaluateOffline(input) {
   try {
     if (!input || typeof input !== "object") return missing("NO_INPUT");
-    const captured = frozen(inertCopy(input));
+    const captured = frozen(inertCopy(input, new WeakSet(), 0, { nodes: 0, bytes: 0, maxDepth: 28 }));
     const { event, observations: o, policy: p, capture } = captured;
     if (!event || !o || !p || !capture) return missing("MISSING_GROUP");
     if (capture.source !== "synthetic-fixture" || capture.complete !== true ||
@@ -207,7 +216,7 @@ export function reviewWithMock(shadow, mock) {
   try {
     // Callers may clone or deserialize a result; do not trust its stored
     // digest/work key, and snapshot it before inspecting anything mutable.
-    const candidate = inertCopy(shadow);
+    const candidate = inertCopy(shadow, new WeakSet(), 0, { nodes: 0, bytes: 0, maxDepth: 40 });
     if (candidate?.mode !== "OFFLINE_SHADOW_ONLY" ||
         candidate?.state !== "SHADOW_EVIDENCE_READY" ||
         candidate.envelope?.authenticated !== false ||
