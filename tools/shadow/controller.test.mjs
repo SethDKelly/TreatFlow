@@ -1085,3 +1085,13 @@ test("S-74 P2: inherited array toJSON cannot spoof duplicate CI identities", () 
     else delete Array.prototype.toJSON;
   }
 });
+
+test("S-74: mutated push cannot rewrite copied evidence", () => {
+  const original = Array.prototype.push;
+  try {
+    Array.prototype.push = function(value) { if (typeof value === "string") return this.length; return Reflect.apply(original, this, [value]); };
+    const result = decide((f) => { f.observations.integratedChange.files[0].path = "src/different.ts"; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype.push = original; }
+});
