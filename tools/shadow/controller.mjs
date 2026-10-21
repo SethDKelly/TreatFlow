@@ -14,6 +14,16 @@ const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCas
 const stableStringify = JSON.stringify;
 const stableSort = Function.prototype.call.bind(Array.prototype.sort);
 const stableDefineProperty = Object.defineProperty;
+const stableGetDescriptor = Object.getOwnPropertyDescriptor;
+const stableGetPrototype = Object.getPrototypeOf;
+const stableOwnKeys = Reflect.ownKeys;
+const stableArrayIsArray = Array.isArray;
+const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const stableJSONParse = JSON.parse;
+const stableSplit = Function.prototype.call.bind(String.prototype.split);
+const stableStartsWith = Function.prototype.call.bind(String.prototype.startsWith);
+const stableIncludes = Function.prototype.call.bind(String.prototype.includes);
+const stableTrim = Function.prototype.call.bind(String.prototype.trim);
 const stableRegexTest = Function.prototype.call.bind(RegExp.prototype.test);
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
@@ -23,7 +33,7 @@ const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && stableRegexTest(SHA, value);
 const sameSha = (left, right) => typeof left === "string" &&
   typeof right === "string" && stableLowerCase(left) === stableLowerCase(right);
-const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
+const validDigest = (value) => typeof value === "string" && stableRegexTest(/^[a-f0-9]{64}$/i, value);
 // Conservatively protect all phase records: current or future phase authority
 // must not be downgraded just because a new numbered phase becomes active.
 // The check's execution policy includes package scripts/locks and runnable
@@ -38,7 +48,7 @@ const MAX_INPUT_BYTES = 786432;
 function chargeText(value, budget) {
   // Account for actual UTF-8 JSON encoding, including escaped characters.
   // Both keys and values are charged before an evidence object is copied.
-  budget.bytes += Buffer.byteLength(JSON.stringify(value), "utf8");
+  budget.bytes += Buffer.byteLength(stableStringify(value), "utf8");
   if (budget.bytes > (budget.maxBytes ?? MAX_EVIDENCE_BYTES))
     throw new TypeError("Evidence size budget exceeded");
 }
@@ -65,12 +75,12 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   if (typeof value !== "object" || stableIsProxy(value) || seen.has(value))
     throw new TypeError("Invalid, proxied or cyclic evidence");
   seen.add(value);
-  if (Array.isArray(value)) {
-    if (value.length > 10000 || Reflect.ownKeys(value).length !== value.length + 1)
+  if (stableArrayIsArray(value)) {
+    if (value.length > 10000 || stableOwnKeys(value).length !== value.length + 1)
       throw new TypeError("Sparse or extended evidence array");
     const output = [];
     for (let index = 0; index < value.length; index++) {
-      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+      const descriptor = stableGetDescriptor(value, String(index));
       if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
       chargeText(String(index), budget);
       stableDefineProperty(output, String(index), { value: inertCopy(descriptor.value, seen, depth + 1, budget), enumerable: true, writable: true, configurable: true });
@@ -78,17 +88,17 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
     seen.delete(value);
     return output;
   }
-  if (Object.getPrototypeOf(value) !== Object.prototype)
+  if (stableGetPrototype(value) !== Object.prototype)
     throw new TypeError("Non-plain evidence object");
-  const keys = Reflect.ownKeys(value);
-  if (keys.some((key) => typeof key !== "string"))
+  const keys = stableOwnKeys(value);
+  for (let i = 0; i < keys.length; i++) if (typeof keys[i] !== "string") throw new TypeError("Non-string evidence key");
     throw new TypeError("Non-string evidence key");
   // Enforce the same byte cap on property names BEFORE collecting all
   // descriptors and doing potentially expensive canonicalization/sorting.
   for (const key of keys) chargeText(key, budget);
-  const output = {};
+  const output = Object.create(null);
   for (const key of keys) {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    const descriptor = stableGetDescriptor(value, key);
     if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
       throw new TypeError("Non-inert evidence field");
     stableDefineProperty(output, key, {
@@ -101,10 +111,10 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
 }
 
 function canonical(value) {
-  if (value === null || typeof value === "string" || typeof value === "boolean") return JSON.stringify(value);
-  if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);
-  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
-  if (value && Object.getPrototypeOf(value) === Object.prototype) {
+  if (value === null || typeof value === "string" || typeof value === "boolean") return stableStringify(value);
+  if (typeof value === "number" && Number.isFinite(value)) return stableStringify(value);
+  if (stableArrayIsArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === Object.prototype)) {
     return "{" + Object.keys(value).sort().map((key) => {
       if (value[key] === undefined) throw new TypeError("Undefined evidence field");
       return JSON.stringify(key) + ":" + canonical(value[key]);
@@ -133,11 +143,11 @@ const hold = (code, detail) => outcome("SHADOW_HOLD", code, detail);
 const missing = (code, detail) => outcome("SHADOW_INSUFFICIENT_EVIDENCE", code, detail);
 
 const validPath = (path) => typeof path === "string" && path.length > 0 &&
-  !path.startsWith("/") && !path.includes("\\") && !/[\u0000-\u001f]/.test(path) &&
+  !stableStartsWith(path, "/") && !stableIncludes(path, "\\") && !stableRegexTest(/[\u0000-\u001f]/, path) &&
   path.split("/").every((part) => part !== "" && part !== "." && part !== "..");
 
 function validFiles(change) {
-  if (!change || change.complete !== true || !Array.isArray(change.files) ||
+  if (!change || change.complete !== true || !stableArrayIsArray(change.files) ||
       change.files.length === 0) return false;
   if (new Set(change.files.map((file) => file.path)).size !== change.files.length)
     return false;
@@ -223,7 +233,7 @@ function freshSyntheticReads(capture, observations, policy) {
       snapshotAt < now - MAX_SNAPSHOT_AGE_MS ||
       snapshotAt > now + FUTURE_SKEW_MS) return false;
   const reads = capture.reads;
-  if (!Array.isArray(reads) || reads.length !== READ_STAGES.length) return false;
+  if (!stableArrayIsArray(reads) || reads.length !== READ_STAGES.length) return false;
   let lastObservedAt = 0;
   for (let index = 0; index < reads.length; index++) {
     const read = reads[index];
@@ -255,9 +265,9 @@ function freshSyntheticReads(capture, observations, policy) {
     Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
     validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
     validSha(run.workflowRevision) && validPath(run.workflowPath) &&
-    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(run.workflowPath) &&
+    stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, run.workflowPath) &&
     ["queued", "in_progress", "completed", "waiting", "pending", "requested"].includes(run.status) &&
-    Object.hasOwn(run, "conclusion") &&
+    stableHasOwn(run, "conclusion") &&
     (run.status === "completed"
       ? ["success", "failure", "cancelled", "skipped", "timed_out",
         "action_required", "neutral", "stale"].includes(run.conclusion)
@@ -290,7 +300,7 @@ function freshSyntheticReads(capture, observations, policy) {
     return true;
   };
   const matchesCompleteScan = (claims) =>
-    Array.isArray(claims) && claims.length === observations.checks.length &&
+    stableArrayIsArray(claims) && claims.length === observations.checks.length &&
     uniqueExecutions(claims) &&
     (() => {
       for (let i = 0; i < claims.length; i++) {
@@ -298,7 +308,7 @@ function freshSyntheticReads(capture, observations, policy) {
       }
       return true;
     })();
-  if (!Array.isArray(observations.checks) ||
+  if (!stableArrayIsArray(observations.checks) ||
       !uniqueExecutions(observations.checks) ||
       !matchesCompleteScan(initialChecks) ||
       !matchesCompleteScan(finalChecks)) return false;
@@ -353,9 +363,9 @@ export function evaluateOffline(input) {
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
     if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
         !validPath(p.workflowPath) ||
-        !/^\.github\/workflows\/[^/]+\.ya?ml$/.test(p.workflowPath) ||
+        !stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, p.workflowPath) ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
-    if (!Array.isArray(o.parentShas) || o.parentShas.length === 0 ||
+    if (!stableArrayIsArray(o.parentShas) || o.parentShas.length === 0 ||
         !o.parentShas.every((sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
     // Object ID spelling is case-insensitive; do not let uppercase aliases
@@ -395,17 +405,17 @@ export function evaluateOffline(input) {
     // matching synthetic descriptors regardless of integration strategy.
     if (!sameChangeDescriptors(o.authoredChange, o.integratedChange))
       return hold("LANDED_CHANGE_NOT_RECONCILED");
-    if (!o.issue || typeof p.issueId !== "string" || !/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(p.issueId) ||
-        typeof o.issue.id !== "string" || !Array.isArray(o.issue.linkedIds) ||
+    if (!o.issue || typeof p.issueId !== "string" || !stableRegexTest(/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/, p.issueId) ||
+        typeof o.issue.id !== "string" || !stableArrayIsArray(o.issue.linkedIds) ||
         o.issue.linkedIds.length !== 1 || o.issue.linkedIds[0] !== o.issue.id ||
         o.issue.id !== p.issueId)
       return hold("AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
     if (o.issue.status !== "Verification" || o.issue.blockersComplete !== true)
       return hold("ISSUE_NOT_ACCEPTANCE_ELIGIBLE");
-    if (!Array.isArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
+    if (!stableArrayIsArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
         !p.requiredChecks.every((name) => typeof name === "string" && name.trim().length > 0 && name === name.trim()) ||
         new Set(p.requiredChecks).size !== p.requiredChecks.length ||
-        !Array.isArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
+        !stableArrayIsArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
     for (const name of p.requiredChecks) {
       const matches = o.checks.filter((c) => c.name === name);
       if (matches.length !== 1) return hold("MISSING_OR_DUPLICATE_REQUIRED_CHECK", name);
@@ -417,7 +427,7 @@ export function evaluateOffline(input) {
           c.status !== "completed" || c.conclusion !== "success")
         return hold("CI_PROVENANCE_OR_RESULT_MISMATCH", name);
     }
-    if (!Array.isArray(o.unresolvedThreads) || o.unresolvedThreads.length !== 0)
+    if (!stableArrayIsArray(o.unresolvedThreads) || o.unresolvedThreads.length !== 0)
       return hold("UNRESOLVED_REVIEW_THREADS");
     if (!freshSyntheticReads(capture, o, p))
       return missing("CAPTURE_STALE_OR_UNORDERED");
