@@ -5,6 +5,18 @@ import { types } from "node:util";
 const nativeArrayPrototype = Array.prototype;
 const nativeFilter = Function.prototype.call.bind(Array.prototype.filter);
 const nativeSome = Function.prototype.call.bind(Array.prototype.some);
+const ownValue = (obj, key) => Object.getOwnPropertyDescriptor(obj, key)?.value;
+function detach(value) {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const out = [];
+    for (let i = 0; i < value.length; i++) out.push(detach(ownValue(value, String(i))));
+    return out;
+  }
+  const out = Object.create(null);
+  for (const key of Reflect.ownKeys(value)) out[key] = detach(ownValue(value, key));
+  return out;
+}
 
 const SHA = /^[a-f0-9]{40}$/i;
 // Do not read Proxy/accessor fields before rejecting them. Non-inert objects
@@ -100,6 +112,7 @@ export function coalesceWakeHints(events, policy) {
 // no event/comment payload may be substituted for those observations.
 export function reconcileOffline(input = {}) {
   if (!safeFixture(input)) return invalid("NON_INERT_FIXTURE");
+  input = detach(input);
   const { policy, observed, retry } = input;
   if (!policy || !observed || !retry || typeof policy !== "object" ||
       typeof observed !== "object" || typeof retry !== "object")
@@ -193,7 +206,7 @@ export function reconcileOffline(input = {}) {
   const reads = observed.postReceiptReads;
   if (!Array.isArray(reads) || reads.length !== 2)
     return result("PENDING", "SETTLING_RECHECK_REQUIRED");
-  const [first, second] = reads;
+  const first = reads[0], second = reads[1];
   if (!first || !second || !safeId(first.generation) ||
       !safeId(second.generation) || second.generation <= first.generation ||
       !sameSha(first.headSha, policy.headSha) ||
