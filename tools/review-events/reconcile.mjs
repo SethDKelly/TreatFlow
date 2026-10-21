@@ -110,8 +110,6 @@ export function normalizeWakeHint(event, policy) {
 export function coalesceWakeHints(events, policy) {
   if (!safeFixture(events) || !safeFixture(policy) || !stableArrayIsArray(events) || events.length > 256)
     return Object.freeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
-  events = detach(events);
-  policy = detach(policy);
   const seen = new StableSet();
   let accepted = 0, duplicates = 0, rejected = 0;
   for (const event of events) {
