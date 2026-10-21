@@ -781,6 +781,47 @@ test("S-74 P2: syncBuiltinESMExports cannot replace module-captured proxy guard"
   }
 });
 
+test("S-74 P2: later mutated toLowerCase cannot spoof CI execution identities", () => {
+  const original = String.prototype.toLowerCase;
+  let invocations = 0;
+  const aux = {
+    name: "Auxiliary", sha: sha("2"), appId: 15368,
+    runId: 601, attempt: 1, workflowRevision: sha("6"),
+    workflowPath: ".github/workflows/optional.yml",
+    status: "completed", conclusion: "success",
+  };
+  try {
+    String.prototype.toLowerCase = function (...args) {
+      invocations++;
+      if (String(this) === "Auxiliary") return "auxiliary-" + invocations;
+      return original.apply(this, args);
+    };
+    const doubled = decide((f) => {
+      for (const run of [aux, aux]) {
+        f.observations.checks.push(clone(run));
+        f.capture.reads[1].checkRuns.push(clone(run));
+        f.capture.reads[4].checkRuns.push(clone(run));
+      }
+      f.capture.reads[4].checkRunCount = 3;
+    });
+    assert.equal(doubled.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(doubled.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(doubled.canApprove, false);
+    assert.equal(doubled.canDispatch, false);
+    assert.equal(doubled.canWrite, false);
+    assert.equal(invocations, 0, "mutable prototype normalizer must not execute");
+
+    const valid = evaluateOffline(fixture());
+    assert.equal(valid.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(valid.canApprove, false);
+    assert.equal(valid.canDispatch, false);
+    assert.equal(valid.canWrite, false);
+    assert.equal(invocations, 0);
+  } finally {
+    String.prototype.toLowerCase = original;
+  }
+});
+
 test("S-74 P2: duplicate or conflicting complete check executions cannot claim ready", () => {
   const additional = {
     name: "Auxiliary", sha: sha("2"), appId: 15368, runId: 601,
