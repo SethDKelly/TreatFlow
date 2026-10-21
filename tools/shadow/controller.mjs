@@ -89,6 +89,17 @@ function validFiles(change) {
         f.kind === "nontext" && validDigest(f.objectDigest)));
 }
 
+// Derive the same work identity from the ACTUAL evidence content on both
+// production of the shadow snapshot and recording of an untrusted mock result.
+function workKeyFor(manifest, manifestDigest) {
+  const { event, observations: o, policy: p } = manifest;
+  return evidenceDigest({
+    repo: event.repositoryId, pr: event.prNumber,
+    head: o.reviewedHead, tip: o.integratedTip,
+    issue: p.issueId, policy: p.policySha, envelope: manifestDigest,
+  });
+}
+
 /**
  * Offline fixtures can demonstrate contract behavior but CANNOT authenticate
  * GitHub, Linear, the CI workflow, or their claimed evidence.
@@ -121,11 +132,12 @@ export function evaluateOffline(input) {
     if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
         !validPath(p.workflowPath) || !p.workflowPath.startsWith(".github/workflows/") ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
-    if (!Array.isArray(o.parentShas) ||
+    if (!Array.isArray(o.parentShas) || o.parentShas.length === 0 ||
         !o.parentShas.every((sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
-        o.mergeStrategy === "squash" && o.parentShas.length !== 1)
+        o.mergeStrategy === "squash" && o.parentShas.length !== 1 ||
+        o.mergeStrategy === "rebase" && o.parentShas.length !== 1)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy !== "rebase" && o.parentShas[0] !== o.preIntegrationBaseSha)
       return hold("WRONG_PRE_INTEGRATION_PARENT");
@@ -182,11 +194,7 @@ export function evaluateOffline(input) {
     // Canonical deep copy prevents later fixture mutations affecting the frozen result.
     const copied = JSON.parse(canonical(snapshot));
     const manifestDigest = evidenceDigest(copied);
-    const workKey = evidenceDigest({
-      repo: event.repositoryId, pr: event.prNumber,
-      head: o.reviewedHead, tip: o.integratedTip,
-      issue: p.issueId, policy: p.policySha, envelope: manifestDigest,
-    });
+    const workKey = workKeyFor(copied, manifestDigest);
     return outcome("SHADOW_EVIDENCE_READY", "SIMULATED_PREREQUISITES_ONLY", "",
       frozen({ manifest: frozen(copied), manifestDigest, workKey, authenticated: false }));
   } catch {
@@ -197,15 +205,34 @@ export function evaluateOffline(input) {
 /** An untrusted mock evaluator NEVER emits trusted PASS or status authorization. */
 export function reviewWithMock(shadow, mock) {
   try {
-    if (shadow?.mode !== "OFFLINE_SHADOW_ONLY" ||
-        shadow?.state !== "SHADOW_EVIDENCE_READY" ||
-        shadow.envelope?.authenticated !== false ||
-        !/^[a-f0-9]{64}$/.test(shadow.envelope.manifestDigest) ||
-        !/^[a-f0-9]{64}$/.test(shadow.envelope.workKey) ||
-        shadow.envelope.manifest?.sourceClass !== "SYNTHETIC_UNATTESTED")
+    // Callers may clone or deserialize a result; do not trust its stored
+    // digest/work key, and snapshot it before inspecting anything mutable.
+    const candidate = inertCopy(shadow);
+    if (candidate?.mode !== "OFFLINE_SHADOW_ONLY" ||
+        candidate?.state !== "SHADOW_EVIDENCE_READY" ||
+        candidate.envelope?.authenticated !== false ||
+        !validDigest(candidate.envelope.manifestDigest) ||
+        !validDigest(candidate.envelope.workKey) ||
+        candidate.envelope.manifest?.sourceClass !== "SYNTHETIC_UNATTESTED")
       return hold("MOCK_REQUIRES_READY_SHADOW");
+
+    const { manifest, manifestDigest, workKey } = candidate.envelope;
+    if (evidenceDigest(manifest) !== manifestDigest ||
+        workKeyFor(manifest, manifestDigest) !== workKey)
+      return hold("MOCK_ENVELOPE_DIGEST_MISMATCH");
+
+    // The manifest also binds each source object's content digest, rather
+    // than merely hashing an internally inconsistent manifest as a whole.
+    const { objectDigests, event, observations, policy, capture } = manifest;
+    if (!objectDigests ||
+        objectDigests.event !== evidenceDigest(event) ||
+        objectDigests.observations !== evidenceDigest(observations) ||
+        objectDigests.policy !== evidenceDigest(policy) ||
+        objectDigests.capture !== evidenceDigest(capture))
+      return hold("MOCK_OBJECT_DIGEST_MISMATCH");
+
     const proposal = inertCopy(mock);
-    if (proposal?.manifestDigest !== shadow.envelope.manifestDigest ||
+    if (proposal?.manifestDigest !== manifestDigest ||
         !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(proposal.verdict))
       return hold("MOCK_RECEIPT_MISMATCH");
     return frozen({
@@ -213,7 +240,7 @@ export function reviewWithMock(shadow, mock) {
       state: "SHADOW_REVIEW_RECORDED",
       code: "UNTRUSTED_MOCK_VERDICT",
       detail: proposal.verdict,
-      envelope: frozen({ manifestDigest: shadow.envelope.manifestDigest, workKey: shadow.envelope.workKey, authenticated: false }),
+      envelope: frozen({ manifestDigest, workKey, authenticated: false }),
       canApprove: false, canWrite: false, canDispatch: false,
     });
   } catch {
