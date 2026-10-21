@@ -14,7 +14,9 @@ An accepted fixture produces SHADOW_EVIDENCE_READY, never a real PASS. The snaps
 
 Other states are SHADOW_IGNORED, SHADOW_HOLD and SHADOW_INSUFFICIENT_EVIDENCE. reviewWithMock records only SHADOW_REVIEW_RECORDED and binds its fake proposed PASS/HOLD to the snapshot digest. Every return sets canDispatch, canApprove and canWrite to false.
 
-Text and nontext changes require explicit completeness and file digests, but this harness does not prove those assertions from Git. Squash and two-parent merge cases are modeled; a rebase requires a claimed complete integrated range, and indirect/batch merges are unsupported. Trusted policy, Actions, IAM and infrastructure path changes intentionally HOLD without a pre-merge authorization gate.
+Text and nontext changes require explicit completeness and file digests, but this harness does not prove those assertions from Git. **Squash/rebase additionally require exact correspondence of synthetic authored vs. landed file descriptors** (path, rename provenance, change type, kind and text-patch/nontext-object digest), allowing file-order differences but holding unreconciled transformations. This is strict synthetic descriptor matching, **not authenticated patch/tree equivalence**; legitimate transformed patches without independent reconciliation also HOLD. Two-parent merge cases are modeled; a rebase requires a declared complete integrated range, and indirect/batch merges are unsupported. Phase records including active Phase 014 deployment authority and later numbered phases deliberately HOLD without a pre-merge authorization gate.
+
+The input-copy resource limit reserves headroom for its later immutable evidence envelope: at most **4,096 input nodes / 768 KiB of serialized string values and property names**, versus **8,192 envelope nodes / 1 MiB**. Both UTF-8 keys and values count toward the byte cap before descriptor copying/canonicalization; malformed, deeply nested or oversized objects fail closed. These are resource guards for synthetic fixtures, not a production sandbox or an API quota.
 
 ## Safety and deferred work
 

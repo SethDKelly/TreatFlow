@@ -127,8 +127,60 @@ test("truncated authored or integrated diffs fail closed", () => {
 });
 test("wrong range and missing binary identity fail closed", () => {
   assert.equal(code((f) => { f.observations.integratedChange.fromSha = sha("9"); }), "INCOMPLETE_OR_WRONG_DIFF");
-  assert.equal(code((f) => { f.observations.integratedChange.files = [file("assets/figure.bin", "nontext")]; }), "SIMULATED_PREREQUISITES_ONLY");
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [file("assets/figure.bin", "nontext")];
+    f.observations.integratedChange.files = [file("assets/figure.bin", "nontext")];
+  }), "SIMULATED_PREREQUISITES_ONLY");
+  assert.equal(code((f) => {
+    f.observations.integratedChange.files = [file("assets/figure.bin", "nontext")];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
   assert.equal(code((f) => { f.observations.integratedChange.files = [{ path: "figure.bin", kind: "nontext", status: "modified" }]; }), "INCOMPLETE_OR_WRONG_DIFF");
+});
+test("squash and rebase must not silently land unrelated changes", () => {
+  assert.equal(code((f) => {
+    f.observations.integratedChange.files = [file("src/unrelated.ts")];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(code((f) => {
+    f.observations.integratedChange.files[0].patchDigest = digest("e");
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(code((f) => {
+    f.observations.integratedChange.files[0].status = "added";
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  const prove = (f) => {
+    f.observations.rebaseRangeProven = true;
+    f.observations.integratedChange.rangeProven = true;
+  };
+  assert.equal(code((f) => {
+    prove(f);
+    f.observations.authoredChange.files = [file("src/reviewed.ts")];
+    f.observations.integratedChange.files = [file("src/unrelated.ts")];
+  }, "rebase"), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(code((f) => {
+    prove(f);
+    f.observations.integratedChange.files[0].patchDigest = digest("f");
+  }, "rebase"), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(code((f) => {
+    prove(f);
+    f.observations.authoredChange.files = [
+      file("src/a.ts"), file("src/b.ts"),
+    ];
+    f.observations.integratedChange.files = [
+      file("src/b.ts"), file("src/a.ts"),
+    ];
+  }, "rebase"), "SIMULATED_PREREQUISITES_ONLY");
+});
+test("rename provenance and duplicate landed paths are conservatively checked", () => {
+  const rename = (previousPath) => ({
+    ...file("src/renamed.ts"), previousPath, status: "renamed",
+  });
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [rename("src/original.ts")];
+    f.observations.integratedChange.files = [rename("src/unrelated.ts")];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [file("src/one.ts"), file("src/two.ts")];
+    f.observations.integratedChange.files = [file("src/one.ts"), file("src/one.ts")];
+  }), "INCOMPLETE_OR_WRONG_DIFF");
 });
 test("privileged policy/workflow paths require separate premerge gate", () => {
   for (const path of [".github/workflows/ci.yml", "AGENTS.md", "terraform/roles.tf", "docs/methodology/agentic-development-governance.md"]) {
@@ -341,6 +393,51 @@ test("shared-reference DAG cannot expand beyond copy-node budget", () => {
   const oversize = fixture();
   oversize.capture.payload = "x".repeat(1048577);
   assert.equal(evaluateOffline(oversize).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+});
+test("active Phase 014 and future phase authorization records always HOLD", () => {
+  for (const path of [
+    "docs/phases/014/014-b-c01-backbone-security-deployment-authority.md",
+    "docs/phases/014/phase-definition.md",
+    "docs/phases/015/015-a-future-authority.md",
+  ]) {
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [file(path)];
+      f.observations.integratedChange.files = [file(path)];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [{
+        ...file("src/moved.txt"), status: "renamed", previousPath: path,
+      }];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  }
+});
+test("large UTF-8 object keys consume the same byte budget as values", () => {
+  const f = fixture();
+  f.capture["é".repeat(540000)] = "";
+  assert.equal(evaluateOffline(f).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  const g = fixture();
+  for (let i = 0; i < 800; i++) {
+    g.capture["n" + i + "_" + "𓀀".repeat(260)] = "";
+  }
+  assert.equal(evaluateOffline(g).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  // Small Unicode keys are supported, bounded and deterministic.
+  const valid = fixture();
+  valid.capture["évidence🦊"] = "tiny";
+  assert.equal(evaluateOffline(valid).state, "SHADOW_EVIDENCE_READY");
+});
+test("near-limit accepted fixture round-trips; oversized node input refuses READY", () => {
+  const accepted = fixture();
+  for (let i = 0; i < 3990; i++) accepted.capture["padding" + i] = i;
+  const ready = evaluateOffline(accepted);
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(reviewWithMock(structuredClone(ready), {
+    manifestDigest: ready.envelope.manifestDigest,
+    verdict: "PASS",
+  }).state, "SHADOW_REVIEW_RECORDED");
+
+  const oversized = fixture();
+  for (let i = 0; i < 4300; i++) oversized.capture["padding" + i] = i;
+  assert.equal(evaluateOffline(oversized).state, "SHADOW_INSUFFICIENT_EVIDENCE");
 });
 test("Claude instructions and independent review methodology are policy-sensitive", () => {
   for (const path of [

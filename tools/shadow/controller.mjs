@@ -4,19 +4,32 @@ import { createHash } from "node:crypto";
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
 const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
-const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/013\/|tools\/shadow\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:AGENTS|CLAUDE)\.md$/i;
+// Conservatively protect all phase records: current or future phase authority
+// must not be downgraded just because a new numbered phase becomes active.
+const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/|tools\/shadow\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:AGENTS|CLAUDE)\.md$/i;
+const MAX_INPUT_NODES = 4096;
+const MAX_ENVELOPE_NODES = 8192;
+const MAX_EVIDENCE_BYTES = 1048576;
+const MAX_INPUT_BYTES = 786432;
+
+function chargeText(value, budget) {
+  // Account for actual UTF-8 JSON encoding, including escaped characters.
+  // Both keys and values are charged before an evidence object is copied.
+  budget.bytes += Buffer.byteLength(JSON.stringify(value), "utf8");
+  if (budget.bytes > (budget.maxBytes ?? MAX_EVIDENCE_BYTES))
+    throw new TypeError("Evidence size budget exceeded");
+}
 
 // Capture one detached, inert snapshot BEFORE validation and hashing.
 // Reject accessors, sparse arrays, exotic objects, cycles and oversized inputs.
-function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40 }) {
+function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES }) {
   // Count every copied node, including duplicated references in a DAG. A
   // WeakSet of active ancestors alone catches cycles but not exponential
   // expansion from many shared subtrees.
-  if (++budget.nodes > 8192 || depth > budget.maxDepth)
+  if (++budget.nodes > budget.maxNodes || depth > budget.maxDepth)
     throw new TypeError("Evidence node/depth budget exceeded");
   if (typeof value === "string") {
-    budget.bytes += value.length;
-    if (budget.bytes > 1048576) throw new TypeError("Evidence size budget exceeded");
+    chargeText(value, budget);
     return value;
   }
   if (value === null || typeof value === "boolean") return value;
@@ -30,17 +43,23 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
     for (let index = 0; index < value.length; index++) {
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
       if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
+      chargeText(String(index), budget);
       output.push(inertCopy(descriptor.value, seen, depth + 1, budget));
     }
     seen.delete(value);
     return output;
   }
-  if (Object.getPrototypeOf(value) !== Object.prototype || Reflect.ownKeys(value).some((k) => typeof k !== "string"))
+  if (Object.getPrototypeOf(value) !== Object.prototype)
     throw new TypeError("Non-plain evidence object");
+  const keys = Reflect.ownKeys(value);
+  if (keys.some((key) => typeof key !== "string"))
+    throw new TypeError("Non-string evidence key");
+  // Enforce the same byte cap on property names BEFORE collecting all
+  // descriptors and doing potentially expensive canonicalization/sorting.
+  for (const key of keys) chargeText(key, budget);
   const output = {};
-  const descriptors = Object.getOwnPropertyDescriptors(value);
-  for (const key of Object.keys(descriptors)) {
-    const descriptor = descriptors[key];
+  for (const key of keys) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
       throw new TypeError("Non-inert evidence field");
     Object.defineProperty(output, key, {
@@ -90,12 +109,27 @@ const validPath = (path) => typeof path === "string" && path.length > 0 &&
 
 function validFiles(change) {
   return change && change.complete === true && Array.isArray(change.files) &&
-    change.files.length > 0 && change.files.every((f) =>
+    change.files.length > 0 &&
+    new Set(change.files.map((file) => file.path)).size === change.files.length &&
+    change.files.every((f) =>
       validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
       (f.status !== "renamed" ||
         (validPath(f.previousPath) && f.previousPath !== f.path)) &&
       (f.kind === "text" ? validDigest(f.patchDigest) :
         f.kind === "nontext" && validDigest(f.objectDigest)));
+}
+
+// This is strict synthetic *descriptor* correspondence, not authenticated
+// Git patch/tree proof. Unreconciled squash/rebase transformations HOLD rather
+// than treating unrelated landed content as the reviewed change.
+function sameChangeDescriptors(authored, integrated) {
+  if (authored.files.length !== integrated.files.length) return false;
+  const normalize = (change) => change.files.map((file) => JSON.stringify([
+    file.path, file.status, file.status === "renamed" ? file.previousPath : null,
+    file.kind, (file.kind === "text" ? file.patchDigest : file.objectDigest).toLowerCase(),
+  ])).sort();
+  const expected = normalize(authored), actual = normalize(integrated);
+  return expected.every((entry, index) => entry === actual[index]);
 }
 
 // Derive the same work identity from the ACTUAL evidence content on both
@@ -117,7 +151,12 @@ function workKeyFor(manifest, manifestDigest) {
 export function evaluateOffline(input) {
   try {
     if (!input || typeof input !== "object") return missing("NO_INPUT");
-    const captured = frozen(inertCopy(input, new WeakSet(), 0, { nodes: 0, bytes: 0, maxDepth: 28 }));
+    // Bound source inputs more tightly than output envelopes; the reserved
+    // headroom guarantees every accepted READY snapshot remains replayable.
+    const captured = frozen(inertCopy(input, new WeakSet(), 0, {
+      nodes: 0, bytes: 0, maxDepth: 28, maxNodes: MAX_INPUT_NODES,
+      maxBytes: MAX_INPUT_BYTES,
+    }));
     const { event, observations: o, policy: p, capture } = captured;
     if (!event || !o || !p || !capture) return missing("MISSING_GROUP");
     if (capture.source !== "synthetic-fixture" || capture.complete !== true ||
@@ -164,6 +203,9 @@ export function evaluateOffline(input) {
     if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
         SENSITIVE_PATH.test(f.path) || (f.previousPath && SENSITIVE_PATH.test(f.previousPath))))
       return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
+    if (o.mergeStrategy !== "merge" &&
+        !sameChangeDescriptors(o.authoredChange, o.integratedChange))
+      return hold("LANDED_CHANGE_NOT_RECONCILED");
     if (!o.issue || typeof p.issueId !== "string" || !/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(p.issueId) ||
         typeof o.issue.id !== "string" || !Array.isArray(o.issue.linkedIds) ||
         o.issue.linkedIds.length !== 1 || o.issue.linkedIds[0] !== o.issue.id ||
@@ -216,7 +258,9 @@ export function reviewWithMock(shadow, mock) {
   try {
     // Callers may clone or deserialize a result; do not trust its stored
     // digest/work key, and snapshot it before inspecting anything mutable.
-    const candidate = inertCopy(shadow, new WeakSet(), 0, { nodes: 0, bytes: 0, maxDepth: 40 });
+    const candidate = inertCopy(shadow, new WeakSet(), 0, {
+      nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES,
+    });
     if (candidate?.mode !== "OFFLINE_SHADOW_ONLY" ||
         candidate?.state !== "SHADOW_EVIDENCE_READY" ||
         candidate.envelope?.authenticated !== false ||
