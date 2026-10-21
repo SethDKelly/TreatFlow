@@ -1,5 +1,7 @@
-// S-32-D: deterministic OFFLINE shadow harness. No IO, network, tokens or status writes.
+// S-32-D: OFFLINE shadow harness. No IO, network, tokens or status writes.
+// Positive fixture qualification is time-bounded, not trusted or live.
 import { createHash } from "node:crypto";
+import { types } from "node:util";
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
@@ -39,7 +41,11 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   }
   if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value !== "object" || seen.has(value)) throw new TypeError("Invalid or cyclic evidence");
+  // Node's native proxy check does not call Proxy traps. It must precede
+  // Array.isArray/Object.getPrototypeOf/Reflect.ownKeys/descriptor access:
+  // even "read-only" reflection can execute attacker-controlled JavaScript.
+  if (typeof value !== "object" || types.isProxy(value) || seen.has(value))
+    throw new TypeError("Invalid, proxied or cyclic evidence");
   seen.add(value);
   if (Array.isArray(value)) {
     if (value.length > 10000 || Reflect.ownKeys(value).length !== value.length + 1)
@@ -169,6 +175,69 @@ function validCaptureTimestamp(value) {
   return Number.isFinite(Date.parse(value));
 }
 
+// Time-bounded SOURCE-CLAIM ordering for synthetic replay, not a trusted clock,
+// authenticated GitHub read, or proof that newer GitHub/Linear facts do not exist.
+// A future source collector must provide independently authenticated completeness
+// and current-state reconciliation. Never upgrade SHADOW_EVIDENCE_READY to PASS.
+const MAX_SNAPSHOT_AGE_MS = 5 * 60 * 1000;
+const FUTURE_SKEW_MS = 30 * 1000;
+const READ_STAGES = ["merge", "checks", "issue", "threads", "final"];
+
+function freshSyntheticReads(capture, observations, policy) {
+  const now = Date.now();
+  const snapshotAt = Date.parse(capture.capturedAt);
+  if (!Number.isFinite(snapshotAt) ||
+      snapshotAt < now - MAX_SNAPSHOT_AGE_MS ||
+      snapshotAt > now + FUTURE_SKEW_MS) return false;
+  const reads = capture.reads;
+  if (!Array.isArray(reads) || reads.length !== READ_STAGES.length) return false;
+  let lastObservedAt = 0;
+  for (let index = 0; index < reads.length; index++) {
+    const read = reads[index];
+    if (!read || read.kind !== READ_STAGES[index] ||
+        read.sequence !== index + 1 || read.complete !== true ||
+        !sameSha(read.tipSha, observations.integratedTip) ||
+        !validCaptureTimestamp(read.observedAt)) return false;
+    const observedAt = Date.parse(read.observedAt);
+    if (!Number.isFinite(observedAt) ||
+        observedAt < now - MAX_SNAPSHOT_AGE_MS ||
+        observedAt > now + FUTURE_SKEW_MS ||
+        observedAt > snapshotAt ||
+        observedAt < lastObservedAt) return false;
+    lastObservedAt = observedAt;
+  }
+  // The final recorded collection time must be the snapshot capture time.
+  // Strict sequence indices establish the declared order even when source
+  // reads occurred within the same millisecond.
+  if (reads[4].observedAt !== capture.capturedAt) return false;
+
+  // Require declared full check-scan coverage, not just a single stale green
+  // run selected from an incomplete history. These IDs are UNATTESTED fixtures.
+  const checkScan = reads[1].checkRuns;
+  if (!Array.isArray(checkScan) || checkScan.length !== observations.checks.length)
+    return false;
+  for (let index = 0; index < checkScan.length; index++) {
+    const claim = checkScan[index];
+    const observed = observations.checks[index];
+    if (!claim || claim.name !== observed.name ||
+        claim.runId !== observed.runId || claim.attempt !== observed.attempt ||
+        claim.status !== observed.status ||
+        claim.conclusion !== observed.conclusion) return false;
+  }
+  if (reads[2].issueId !== policy.issueId ||
+      reads[2].status !== observations.issue.status ||
+      reads[2].blockersComplete !== observations.issue.blockersComplete ||
+      reads[3].unresolvedCount !== observations.unresolvedThreads.length)
+    return false;
+  // Explicit final re-read binds the source-claim scan to the same issue,
+  // thread count and check history; still never a live freshness attestation.
+  if (reads[4].issueId !== policy.issueId ||
+      reads[4].status !== observations.issue.status ||
+      reads[4].unresolvedCount !== observations.unresolvedThreads.length ||
+      reads[4].checkRunCount !== checkScan.length) return false;
+  return true;
+}
+
 /**
  * Offline fixtures can demonstrate contract behavior but CANNOT authenticate
  * GitHub, Linear, the CI workflow, or their claimed evidence.
@@ -271,6 +340,8 @@ export function evaluateOffline(input) {
     }
     if (!Array.isArray(o.unresolvedThreads) || o.unresolvedThreads.length !== 0)
       return hold("UNRESOLVED_REVIEW_THREADS");
+    if (!freshSyntheticReads(capture, o, p))
+      return missing("CAPTURE_STALE_OR_UNORDERED");
 
     const snapshot = {
       schema: "shadow-review-envelope/0.1",
