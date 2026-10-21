@@ -200,3 +200,14 @@ test("adversarially large or malformed event batches never cause dispatch", () =
   assert.equal(got.needsRecheck, true);
   assert.equal(got.accepted, 0);
 });
+
+
+test("malformed duplicate Verify cannot be filtered into readiness", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => {
+    const duplicate = structuredClone(f.observed.checks[0]);
+    delete duplicate.runId;
+    delete duplicate.attempt;
+    duplicate.conclusion = "failure";
+    f.observed.checks.push(duplicate);
+  });
+});
