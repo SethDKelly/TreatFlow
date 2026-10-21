@@ -72,7 +72,7 @@ const code = (update, strategy) => decide(update, strategy).code;
 test("offline squash and ordinary merge produce shadow-ready envelopes, never trusted PASS", () => {
   for (const s of ["squash", "merge"]) {
     const result = evaluateOffline(fixture(s));
-    assert.equal(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.state, "SHADOW_EVIDENCE_READY", result.code);
     assert.equal(result.envelope.authenticated, false);
     assert.equal(result.envelope.manifest.sourceClass, "SYNTHETIC_UNATTESTED");
     assert.equal(result.canDispatch, false);
