@@ -13,6 +13,7 @@ const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCas
 // Duplicate identity comparison must not use post-initialization JSON/Set mutations.
 const stableStringify = JSON.stringify;
 const stableSort = Function.prototype.call.bind(Array.prototype.sort);
+const stableDefineProperty = Object.defineProperty;
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
@@ -71,7 +72,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
       if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
       chargeText(String(index), budget);
-      output[output.length] = inertCopy(descriptor.value, seen, depth + 1, budget);
+      stableDefineProperty(output, String(index), { value: inertCopy(descriptor.value, seen, depth + 1, budget), enumerable: true, writable: true, configurable: true });
     }
     seen.delete(value);
     return output;
@@ -169,7 +170,7 @@ function sameChangeDescriptors(authored, integrated) {
         const value = fields[j];
         key += value === null ? "N;" : `S${value.length}:${value}`;
       }
-      encoded[encoded.length] = key;
+      stableDefineProperty(encoded, String(encoded.length), { value: key, enumerable: true, writable: true, configurable: true });
     }
     return stableSort(encoded);
   };
