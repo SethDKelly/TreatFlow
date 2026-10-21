@@ -154,6 +154,21 @@ function workKeyFor(manifest, manifestDigest) {
   });
 }
 
+// Require an explicitly timezone-qualified RFC 3339-style date-time.
+// Date.parse alone coerces arrays and accepts legacy strings such as "0".
+function validCaptureTimestamp(value) {
+  if (typeof value !== "string") return false;
+  const match = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  // Reject impossible calendar dates that some JS engines normalize.
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  if (date.getUTCFullYear() !== year ||
+      date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
+  return Number.isFinite(Date.parse(value));
+}
+
 /**
  * Offline fixtures can demonstrate contract behavior but CANNOT authenticate
  * GitHub, Linear, the CI workflow, or their claimed evidence.
@@ -172,8 +187,7 @@ export function evaluateOffline(input) {
     if (!event || !o || !p || !capture) return missing("MISSING_GROUP");
     if (capture.source !== "synthetic-fixture" || capture.complete !== true ||
         typeof capture.producer !== "string" || !capture.producer ||
-        typeof capture.capturedAt !== "string" ||
-        !Number.isFinite(Date.parse(capture.capturedAt))) return missing("CAPTURE_NOT_ATTESTED");
+        !validCaptureTimestamp(capture.capturedAt)) return missing("CAPTURE_NOT_ATTESTED");
     if (event.action !== "closed") return outcome("SHADOW_IGNORED", "NON_CLOSED_EVENT");
     if (event.merged !== true) return outcome("SHADOW_IGNORED", "NOT_MERGED");
     if (!Number.isSafeInteger(event.repositoryId) || event.repositoryId <= 0 ||

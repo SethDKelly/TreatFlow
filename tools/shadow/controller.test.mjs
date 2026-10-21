@@ -502,6 +502,10 @@ test("capture timestamp must be a string and must parse as a date", () => {
   for (const timestamp of [
     [0], ["2026-10-21T00:00:00Z"], 0, 20261021, false, null,
     { toString: "2026-10-21T00:00:00Z" }, "not-a-date",
+    "0", "2026-10-21", "10/21/2026", "2026-10-21 00:00:00Z",
+    "2026-10-21T00:00:00", "2026-02-30T00:00:00Z",
+    "2026-10-21T24:00:00Z", "2026-10-21T00:00:60Z",
+    "2026-10-21T00:00:00+24:00", "2026-10-21T00:00:00+00:60",
   ]) {
     const f = fixture();
     f.capture.capturedAt = timestamp;
@@ -515,6 +519,14 @@ test("capture timestamp must be a string and must parse as a date", () => {
   const valid = evaluateOffline(fixture());
   assert.equal(valid.state, "SHADOW_EVIDENCE_READY");
   assert.equal(typeof valid.envelope.manifest.capture.capturedAt, "string");
+  for (const timestamp of [
+    "2024-02-29T23:59:59Z", "2026-10-21T00:00:00.123Z",
+    "2026-10-21T12:30:59+05:30", "2026-10-21T12:30:59-04:00",
+  ]) {
+    const f = fixture();
+    f.capture.capturedAt = timestamp;
+    assert.equal(evaluateOffline(f).state, "SHADOW_EVIDENCE_READY");
+  }
 });
 test("unattested source and malformed inputs fail closed", () => {
   assert.equal(state((f) => { f.capture.source = "github-live"; }), "SHADOW_INSUFFICIENT_EVIDENCE");
