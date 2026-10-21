@@ -2,6 +2,8 @@
 import { createHash } from "node:crypto";
 
 const SHA = /^[a-f0-9]{40}$/i;
+const validSha = (value) => typeof value === "string" && SHA.test(value);
+const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
 const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/agentic-development-governance\.md$|(?:infra|terraform|security)\/)|(?:^|\/)AGENTS\.md$/i;
 
 // Capture one detached, inert snapshot BEFORE validation and hashing.
@@ -83,8 +85,8 @@ function validFiles(change) {
       validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
       (f.status !== "renamed" ||
         (validPath(f.previousPath) && f.previousPath !== f.path)) &&
-      (f.kind === "text" ? /^[a-f0-9]{64}$/i.test(f.patchDigest) :
-        f.kind === "nontext" && /^[a-f0-9]{64}$/i.test(f.objectDigest)));
+      (f.kind === "text" ? validDigest(f.patchDigest) :
+        f.kind === "nontext" && validDigest(f.objectDigest)));
 }
 
 /**
@@ -110,17 +112,17 @@ export function evaluateOffline(input) {
     if (o.repositoryId !== event.repositoryId || o.prNumber !== event.prNumber ||
         o.baseRef !== event.baseRef || o.merged !== true)
       return hold("EVENT_API_MISMATCH");
-    if (!SHA.test(o.reviewedHead) || !SHA.test(o.integratedTip) ||
-        !SHA.test(o.mergeBaseSha) || !SHA.test(o.preIntegrationBaseSha) ||
-        !SHA.test(p.policySha) || !SHA.test(p.workflowRevision))
+    if (!validSha(o.reviewedHead) || !validSha(o.integratedTip) ||
+        !validSha(o.mergeBaseSha) || !validSha(o.preIntegrationBaseSha) ||
+        !validSha(p.policySha) || !validSha(p.workflowRevision))
       return missing("UNPINNED_GIT_OR_POLICY");
     if (!["merge", "squash", "rebase"].includes(o.mergeStrategy))
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
     if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
-        typeof p.workflowPath !== "string" || !p.workflowPath.startsWith(".github/workflows/") ||
+        !validPath(p.workflowPath) || !p.workflowPath.startsWith(".github/workflows/") ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
     if (!Array.isArray(o.parentShas) ||
-        !o.parentShas.every((sha) => SHA.test(sha)))
+        !o.parentShas.every((sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
         o.mergeStrategy === "squash" && o.parentShas.length !== 1)
