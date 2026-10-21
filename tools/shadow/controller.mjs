@@ -215,7 +215,22 @@ function freshSyntheticReads(capture, observations, policy) {
   // the FINAL source reread. Matching counts cannot conceal a replaced run,
   // a newer attempt, a failed rerun or an untrusted workflow/check origin.
   // All of these are still caller-asserted synthetic claims, not live proofs.
-  const sameRun = (claim, observed) => claim && observed &&
+  const completeRun = (run) => run &&
+    typeof run.name === "string" && run.name.trim() !== "" &&
+    run.name === run.name.trim() &&
+    Number.isSafeInteger(run.runId) && run.runId > 0 &&
+    Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
+    validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
+    validSha(run.workflowRevision) && validPath(run.workflowPath) &&
+    /^\\.github\\/workflows\\/[^/]+\\.ya?ml$/.test(run.workflowPath) &&
+    ["queued", "in_progress", "completed", "waiting", "pending", "requested"].includes(run.status) &&
+    Object.hasOwn(run, "conclusion") &&
+    (run.status === "completed"
+      ? ["success", "failure", "cancelled", "skipped", "timed_out",
+        "action_required", "neutral", "stale"].includes(run.conclusion)
+      : run.conclusion === null);
+  const sameRun = (claim, observed) => completeRun(claim) &&
+    completeRun(observed) &&
     claim.name === observed.name && claim.runId === observed.runId &&
     claim.attempt === observed.attempt && claim.status === observed.status &&
     claim.conclusion === observed.conclusion && sameSha(claim.sha, observed.sha) &&
