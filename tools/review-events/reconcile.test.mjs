@@ -104,6 +104,13 @@ test("duplicate provider review IDs cannot be double-counted", () =>
     f.observed.reviews.push(structuredClone(f.observed.reviews[0]));
   }));
 
+test("late older-head receipt does not undo an independently observed current-head clean review", () =>
+  verdict("READY_FOR_SPONSOR_DECISION", (f) => {
+    f.observed.reviews.unshift({ id: 99, appId: 23, source: "provider-authored",
+      commitSha: "c".repeat(40), state: "completed",
+      hasFindings: false, unresolvedFindings: false });
+  }));
+
 test("review event is only a wake hint with no approval capability", () => {
   const got = normalizeWakeHint(hint(), BASE.policy);
   assert.equal(got.state, "WAKE_RECONCILIATION");
