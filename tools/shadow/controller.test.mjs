@@ -1108,3 +1108,32 @@ test("S-74: inherited numeric setter cannot drop copied unresolved evidence", ()
     else delete Array.prototype[0];
   }
 });
+
+test("S-74: mutable property definer cannot discard unresolved evidence", () => {
+  const original = Object.defineProperty;
+  try {
+    Object.defineProperty = function(target, key, descriptor) {
+      if (key === "unresolvedThreads" && target && !Object.hasOwn(target, "unresolvedThreads")) return target;
+      return Reflect.apply(original, Object, [target, key, descriptor]);
+    };
+    const result = decide((f) => { f.observations.unresolvedThreads = [{ id: 99 }]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Object.defineProperty = original; }
+});
+
+test("S-74: mutable regex matcher cannot bypass sensitive-path hold", () => {
+  const original = RegExp.prototype.test;
+  try {
+    RegExp.prototype.test = function(value) {
+      if (this.source.includes("github") && typeof value === "string") return false;
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = decide((f) => {
+      f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+      f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { RegExp.prototype.test = original; }
+});
