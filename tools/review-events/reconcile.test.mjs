@@ -5,15 +5,22 @@ import { normalizeWakeHint, coalesceWakeHints, reconcileOffline } from "./reconc
 const SHA = "a".repeat(40);
 const WF = "b".repeat(40);
 const BASE = {
-  policy: { repositoryId: 75, prNumber: 116, headSha: SHA, reviewerAppId: 23, checkAppId: 15368, workflowRevision: WF },
+  policy: { repositoryId: 75, prNumber: 116, headSha: SHA, reviewerAppId: 23, checkAppId: 15368, workflowRevision: WF,
+    workflowPath: ".github/workflows/ci.yml" },
   observed: {
     readStatus: "complete",
     pr: { repositoryId: 75, number: 116, headSha: SHA },
     reviews: [{ id: 1, appId: 23, source: "provider-authored", commitSha: SHA,
       state: "completed", hasFindings: false, unresolvedFindings: false }],
     checks: [{ name: "Verify", appId: 15368, headSha: SHA, workflowRevision: WF,
+      workflowPath: ".github/workflows/ci.yml", runId: 123456, attempt: 1,
       status: "completed", conclusion: "success" }],
     unresolvedThreads: 0,
+    postReceiptReads: [
+      { generation: 10, afterReceipt: true, headSha: SHA, receiptId: 1 },
+      { generation: 11, afterReceipt: true, headSha: SHA, receiptId: 1,
+        reviewThreadReadComplete: true, checkReadComplete: true, unresolvedThreads: 0 },
+    ],
   },
   retry: { attempt: 0, maxAttempts: 3 },
 };
@@ -110,6 +117,47 @@ test("late older-head receipt does not undo an independently observed current-he
       commitSha: "c".repeat(40), state: "completed",
       hasFindings: false, unresolvedFindings: false });
   }));
+
+test("terminal clean receipt does not bypass missing settling read", () =>
+  verdict("PENDING", (f) => { f.observed.postReceiptReads = []; }));
+
+test("post-receipt reads must advance monotonically on the exact head", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.postReceiptReads[1].generation = 9; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.postReceiptReads[1].headSha = "c".repeat(40); });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.postReceiptReads[1].receiptId = 22; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.postReceiptReads[1].reviewThreadReadComplete = false; });
+});
+
+test("late inline P2 invalidates previously clean evidence", () =>
+  verdict("HOLD_FINDINGS", (f) => {
+    f.observed.unresolvedThreads = 1;
+    f.observed.postReceiptReads[1].unresolvedThreads = 1;
+  }));
+
+test("only one configured workflow run with valid path/attempt is trusted", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks[0].workflowPath = ".github/workflows/other.yml"; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { delete f.observed.checks[0].runId; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks[0].attempt = 0; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks.push(structuredClone(f.observed.checks[0])); });
+});
+
+test("oversized and sparse review/check collections fail before traversal", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.reviews = Array(4294967294); });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks = Array(257).fill(f.observed.checks[0]); });
+});
+
+test("malicious Proxy input is rejected before side-effectful trap access", () => {
+  let traps = 0;
+  const evil = new Proxy(make(), {
+    get(target, key) { traps++; return Reflect.get(target, key); },
+    ownKeys(target) { traps++; return Reflect.ownKeys(target); },
+    getPrototypeOf(target) { traps++; return Reflect.getPrototypeOf(target); },
+  });
+  const got = reconcileOffline(evil);
+  assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+  assert.equal(traps, 0);
+  checkSafe(got);
+});
 
 test("review event is only a wake hint with no approval capability", () => {
   const got = normalizeWakeHint(hint(), BASE.policy);
