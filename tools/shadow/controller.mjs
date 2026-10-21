@@ -128,9 +128,9 @@ function canonical(value) {
   if (typeof value === "number" && Number.isFinite(value)) return stableStringify(value);
   if (stableArrayIsArray(value)) return "[" + stableJoin(stableMap(value, canonical), ",") + "]";
   if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === Object.prototype)) {
-    return "{" + stableMap(stableSort(stableObjectKeys(value)), (key) => {
+    return "{" + stableJoin(stableMap(stableSort(stableObjectKeys(value)), (key) => {
       if (value[key] === undefined) throw new TypeError("Undefined evidence field");
-      return JSON.stringify(key) + ":" + canonical(value[key]);
+      return stableStringify(key) + ":" + canonical(value[key]);
     }), ",") + "}";
   }
   throw new TypeError("Evidence must be finite JSON values");
@@ -281,8 +281,8 @@ function freshSyntheticReads(capture, observations, policy) {
     stableArrayIncludes(["queued", "in_progress", "completed", "waiting", "pending", "requested"], run.status) &&
     stableHasOwn(run, "conclusion") &&
     (run.status === "completed"
-      ? ["success", "failure", "cancelled", "skipped", "timed_out",
-        "action_required", "neutral", "stale"].includes(run.conclusion)
+      ? stableArrayIncludes(["success", "failure", "cancelled", "skipped", "timed_out",
+        "action_required", "neutral", "stale"], run.conclusion)
       : run.conclusion === null);
   const sameRun = (claim, observed) => completeRun(claim) &&
     completeRun(observed) &&
@@ -384,7 +384,7 @@ export function evaluateOffline(input) {
     // evade self-parent or duplicate-parent checks.
     const canonicalParents = stableMap(o.parentShas, (sha) => stableLowerCase(sha));
     if (stableArrayIncludes(canonicalParents, stableLowerCase(o.integratedTip)) ||
-        new Set(canonicalParents).size !== canonicalParents.length)
+        new StableSet(canonicalParents).size !== canonicalParents.length)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
         o.mergeStrategy === "squash" && o.parentShas.length !== 1 ||
@@ -426,7 +426,7 @@ export function evaluateOffline(input) {
       return hold("ISSUE_NOT_ACCEPTANCE_ELIGIBLE");
     if (!stableArrayIsArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
         !stableEvery(p.requiredChecks, (name) => typeof name === "string" && stableTrim(name).length > 0 && name === stableTrim(name)) ||
-        new Set(p.requiredChecks).size !== p.requiredChecks.length ||
+        new StableSet(p.requiredChecks).size !== p.requiredChecks.length ||
         !stableArrayIsArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
     for (const name of p.requiredChecks) {
       const matches = stableFilter(o.checks, (c) => c.name === name);
