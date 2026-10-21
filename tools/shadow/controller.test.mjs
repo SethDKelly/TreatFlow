@@ -111,6 +111,16 @@ test("multi-commit rebase requires complete landing range proof", () => {
   // Even a simulated asserted proof never creates a trusted PASS.
   assert.equal(evaluateOffline(a).state, "SHADOW_EVIDENCE_READY");
 });
+test("rebase requires a nonempty, single-parent Git graph even with claimed range proof", () => {
+  const proven = (f) => {
+    f.observations.rebaseRangeProven = true;
+    f.observations.integratedChange.rangeProven = true;
+  };
+  assert.equal(code((f) => { proven(f); f.observations.parentShas = []; }, "rebase"), "MISSING_GIT_GRAPH");
+  assert.equal(code((f) => { proven(f); f.observations.parentShas = [sha("3"), sha("4")]; }, "rebase"), "INCONSISTENT_PARENT_GRAPH");
+  assert.equal(code((f) => { proven(f); f.observations.parentShas = ["not-a-sha"]; }, "rebase"), "MISSING_GIT_GRAPH");
+  assert.equal(decide((f) => { proven(f); }, "rebase").state, "SHADOW_EVIDENCE_READY");
+});
 test("truncated authored or integrated diffs fail closed", () => {
   assert.equal(code((f) => { f.observations.authoredChange.complete = false; }), "INCOMPLETE_OR_WRONG_DIFF");
   assert.equal(code((f) => { f.observations.integratedChange.complete = false; }), "INCOMPLETE_OR_WRONG_DIFF");
@@ -227,6 +237,37 @@ test("unattested source and malformed inputs fail closed", () => {
   assert.equal(evaluateOffline(null).state, "SHADOW_INSUFFICIENT_EVIDENCE");
   assert.equal(state((f) => { f.capture.extra = undefined; }), "SHADOW_INSUFFICIENT_EVIDENCE");
 });
+test("mock verifier rehashes cloned evidence and work key before recording verdicts", () => {
+  const ready = evaluateOffline(fixture());
+  const cleanCopy = structuredClone(ready);
+  const proposal = { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" };
+  assert.equal(reviewWithMock(cleanCopy, proposal).state, "SHADOW_REVIEW_RECORDED");
+
+  const tampered = structuredClone(ready);
+  tampered.envelope.manifest.observations.issue.status = "Done";
+  const rejection = reviewWithMock(tampered, proposal);
+  assert.equal(rejection.state, "SHADOW_HOLD");
+  assert.equal(rejection.code, "MOCK_ENVELOPE_DIGEST_MISMATCH");
+  assert.equal(rejection.canApprove, false);
+  assert.equal(rejection.canWrite, false);
+  assert.equal(rejection.canDispatch, false);
+
+  const wrongWorkKey = structuredClone(ready);
+  wrongWorkKey.envelope.workKey = digest("e");
+  assert.equal(reviewWithMock(wrongWorkKey, proposal).code, "MOCK_ENVELOPE_DIGEST_MISMATCH");
+
+  const corruptedObject = structuredClone(ready);
+  corruptedObject.envelope.manifest.objectDigests.event = digest("f");
+  corruptedObject.envelope.manifestDigest = evidenceDigest(corruptedObject.envelope.manifest);
+  assert.equal(reviewWithMock(corruptedObject, {
+    manifestDigest: corruptedObject.envelope.manifestDigest, verdict: "PASS",
+  }).code, "MOCK_ENVELOPE_DIGEST_MISMATCH");
+
+  const omitted = structuredClone(ready);
+  delete omitted.envelope.manifest.event.repositoryId;
+  assert.equal(reviewWithMock(omitted, proposal).state, "SHADOW_HOLD");
+});
+
 test("mock PASS remains untrusted, never grants status writes", () => {
   const ready = evaluateOffline(fixture());
   const result = reviewWithMock(ready, { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" });
