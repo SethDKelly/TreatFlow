@@ -73,6 +73,9 @@ export function evaluateOffline(input) {
       return missing("UNPINNED_GIT_OR_POLICY");
     if (!["merge", "squash", "rebase"].includes(o.mergeStrategy))
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
+    if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
+        typeof p.workflowPath !== "string" || !p.workflowPath.startsWith(".github/workflows/") ||
+        typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
     if (!Array.isArray(o.parentShas) ||
         !o.parentShas.every((sha) => SHA.test(sha)))
       return missing("MISSING_GIT_GRAPH");
@@ -81,6 +84,8 @@ export function evaluateOffline(input) {
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy !== "rebase" && o.parentShas[0] !== o.preIntegrationBaseSha)
       return hold("WRONG_PRE_INTEGRATION_PARENT");
+    if (o.mergeStrategy === "merge" && o.parentShas[1] !== o.reviewedHead)
+      return hold("WRONG_MERGE_SECOND_PARENT");
     if (o.mergeStrategy === "rebase" &&
         (o.rebaseRangeProven !== true || o.integratedChange.rangeProven !== true))
       return missing("REBASE_LANDING_RANGE_UNPROVEN");
@@ -147,5 +152,12 @@ export function reviewWithMock(shadow, mock) {
   if (!mock || mock.manifestDigest !== shadow.envelope.manifestDigest ||
       !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(mock.verdict))
     return hold("MOCK_RECEIPT_MISMATCH");
-  return outcome("SHADOW_REVIEW_RECORDED", "UNTRUSTED_MOCK_VERDICT", mock.verdict);
+  return frozen({
+    mode: "OFFLINE_SHADOW_ONLY",
+    state: "SHADOW_REVIEW_RECORDED",
+    code: "UNTRUSTED_MOCK_VERDICT",
+    detail: mock.verdict,
+    envelope: frozen({ manifestDigest: shadow.envelope.manifestDigest, workKey: shadow.envelope.workKey, authenticated: false }),
+    canApprove: false, canWrite: false, canDispatch: false,
+  });
 }
