@@ -231,6 +231,15 @@ export function reviewWithMock(shadow, mock) {
         objectDigests.capture !== evidenceDigest(capture))
       return hold("MOCK_OBJECT_DIGEST_MISMATCH");
 
+    // A fully rehashed, self-consistent object can still describe evidence
+    // that would never have satisfied the offline decision predicates. Replay
+    // those predicates from the supplied inert snapshot before recording.
+    const reconstructed = evaluateOffline({ event, observations, policy, capture });
+    if (reconstructed.state !== "SHADOW_EVIDENCE_READY" ||
+        reconstructed.envelope.manifestDigest !== manifestDigest ||
+        reconstructed.envelope.workKey !== workKey)
+      return hold("MOCK_ENVELOPE_SEMANTICS_INVALID");
+
     const proposal = inertCopy(mock);
     if (proposal?.manifestDigest !== manifestDigest ||
         !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(proposal.verdict))
