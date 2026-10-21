@@ -1058,3 +1058,30 @@ test("mock PASS remains untrusted, never grants status writes", () => {
   assert.equal(reviewWithMock(ready, { manifestDigest: digest("d"), verdict: "PASS" }).state, "SHADOW_HOLD");
   assert.equal(reviewWithMock(ready, { manifestDigest: ready.envelope.manifestDigest, verdict: "APPROVED" }).state, "SHADOW_HOLD");
 });
+
+
+test("S-74 P2: inherited array toJSON cannot spoof duplicate CI identities", () => {
+  const original = Object.getOwnPropertyDescriptor(Array.prototype, "toJSON");
+  let calls = 0;
+  try {
+    Object.defineProperty(Array.prototype, "toJSON", { configurable: true, value() { calls++; return String(calls); } });
+    const extra = { name: "Auxiliary", sha: sha("2"), appId: 15368, runId: 601,
+      attempt: 1, workflowRevision: sha("6"), workflowPath: ".github/workflows/optional.yml",
+      status: "completed", conclusion: "success" };
+    const result = decide((f) => {
+      for (const run of [extra, extra]) {
+        f.observations.checks.push(clone(run));
+        f.capture.reads[1].checkRuns.push(clone(run));
+        f.capture.reads[4].checkRuns.push(clone(run));
+      }
+      f.capture.reads[4].checkRunCount = 3;
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  } finally {
+    if (original) Object.defineProperty(Array.prototype, "toJSON", original);
+    else delete Array.prototype.toJSON;
+  }
+});
