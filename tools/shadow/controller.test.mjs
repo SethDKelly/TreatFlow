@@ -182,6 +182,26 @@ test("rename provenance and duplicate landed paths are conservatively checked", 
     f.observations.integratedChange.files = [file("src/one.ts"), file("src/one.ts")];
   }), "INCOMPLETE_OR_WRONG_DIFF");
 });
+test("hidden tool settings including .npmrc cannot neutralize required Verify", () => {
+  for (const path of [
+    ".npmrc", "packages/app/.npmrc", ".yarnrc.yml", ".nvmrc",
+    ".config/npm/npmrc", ".env", ".pnpmfile.cjs", "nested/.tools/runner.toml",
+  ]) {
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [file(path)];
+      f.observations.integratedChange.files = [file(path)];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [{
+        ...file("src/moved-config.ts"), status: "renamed", previousPath: path,
+      }];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  }
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [file("src/component.ts")];
+    f.observations.integratedChange.files = [file("src/component.ts")];
+  }), "SIMULATED_PREREQUISITES_ONLY");
+});
 test("Verify tool configs and TypeScript project variants require a separate pre-merge gate", () => {
   for (const path of [
     "vite.config.ts", "vitest.config.ts", "eslint.config.js",
