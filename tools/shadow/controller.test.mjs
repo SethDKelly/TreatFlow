@@ -22,8 +22,11 @@ function fixture(strategy = "squash") {
     kind, sequence: index + 1, observedAt: at(4 - index),
     complete: true, tipSha: tip,
   }));
-  reads[1].checkRuns = [{ name: check.name, runId: check.runId,
-    attempt: check.attempt, status: check.status, conclusion: check.conclusion }];
+  const checkClaim = { name: check.name, runId: check.runId,
+    attempt: check.attempt, status: check.status, conclusion: check.conclusion,
+    sha: check.sha, appId: check.appId,
+    workflowRevision: check.workflowRevision, workflowPath: check.workflowPath };
+  reads[1].checkRuns = [clone(checkClaim)];
   reads[2].issueId = "S-32";
   reads[2].status = "Verification";
   reads[2].blockersComplete = true;
@@ -32,6 +35,8 @@ function fixture(strategy = "squash") {
   reads[4].status = "Verification";
   reads[4].unresolvedCount = 0;
   reads[4].checkRunCount = 1;
+  reads[4].blockersComplete = true;
+  reads[4].checkRuns = [clone(checkClaim)];
   return {
     capture: { source: "synthetic-fixture", complete: true, producer: "test-harness",
       capturedAt: at(), reads },
@@ -569,9 +574,41 @@ test("source claim missing, partial or disordered remains insufficient", () => {
   assert.equal(code((f) => { f.capture.reads[1].checkRuns[0].runId = 123; }), "CAPTURE_STALE_OR_UNORDERED");
   assert.equal(code((f) => { f.capture.reads[1].checkRuns[0].attempt = 2; }), "CAPTURE_STALE_OR_UNORDERED");
   assert.equal(code((f) => { f.capture.reads[4].checkRunCount = 0; }), "CAPTURE_STALE_OR_UNORDERED");
+  // A final scan of the same cardinality is not evidence of same run.
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].runId = 401; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].attempt = 2; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].status = "queued"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].conclusion = "failure"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].appId = 999; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].sha = sha("9"); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].workflowRevision = sha("9"); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].workflowPath = ".github/workflows/other.yml"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns = []; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { delete f.capture.reads[4].checkRuns; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { delete f.capture.reads[4].blockersComplete; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].blockersComplete = false; }), "CAPTURE_STALE_OR_UNORDERED");
   assert.equal(code((f) => { f.capture.reads[2].status = "In Progress"; }), "CAPTURE_STALE_OR_UNORDERED");
   assert.equal(code((f) => { f.capture.reads[3].unresolvedCount = 1; }), "CAPTURE_STALE_OR_UNORDERED");
   assert.equal(code((f) => { f.capture.reads[4].issueId = "S-33"; }), "CAPTURE_STALE_OR_UNORDERED");
+});
+
+test("P2 exact final source reread catches same-count run replacement and blocker regression", () => {
+  for (const change of [
+    (f) => { f.capture.reads[4].checkRuns[0].runId = 500; },
+    (f) => { f.capture.reads[4].checkRuns[0].attempt = 3; },
+    (f) => { f.capture.reads[4].checkRuns[0].conclusion = "failure"; },
+    (f) => { f.capture.reads[4].blockersComplete = false; },
+  ]) {
+    const result = decide(change);
+    assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(result.canDispatch, false);
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+  }
+  const ready = evaluateOffline(fixture());
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(ready.envelope.authenticated, false);
 });
 
 test("source claims older than five minutes or future dated cannot become ready", () => {
