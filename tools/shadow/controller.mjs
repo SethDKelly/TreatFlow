@@ -4,6 +4,9 @@ import { createHash } from "node:crypto";
 // Capture the node:util/types ESM export, not the mutable util.types object
 // property. Another in-process module may replace util.types.isProxy.
 import { isProxy as nativeIsProxy } from "node:util/types";
+// Node builtin ESM named exports can be live-synchronized by another module's
+// syncBuiltinESMExports(). Capture the function ONCE, at module evaluation.
+const stableIsProxy = nativeIsProxy;
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
@@ -43,11 +46,12 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   }
   if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
-  // Use the captured Node ESM export, not util.types.isProxy: a caller can
+  // Use the module-local function snapshot, not a live built-in export or
+  // util.types.isProxy: a caller can
   // replace the latter's shared mutable property. The intrinsic must run
   // before Array.isArray, prototype, own-key or descriptor reflection.
   // A wholly compromised JS runtime before module loading is not trusted.
-  if (typeof value !== "object" || nativeIsProxy(value) || seen.has(value))
+  if (typeof value !== "object" || stableIsProxy(value) || seen.has(value))
     throw new TypeError("Invalid, proxied or cyclic evidence");
   seen.add(value);
   if (Array.isArray(value)) {
