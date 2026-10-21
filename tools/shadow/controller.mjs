@@ -90,7 +90,7 @@ export function evaluateOffline(input) {
         o.integratedChange.fromSha !== o.preIntegrationBaseSha ||
         o.integratedChange.toSha !== o.integratedTip)
       return missing("INCOMPLETE_OR_WRONG_DIFF");
-    if (o.integratedChange.files.some((f) => SENSITIVE_PATH.test(f.path)))
+    if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) => SENSITIVE_PATH.test(f.path)))
       return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
     if (!o.issue || !Array.isArray(o.issue.linkedIds) ||
         o.issue.linkedIds.length !== 1 || o.issue.linkedIds[0] !== o.issue.id ||
