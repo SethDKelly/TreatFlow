@@ -117,6 +117,12 @@ test("privileged policy/workflow paths require separate premerge gate", () => {
     assert.equal(code((f) => { f.observations.integratedChange.files = [file(path)]; }), "PREMERGE_SECURITY_GATE_UNATTESTED");
   }
 });
+test("authored-only security path also demands the pre-merge gate", () => {
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [file(".github/workflows/ci.yml")];
+    f.observations.integratedChange.files = [file("src/domain/types.ts")];
+  }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+});
 test("ambiguous issue correlation is HOLD", () => {
   assert.equal(code((f) => { f.observations.issue.linkedIds.push("S-42"); }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
   assert.equal(code((f) => { f.observations.issue.linkedIds = ["S-44"]; }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
