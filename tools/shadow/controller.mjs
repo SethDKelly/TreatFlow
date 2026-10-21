@@ -12,6 +12,7 @@ const stableIsProxy = nativeIsProxy;
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
 // Duplicate identity comparison must not use post-initialization JSON/Set mutations.
 const stableStringify = JSON.stringify;
+const stableSort = Function.prototype.call.bind(Array.prototype.sort);
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
@@ -170,10 +171,13 @@ function sameChangeDescriptors(authored, integrated) {
       }
       encoded.push(key);
     }
-    return encoded.sort();
+    return stableSort(encoded);
   };
   const expected = normalize(authored), actual = normalize(integrated);
-  return expected.every((entry, index) => entry === actual[index]);
+  for (let i = 0; i < expected.length; i++) {
+    if (expected[i] !== actual[i]) return false;
+  }
+  return true;
 }
 
 // Derive the same work identity from the ACTUAL evidence content on both
@@ -286,7 +290,12 @@ function freshSyntheticReads(capture, observations, policy) {
   const matchesCompleteScan = (claims) =>
     Array.isArray(claims) && claims.length === observations.checks.length &&
     uniqueExecutions(claims) &&
-    claims.every((claim, index) => sameRun(claim, observations.checks[index]));
+    (() => {
+      for (let i = 0; i < claims.length; i++) {
+        if (!sameRun(claims[i], observations.checks[i])) return false;
+      }
+      return true;
+    })();
   if (!Array.isArray(observations.checks) ||
       !uniqueExecutions(observations.checks) ||
       !matchesCompleteScan(initialChecks) ||
