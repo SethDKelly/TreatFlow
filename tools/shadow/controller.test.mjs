@@ -131,6 +131,47 @@ test("authored-only security path also demands the pre-merge gate", () => {
     f.observations.integratedChange.files = [file("src/domain/types.ts")];
   }), "PREMERGE_SECURITY_GATE_UNATTESTED");
 });
+test("renames classify BOTH old and new paths, and missing old path is insufficient", () => {
+  assert.equal(code((f) => {
+    f.observations.integratedChange.files = [{
+      ...file("src/safe.ts"), status: "renamed", previousPath: ".github/workflows/ci.yml",
+    }];
+  }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [{
+      ...file("src/safe.ts"), status: "renamed", previousPath: "security/roles.ts",
+    }];
+  }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  assert.equal(code((f) => {
+    f.observations.integratedChange.files = [{ ...file("src/safe.ts"), status: "renamed" }];
+  }), "INCOMPLETE_OR_WRONG_DIFF");
+});
+test("missing identities and nonpositive check run IDs fail closed", () => {
+  assert.equal(code((f) => { f.policy.issueId = null; f.observations.issue.id = null; f.observations.issue.linkedIds = [null]; }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
+  assert.equal(code((f) => { f.observations.checks[0].runId = 0; }), "CI_PROVENANCE_OR_RESULT_MISMATCH");
+  assert.equal(code((f) => { f.observations.checks[0].attempt = 0; }), "CI_PROVENANCE_OR_RESULT_MISMATCH");
+});
+test("getter mutations, sparse arrays and exotic values never reach shadow ready", () => {
+  const a = fixture();
+  let getterCalls = 0;
+  Object.defineProperty(a.capture, "producer", { enumerable: true, get() { getterCalls++; return "spoof"; } });
+  assert.equal(evaluateOffline(a).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  assert.equal(getterCalls, 0);
+  const b = fixture();
+  b.observations.parentShas = new Array(1);
+  assert.equal(evaluateOffline(b).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  const c = fixture();
+  c.observations.issue = new Date();
+  assert.equal(evaluateOffline(c).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+});
+test("invalid mock envelope does not throw or claim PASS", () => {
+  assert.equal(reviewWithMock({ state: "SHADOW_EVIDENCE_READY" }, { verdict: "PASS" }).state, "SHADOW_HOLD");
+  assert.equal(reviewWithMock({ state: "SHADOW_EVIDENCE_READY", envelope: null }, null).state, "SHADOW_HOLD");
+  const a = evaluateOffline(fixture());
+  const bad = {};
+  Object.defineProperty(bad, "verdict", { enumerable: true, get() { throw new Error("should not run"); } });
+  assert.equal(reviewWithMock(a, bad).state, "SHADOW_HOLD");
+});
 test("ambiguous issue correlation is HOLD", () => {
   assert.equal(code((f) => { f.observations.issue.linkedIds.push("S-42"); }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
   assert.equal(code((f) => { f.observations.issue.linkedIds = ["S-44"]; }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
