@@ -312,6 +312,48 @@ test("fully rehashed but semantically invalid mock evidence is still denied", ()
   }).state, "SHADOW_REVIEW_RECORDED");
 });
 
+test("bounded nested evidence survives mock round trip without asymmetric depth rejection", () => {
+  const f = fixture();
+  let nested = { value: "leaf" };
+  for (let i = 0; i < 23; i++) nested = { child: nested };
+  f.capture.nested = nested;
+  const ready = evaluateOffline(f);
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  const result = reviewWithMock(structuredClone(ready), {
+    manifestDigest: ready.envelope.manifestDigest, verdict: "PASS",
+  });
+  assert.equal(result.state, "SHADOW_REVIEW_RECORDED");
+  assert.equal(result.canWrite, false);
+
+  let tooDeep = { value: "leaf" };
+  for (let i = 0; i < 32; i++) tooDeep = { child: tooDeep };
+  const invalid = fixture();
+  invalid.capture.nested = tooDeep;
+  assert.equal(evaluateOffline(invalid).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+});
+test("shared-reference DAG cannot expand beyond copy-node budget", () => {
+  const f = fixture();
+  let shared = { value: "leaf" };
+  for (let i = 0; i < 21; i++) shared = { a: shared, b: shared };
+  f.capture.nested = shared;
+  assert.equal(evaluateOffline(f).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+
+  const oversize = fixture();
+  oversize.capture.payload = "x".repeat(1048577);
+  assert.equal(evaluateOffline(oversize).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+});
+test("Claude instructions and independent review methodology are policy-sensitive", () => {
+  for (const path of [
+    "CLAUDE.md", "nested/CLAUDE.md",
+    "docs/phases/013/013-f-agentic-independent-test-control.md",
+    "docs/methodology/other-policy.md",
+    "tools/shadow/controller.mjs",
+  ]) {
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [file(path)];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  }
+});
 test("mock PASS remains untrusted, never grants status writes", () => {
   const ready = evaluateOffline(fixture());
   const result = reviewWithMock(ready, { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" });
