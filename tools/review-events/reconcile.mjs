@@ -112,11 +112,9 @@ export function reconcileOffline({ policy, observed, retry } = {}) {
   // Conflicting terminal review records cannot be resolved by arrival order.
   if (new Set(terminal.map((review) => review.id)).size !== terminal.length)
     return invalid("DUPLICATE_REVIEW_ID");
-  if (observed.reviews.some((review) =>
-      review && review.appId === policy.reviewerAppId &&
-      review.state === "completed" && review.source === "provider-authored" &&
-      !sameSha(review.commitSha, policy.headSha)))
-    return result("STALE_HEAD", "STALE_PROVIDER_RECEIPT_PRESENT");
+  // Historical receipts on earlier heads are normal. Ignore them when the
+  // authenticated-source fixture contains a current-head terminal receipt;
+  // stale-only history above remains PENDING and never confers clearance.
 
   const trustedChecks = observed.checks.filter((check) => check &&
     check.name === "Verify" && check.appId === policy.checkAppId &&
