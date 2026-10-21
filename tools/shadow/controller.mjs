@@ -211,30 +211,36 @@ function freshSyntheticReads(capture, observations, policy) {
   // reads occurred within the same millisecond.
   if (reads[4].observedAt !== capture.capturedAt) return false;
 
-  // Require declared full check-scan coverage, not just a single stale green
-  // run selected from an incomplete history. These IDs are UNATTESTED fixtures.
-  const checkScan = reads[1].checkRuns;
-  if (!Array.isArray(checkScan) || checkScan.length !== observations.checks.length)
-    return false;
-  for (let index = 0; index < checkScan.length; index++) {
-    const claim = checkScan[index];
-    const observed = observations.checks[index];
-    if (!claim || claim.name !== observed.name ||
-        claim.runId !== observed.runId || claim.attempt !== observed.attempt ||
-        claim.status !== observed.status ||
-        claim.conclusion !== observed.conclusion) return false;
-  }
+  // Every relevant field is compared at both the initial check scan and
+  // the FINAL source reread. Matching counts cannot conceal a replaced run,
+  // a newer attempt, a failed rerun or an untrusted workflow/check origin.
+  // All of these are still caller-asserted synthetic claims, not live proofs.
+  const sameRun = (claim, observed) => claim && observed &&
+    claim.name === observed.name && claim.runId === observed.runId &&
+    claim.attempt === observed.attempt && claim.status === observed.status &&
+    claim.conclusion === observed.conclusion && sameSha(claim.sha, observed.sha) &&
+    claim.appId === observed.appId &&
+    sameSha(claim.workflowRevision, observed.workflowRevision) &&
+    claim.workflowPath === observed.workflowPath;
+  const initialChecks = reads[1].checkRuns;
+  const finalChecks = reads[4].checkRuns;
+  const matchesCompleteScan = (claims) =>
+    Array.isArray(claims) && claims.length === observations.checks.length &&
+    claims.every((claim, index) => sameRun(claim, observations.checks[index]));
+  if (!matchesCompleteScan(initialChecks) ||
+      !matchesCompleteScan(finalChecks)) return false;
   if (reads[2].issueId !== policy.issueId ||
       reads[2].status !== observations.issue.status ||
       reads[2].blockersComplete !== observations.issue.blockersComplete ||
       reads[3].unresolvedCount !== observations.unresolvedThreads.length)
     return false;
-  // Explicit final re-read binds the source-claim scan to the same issue,
-  // thread count and check history; still never a live freshness attestation.
+  // Reconfirm blocker eligibility, full check provenance and review state
+  // at the final claim. The earlier checks alone cannot confer readiness.
   if (reads[4].issueId !== policy.issueId ||
       reads[4].status !== observations.issue.status ||
+      reads[4].blockersComplete !== observations.issue.blockersComplete ||
       reads[4].unresolvedCount !== observations.unresolvedThreads.length ||
-      reads[4].checkRunCount !== checkScan.length) return false;
+      reads[4].checkRunCount !== finalChecks.length) return false;
   return true;
 }
 
