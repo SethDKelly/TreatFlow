@@ -156,12 +156,22 @@ function validFiles(change) {
 // strategies HOLD; parent ancestry alone never attests to landed content.
 function sameChangeDescriptors(authored, integrated) {
   if (authored.files.length !== integrated.files.length) return false;
-  const normalize = (change) => change.files.map((file) => {
-    const fields = [file.path, file.status,
-      file.status === "renamed" ? file.previousPath : null,
-      file.kind, stableLowerCase(file.kind === "text" ? file.patchDigest : file.objectDigest)];
-    return fields.map((value) => value === null ? "N;" : `S${value.length}:${value}`).join("");
-  }).sort();
+  const normalize = (change) => {
+    const encoded = [];
+    for (let i = 0; i < change.files.length; i++) {
+      const file = change.files[i];
+      const fields = [file.path, file.status,
+        file.status === "renamed" ? file.previousPath : null,
+        file.kind, stableLowerCase(file.kind === "text" ? file.patchDigest : file.objectDigest)];
+      let key = "";
+      for (let j = 0; j < fields.length; j++) {
+        const value = fields[j];
+        key += value === null ? "N;" : `S${value.length}:${value}`;
+      }
+      encoded.push(key);
+    }
+    return encoded.sort();
+  };
   const expected = normalize(authored), actual = normalize(integrated);
   return expected.every((entry, index) => entry === actual[index]);
 }
@@ -262,7 +272,8 @@ function freshSyntheticReads(capture, observations, policy) {
   // a duplicate with a conflicting result cannot masquerade as a new run.
   const uniqueExecutions = (runs) => {
     const identities = new StableSet();
-    for (const run of runs) {
+    for (let i = 0; i < runs.length; i++) {
+      const run = runs[i];
       if (!completeRun(run)) return false;
       // Primitive fields only: explicit length-prefixing avoids inherited toJSON.
       const name = stableLowerCase(run.name);
