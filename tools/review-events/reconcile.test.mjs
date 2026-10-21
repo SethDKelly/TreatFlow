@@ -252,3 +252,19 @@ test("mutated SHA case normalizer cannot fabricate matching review head", () => 
     checkSafe(got);
   } finally { String.prototype.toLowerCase = original; }
 });
+
+test("mutated RegExp.test cannot qualify invalid SHA provenance", () => {
+  const original = RegExp.prototype.test;
+  const f = make();
+  f.policy.headSha = "not-a-sha";
+  f.observed.pr.headSha = "not-a-sha";
+  f.observed.reviews[0].commitSha = "not-a-sha";
+  f.observed.checks[0].headSha = "not-a-sha";
+  for (const read of f.observed.postReceiptReads) read.headSha = "not-a-sha";
+  try {
+    RegExp.prototype.test = function() { return true; };
+    const got = reconcileOffline(f);
+    assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(got);
+  } finally { RegExp.prototype.test = original; }
+});
