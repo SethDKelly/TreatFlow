@@ -101,7 +101,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
     seen.delete(value);
     return output;
   }
-  if (stableGetPrototype(value) !== Object.prototype)
+  if (stableGetPrototype(value) !== Object.prototype && stableGetPrototype(value) !== null)
     throw new TypeError("Non-plain evidence object");
   const keys = stableOwnKeys(value);
   for (let i = 0; i < keys.length; i++) if (typeof keys[i] !== "string") throw new TypeError("Non-string evidence key");
