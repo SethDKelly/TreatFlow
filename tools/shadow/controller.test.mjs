@@ -172,6 +172,19 @@ test("invalid mock envelope does not throw or claim PASS", () => {
   Object.defineProperty(bad, "verdict", { enumerable: true, get() { throw new Error("should not run"); } });
   assert.equal(reviewWithMock(a, bad).state, "SHADOW_HOLD");
 });
+test("nested agent instructions cannot evade pre-merge policy classification", () => {
+  assert.equal(code((f) => { f.observations.authoredChange.files = [file("tools/AGENTS.md")]; }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  assert.equal(code((f) => { f.observations.integratedChange.files = [file("nested/config/AGENTS.md")]; }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+});
+test("ambiguous leading-dot or backslash paths cannot evade sensitive-path checks", () => {
+  assert.equal(code((f) => { f.observations.integratedChange.files = [file("./.github/workflows/ci.yml")]; }), "INCOMPLETE_OR_WRONG_DIFF");
+  assert.equal(code((f) => { f.observations.authoredChange.files = [{ ...file("src/new.ts"), status: "renamed", previousPath: "./.github/workflows/ci.yml" }]; }), "INCOMPLETE_OR_WRONG_DIFF");
+  assert.equal(code((f) => { f.observations.integratedChange.files = [file("src\\file.ts")]; }), "INCOMPLETE_OR_WRONG_DIFF");
+});
+test("required check identities must be nonempty, configured names", () => {
+  assert.equal(code((f) => { f.policy.requiredChecks = [""]; f.observations.checks[0].name = ""; }), "REQUIRED_CHECK_POLICY_MISSING");
+  assert.equal(code((f) => { f.policy.requiredChecks = ["   "]; f.observations.checks[0].name = "   "; }), "REQUIRED_CHECK_POLICY_MISSING");
+});
 test("ambiguous issue correlation is HOLD", () => {
   assert.equal(code((f) => { f.observations.issue.linkedIds.push("S-42"); }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
   assert.equal(code((f) => { f.observations.issue.linkedIds = ["S-44"]; }), "AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
