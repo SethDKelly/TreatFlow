@@ -7,11 +7,14 @@ import { isProxy as nativeIsProxy } from "node:util/types";
 // Node builtin ESM named exports can be live-synchronized by another module's
 // syncBuiltinESMExports(). Capture the function ONCE, at module evaluation.
 const stableIsProxy = nativeIsProxy;
+// Capture the normalizer at trusted initialization, rather than invoking
+// post-initialization mutable String.prototype methods through evidence.
+const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
 const sameSha = (left, right) => typeof left === "string" &&
-  typeof right === "string" && left.toLowerCase() === right.toLowerCase();
+  typeof right === "string" && stableLowerCase(left) === stableLowerCase(right);
 const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
 // Conservatively protect all phase records: current or future phase authority
 // must not be downgraded just because a new numbered phase becomes active.
@@ -150,7 +153,7 @@ function sameChangeDescriptors(authored, integrated) {
   if (authored.files.length !== integrated.files.length) return false;
   const normalize = (change) => change.files.map((file) => JSON.stringify([
     file.path, file.status, file.status === "renamed" ? file.previousPath : null,
-    file.kind, (file.kind === "text" ? file.patchDigest : file.objectDigest).toLowerCase(),
+    file.kind, stableLowerCase(file.kind === "text" ? file.patchDigest : file.objectDigest),
   ])).sort();
   const expected = normalize(authored), actual = normalize(integrated);
   return expected.every((entry, index) => entry === actual[index]);
@@ -255,7 +258,7 @@ function freshSyntheticReads(capture, observations, policy) {
     for (const run of runs) {
       if (!completeRun(run)) return false;
       const key = JSON.stringify([run.appId, run.runId, run.attempt,
-        run.name.toLowerCase()]);
+        stableLowerCase(run.name)]);
       if (identities.has(key)) return false;
       identities.add(key);
     }
@@ -327,8 +330,8 @@ export function evaluateOffline(input) {
       return missing("MISSING_GIT_GRAPH");
     // Object ID spelling is case-insensitive; do not let uppercase aliases
     // evade self-parent or duplicate-parent checks.
-    const canonicalParents = o.parentShas.map((sha) => sha.toLowerCase());
-    if (canonicalParents.includes(o.integratedTip.toLowerCase()) ||
+    const canonicalParents = o.parentShas.map((sha) => stableLowerCase(sha));
+    if (canonicalParents.includes(stableLowerCase(o.integratedTip)) ||
         new Set(canonicalParents).size !== canonicalParents.length)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
