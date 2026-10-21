@@ -4,6 +4,43 @@ import { createHash } from "node:crypto";
 const SHA = /^[a-f0-9]{40}$/i;
 const SENSITIVE_PATH = /^(?:\.github\/|AGENTS\.md$|\.cursor\/|docs\/methodology\/agentic-development-governance\.md$|(?:infra|terraform|security)\/)/i;
 
+// Capture one detached, inert snapshot BEFORE validation and hashing.
+// Reject accessors, sparse arrays, exotic objects, cycles and oversized inputs.
+function inertCopy(value, seen = new WeakSet(), depth = 0) {
+  if (depth > 40) throw new TypeError("Evidence nesting too deep");
+  if (value === null || typeof value === "string" || typeof value === "boolean") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "object" || seen.has(value)) throw new TypeError("Invalid or cyclic evidence");
+  seen.add(value);
+  if (Array.isArray(value)) {
+    if (value.length > 10000 || Reflect.ownKeys(value).length !== value.length + 1)
+      throw new TypeError("Sparse or extended evidence array");
+    const output = [];
+    for (let index = 0; index < value.length; index++) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+      if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
+      output.push(inertCopy(descriptor.value, seen, depth + 1));
+    }
+    seen.delete(value);
+    return output;
+  }
+  if (Object.getPrototypeOf(value) !== Object.prototype || Reflect.ownKeys(value).some((k) => typeof k !== "string"))
+    throw new TypeError("Non-plain evidence object");
+  const output = {};
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  for (const key of Object.keys(descriptors)) {
+    const descriptor = descriptors[key];
+    if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
+      throw new TypeError("Non-inert evidence field");
+    Object.defineProperty(output, key, {
+      enumerable: true, configurable: true, writable: true,
+      value: inertCopy(descriptor.value, seen, depth + 1),
+    });
+  }
+  seen.delete(value);
+  return output;
+}
+
 function canonical(value) {
   if (value === null || typeof value === "string" || typeof value === "boolean") return JSON.stringify(value);
   if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);
@@ -18,7 +55,7 @@ function canonical(value) {
 }
 
 export function evidenceDigest(value) {
-  return createHash("sha256").update(canonical(value), "utf8").digest("hex");
+  return createHash("sha256").update(canonical(inertCopy(value)), "utf8").digest("hex");
 }
 
 function frozen(value) {
@@ -36,11 +73,15 @@ function outcome(state, code, detail = "", envelope = null) {
 const hold = (code, detail) => outcome("SHADOW_HOLD", code, detail);
 const missing = (code, detail) => outcome("SHADOW_INSUFFICIENT_EVIDENCE", code, detail);
 
+const validPath = (path) => typeof path === "string" && path.length > 0 &&
+  !path.startsWith("/") && !path.includes("..");
+
 function validFiles(change) {
   return change && change.complete === true && Array.isArray(change.files) &&
     change.files.length > 0 && change.files.every((f) =>
-      typeof f.path === "string" && f.path.length > 0 && !f.path.startsWith("/") &&
-      !f.path.includes("..") && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
+      validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
+      (f.status !== "renamed" ||
+        (validPath(f.previousPath) && f.previousPath !== f.path)) &&
       (f.kind === "text" ? /^[a-f0-9]{64}$/i.test(f.patchDigest) :
         f.kind === "nontext" && /^[a-f0-9]{64}$/i.test(f.objectDigest)));
 }
@@ -53,7 +94,8 @@ function validFiles(change) {
 export function evaluateOffline(input) {
   try {
     if (!input || typeof input !== "object") return missing("NO_INPUT");
-    const { event, observations: o, policy: p, capture } = input;
+    const captured = frozen(inertCopy(input));
+    const { event, observations: o, policy: p, capture } = captured;
     if (!event || !o || !p || !capture) return missing("MISSING_GROUP");
     if (capture.source !== "synthetic-fixture" || capture.complete !== true ||
         typeof capture.producer !== "string" || !capture.producer ||
@@ -95,9 +137,11 @@ export function evaluateOffline(input) {
         o.integratedChange.fromSha !== o.preIntegrationBaseSha ||
         o.integratedChange.toSha !== o.integratedTip)
       return missing("INCOMPLETE_OR_WRONG_DIFF");
-    if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) => SENSITIVE_PATH.test(f.path)))
+    if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
+        SENSITIVE_PATH.test(f.path) || (f.previousPath && SENSITIVE_PATH.test(f.previousPath))))
       return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
-    if (!o.issue || !Array.isArray(o.issue.linkedIds) ||
+    if (!o.issue || typeof p.issueId !== "string" || !/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(p.issueId) ||
+        typeof o.issue.id !== "string" || !Array.isArray(o.issue.linkedIds) ||
         o.issue.linkedIds.length !== 1 || o.issue.linkedIds[0] !== o.issue.id ||
         o.issue.id !== p.issueId)
       return hold("AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
@@ -112,7 +156,8 @@ export function evaluateOffline(input) {
       const c = matches[0];
       if (c.sha !== o.integratedTip || c.appId !== p.checkAppId ||
           c.workflowRevision !== p.workflowRevision || c.workflowPath !== p.workflowPath ||
-          !Number.isSafeInteger(c.runId) || !Number.isSafeInteger(c.attempt) ||
+          !Number.isSafeInteger(c.runId) || c.runId <= 0 ||
+          !Number.isSafeInteger(c.attempt) || c.attempt <= 0 ||
           c.status !== "completed" || c.conclusion !== "success")
         return hold("CI_PROVENANCE_OR_RESULT_MISMATCH", name);
     }
@@ -147,17 +192,27 @@ export function evaluateOffline(input) {
 
 /** An untrusted mock evaluator NEVER emits trusted PASS or status authorization. */
 export function reviewWithMock(shadow, mock) {
-  if (shadow?.state !== "SHADOW_EVIDENCE_READY")
-    return hold("MOCK_REQUIRES_READY_SHADOW");
-  if (!mock || mock.manifestDigest !== shadow.envelope.manifestDigest ||
-      !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(mock.verdict))
-    return hold("MOCK_RECEIPT_MISMATCH");
-  return frozen({
-    mode: "OFFLINE_SHADOW_ONLY",
-    state: "SHADOW_REVIEW_RECORDED",
-    code: "UNTRUSTED_MOCK_VERDICT",
-    detail: mock.verdict,
-    envelope: frozen({ manifestDigest: shadow.envelope.manifestDigest, workKey: shadow.envelope.workKey, authenticated: false }),
-    canApprove: false, canWrite: false, canDispatch: false,
-  });
+  try {
+    if (shadow?.mode !== "OFFLINE_SHADOW_ONLY" ||
+        shadow?.state !== "SHADOW_EVIDENCE_READY" ||
+        shadow.envelope?.authenticated !== false ||
+        !/^[a-f0-9]{64}$/.test(shadow.envelope.manifestDigest) ||
+        !/^[a-f0-9]{64}$/.test(shadow.envelope.workKey) ||
+        shadow.envelope.manifest?.sourceClass !== "SYNTHETIC_UNATTESTED")
+      return hold("MOCK_REQUIRES_READY_SHADOW");
+    const proposal = inertCopy(mock);
+    if (proposal?.manifestDigest !== shadow.envelope.manifestDigest ||
+        !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(proposal.verdict))
+      return hold("MOCK_RECEIPT_MISMATCH");
+    return frozen({
+      mode: "OFFLINE_SHADOW_ONLY",
+      state: "SHADOW_REVIEW_RECORDED",
+      code: "UNTRUSTED_MOCK_VERDICT",
+      detail: proposal.verdict,
+      envelope: frozen({ manifestDigest: shadow.envelope.manifestDigest, workKey: shadow.envelope.workKey, authenticated: false }),
+      canApprove: false, canWrite: false, canDispatch: false,
+    });
+  } catch {
+    return hold("MALFORMED_MOCK_RECEIPT");
+  }
 }
