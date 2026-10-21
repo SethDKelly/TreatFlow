@@ -1,7 +1,9 @@
 // S-32-D: OFFLINE shadow harness. No IO, network, tokens or status writes.
 // Positive fixture qualification is time-bounded, not trusted or live.
 import { createHash } from "node:crypto";
-import { types } from "node:util";
+// Capture the node:util/types ESM export, not the mutable util.types object
+// property. Another in-process module may replace util.types.isProxy.
+import { isProxy as nativeIsProxy } from "node:util/types";
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
@@ -41,10 +43,11 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   }
   if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
-  // Node's native proxy check does not call Proxy traps. It must precede
-  // Array.isArray/Object.getPrototypeOf/Reflect.ownKeys/descriptor access:
-  // even "read-only" reflection can execute attacker-controlled JavaScript.
-  if (typeof value !== "object" || types.isProxy(value) || seen.has(value))
+  // Use the captured Node ESM export, not util.types.isProxy: a caller can
+  // replace the latter's shared mutable property. The intrinsic must run
+  // before Array.isArray, prototype, own-key or descriptor reflection.
+  // A wholly compromised JS runtime before module loading is not trusted.
+  if (typeof value !== "object" || nativeIsProxy(value) || seen.has(value))
     throw new TypeError("Invalid, proxied or cyclic evidence");
   seen.add(value);
   if (Array.isArray(value)) {
@@ -239,10 +242,28 @@ function freshSyntheticReads(capture, observations, policy) {
     claim.workflowPath === observed.workflowPath;
   const initialChecks = reads[1].checkRuns;
   const finalChecks = reads[4].checkRuns;
+  // Run IDs identify workflow runs, not individual job/check records; include
+  // name and app plus attempt to distinguish legitimately separate checks in
+  // one run. Ignore mutable result/provenance fields in the uniqueness key so
+  // a duplicate with a conflicting result cannot masquerade as a new run.
+  const uniqueExecutions = (runs) => {
+    const identities = new Set();
+    for (const run of runs) {
+      if (!completeRun(run)) return false;
+      const key = JSON.stringify([run.appId, run.runId, run.attempt,
+        run.name.toLowerCase()]);
+      if (identities.has(key)) return false;
+      identities.add(key);
+    }
+    return true;
+  };
   const matchesCompleteScan = (claims) =>
     Array.isArray(claims) && claims.length === observations.checks.length &&
+    uniqueExecutions(claims) &&
     claims.every((claim, index) => sameRun(claim, observations.checks[index]));
-  if (!matchesCompleteScan(initialChecks) ||
+  if (!Array.isArray(observations.checks) ||
+      !uniqueExecutions(observations.checks) ||
+      !matchesCompleteScan(initialChecks) ||
       !matchesCompleteScan(finalChecks)) return false;
   if (reads[2].issueId !== policy.issueId ||
       reads[2].status !== observations.issue.status ||
