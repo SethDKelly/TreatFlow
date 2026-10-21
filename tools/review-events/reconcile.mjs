@@ -132,9 +132,20 @@ export function reconcileOffline(input = {}) {
     return invalid("INCOMPLETE_SOURCE_OBSERVATION");
 
   const current = nativeFilter(observed.reviews, (review) =>
-    review && safeId(review.id) &&
-    review.appId === policy.reviewerAppId &&
+    review && review.appId === policy.reviewerAppId &&
     sameSha(review.commitSha, policy.headSha));
+  // Reject malformed same-app/current-head receipts before terminal filtering.
+  if (nativeSome(current, (review) => !safeId(review.id) ||
+      (review.state === "completed" &&
+       (review.source !== "provider-authored" ||
+        typeof review.hasFindings !== "boolean" ||
+        typeof review.unresolvedFindings !== "boolean"))))
+    return invalid("MALFORMED_CURRENT_REVIEW");
+  for (let i = 0; i < current.length; i++) {
+    for (let j = i + 1; j < current.length; j++) {
+      if (current[i].id === current[j].id) return invalid("DUPLICATE_REVIEW_ID");
+    }
+  }
   const dismissed = nativeSome(current, (review) => review.dismissed === true);
   if (dismissed) return result("HOLD_FINDINGS", "REVIEW_DISMISSED");
 
