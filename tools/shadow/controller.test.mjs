@@ -268,6 +268,50 @@ test("mock verifier rehashes cloned evidence and work key before recording verdi
   assert.equal(reviewWithMock(omitted, proposal).state, "SHADOW_HOLD");
 });
 
+test("fully rehashed but semantically invalid mock evidence is still denied", () => {
+  const ready = evaluateOffline(fixture());
+  const forged = structuredClone(ready);
+  const m = forged.envelope.manifest;
+  // An adversary can recompute all public digests after changing the issue.
+  m.observations.issue.status = "Done";
+  m.objectDigests.observations = evidenceDigest(m.observations);
+  forged.envelope.manifestDigest = evidenceDigest(m);
+  forged.envelope.workKey = evidenceDigest({
+    repo: m.event.repositoryId, pr: m.event.prNumber,
+    head: m.observations.reviewedHead, tip: m.observations.integratedTip,
+    issue: m.policy.issueId, policy: m.policy.policySha,
+    envelope: forged.envelope.manifestDigest,
+  });
+  const result = reviewWithMock(forged, {
+    manifestDigest: forged.envelope.manifestDigest, verdict: "PASS",
+  });
+  assert.equal(result.state, "SHADOW_HOLD");
+  assert.equal(result.code, "MOCK_ENVELOPE_SEMANTICS_INVALID");
+  assert.equal(result.canDispatch, false);
+  assert.equal(result.canApprove, false);
+  assert.equal(result.canWrite, false);
+
+  const changedCheck = structuredClone(ready);
+  const n = changedCheck.envelope.manifest;
+  n.observations.checks[0].conclusion = "failure";
+  n.objectDigests.observations = evidenceDigest(n.observations);
+  changedCheck.envelope.manifestDigest = evidenceDigest(n);
+  changedCheck.envelope.workKey = evidenceDigest({
+    repo: n.event.repositoryId, pr: n.event.prNumber,
+    head: n.observations.reviewedHead, tip: n.observations.integratedTip,
+    issue: n.policy.issueId, policy: n.policy.policySha,
+    envelope: changedCheck.envelope.manifestDigest,
+  });
+  assert.equal(reviewWithMock(changedCheck, {
+    manifestDigest: changedCheck.envelope.manifestDigest, verdict: "PASS",
+  }).code, "MOCK_ENVELOPE_SEMANTICS_INVALID");
+
+  // An intact serialized/rehydrated offline shadow is still acceptable.
+  assert.equal(reviewWithMock(structuredClone(ready), {
+    manifestDigest: ready.envelope.manifestDigest, verdict: "PASS",
+  }).state, "SHADOW_REVIEW_RECORDED");
+});
+
 test("mock PASS remains untrusted, never grants status writes", () => {
   const ready = evaluateOffline(fixture());
   const result = reviewWithMock(ready, { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" });
