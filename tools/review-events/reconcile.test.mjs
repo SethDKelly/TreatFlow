@@ -228,3 +228,27 @@ test("nonstandard array prototype cannot fabricate a terminal review", () => {
   assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
   checkSafe(got);
 });
+
+test("mutated array push cannot fabricate detached review evidence", () => {
+  const original = Array.prototype.push;
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  try {
+    Array.prototype.push = function(value) { if (value && typeof value === "object" && value.hasFindings === true) return this.length; return Reflect.apply(original, this, [value]); };
+    const got = reconcileOffline(fixture);
+    assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(got);
+  } finally { Array.prototype.push = original; }
+});
+
+test("mutated SHA case normalizer cannot fabricate matching review head", () => {
+  const original = String.prototype.toLowerCase;
+  const fixture = make();
+  fixture.observed.pr.headSha = "c".repeat(40);
+  try {
+    String.prototype.toLowerCase = function() { return SHA; };
+    const got = reconcileOffline(fixture);
+    assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(got);
+  } finally { String.prototype.toLowerCase = original; }
+});
