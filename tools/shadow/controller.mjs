@@ -1,5 +1,7 @@
-// S-32-D: deterministic OFFLINE shadow harness. No IO, network, tokens or status writes.
+// S-32-D: OFFLINE shadow harness. No IO, network, tokens or status writes.
+// Positive fixture qualification is time-bounded, not trusted or live.
 import { createHash } from "node:crypto";
+import { types } from "node:util";
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
@@ -39,7 +41,11 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   }
   if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value !== "object" || seen.has(value)) throw new TypeError("Invalid or cyclic evidence");
+  // Node's native proxy check does not call Proxy traps. It must precede
+  // Array.isArray/Object.getPrototypeOf/Reflect.ownKeys/descriptor access:
+  // even "read-only" reflection can execute attacker-controlled JavaScript.
+  if (typeof value !== "object" || types.isProxy(value) || seen.has(value))
+    throw new TypeError("Invalid, proxied or cyclic evidence");
   seen.add(value);
   if (Array.isArray(value)) {
     if (value.length > 10000 || Reflect.ownKeys(value).length !== value.length + 1)
@@ -169,6 +175,90 @@ function validCaptureTimestamp(value) {
   return Number.isFinite(Date.parse(value));
 }
 
+// Time-bounded SOURCE-CLAIM ordering for synthetic replay, not a trusted clock,
+// authenticated GitHub read, or proof that newer GitHub/Linear facts do not exist.
+// A future source collector must provide independently authenticated completeness
+// and current-state reconciliation. Never upgrade SHADOW_EVIDENCE_READY to PASS.
+const MAX_SNAPSHOT_AGE_MS = 5 * 60 * 1000;
+const FUTURE_SKEW_MS = 30 * 1000;
+const READ_STAGES = ["merge", "checks", "issue", "threads", "final"];
+
+function freshSyntheticReads(capture, observations, policy) {
+  const now = Date.now();
+  const snapshotAt = Date.parse(capture.capturedAt);
+  if (!Number.isFinite(snapshotAt) ||
+      snapshotAt < now - MAX_SNAPSHOT_AGE_MS ||
+      snapshotAt > now + FUTURE_SKEW_MS) return false;
+  const reads = capture.reads;
+  if (!Array.isArray(reads) || reads.length !== READ_STAGES.length) return false;
+  let lastObservedAt = 0;
+  for (let index = 0; index < reads.length; index++) {
+    const read = reads[index];
+    if (!read || read.kind !== READ_STAGES[index] ||
+        read.sequence !== index + 1 || read.complete !== true ||
+        !sameSha(read.tipSha, observations.integratedTip) ||
+        !validCaptureTimestamp(read.observedAt)) return false;
+    const observedAt = Date.parse(read.observedAt);
+    if (!Number.isFinite(observedAt) ||
+        observedAt < now - MAX_SNAPSHOT_AGE_MS ||
+        observedAt > now + FUTURE_SKEW_MS ||
+        observedAt > snapshotAt ||
+        observedAt < lastObservedAt) return false;
+    lastObservedAt = observedAt;
+  }
+  // The final recorded collection time must be the snapshot capture time.
+  // Strict sequence indices establish the declared order even when source
+  // reads occurred within the same millisecond.
+  if (reads[4].observedAt !== capture.capturedAt) return false;
+
+  // Every relevant field is compared at both the initial check scan and
+  // the FINAL source reread. Matching counts cannot conceal a replaced run,
+  // a newer attempt, a failed rerun or an untrusted workflow/check origin.
+  // All of these are still caller-asserted synthetic claims, not live proofs.
+  const completeRun = (run) => run &&
+    typeof run.name === "string" && run.name.trim() !== "" &&
+    run.name === run.name.trim() &&
+    Number.isSafeInteger(run.runId) && run.runId > 0 &&
+    Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
+    validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
+    validSha(run.workflowRevision) && validPath(run.workflowPath) &&
+    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(run.workflowPath) &&
+    ["queued", "in_progress", "completed", "waiting", "pending", "requested"].includes(run.status) &&
+    Object.hasOwn(run, "conclusion") &&
+    (run.status === "completed"
+      ? ["success", "failure", "cancelled", "skipped", "timed_out",
+        "action_required", "neutral", "stale"].includes(run.conclusion)
+      : run.conclusion === null);
+  const sameRun = (claim, observed) => completeRun(claim) &&
+    completeRun(observed) &&
+    claim.name === observed.name && claim.runId === observed.runId &&
+    claim.attempt === observed.attempt && claim.status === observed.status &&
+    claim.conclusion === observed.conclusion && sameSha(claim.sha, observed.sha) &&
+    claim.appId === observed.appId &&
+    sameSha(claim.workflowRevision, observed.workflowRevision) &&
+    claim.workflowPath === observed.workflowPath;
+  const initialChecks = reads[1].checkRuns;
+  const finalChecks = reads[4].checkRuns;
+  const matchesCompleteScan = (claims) =>
+    Array.isArray(claims) && claims.length === observations.checks.length &&
+    claims.every((claim, index) => sameRun(claim, observations.checks[index]));
+  if (!matchesCompleteScan(initialChecks) ||
+      !matchesCompleteScan(finalChecks)) return false;
+  if (reads[2].issueId !== policy.issueId ||
+      reads[2].status !== observations.issue.status ||
+      reads[2].blockersComplete !== observations.issue.blockersComplete ||
+      reads[3].unresolvedCount !== observations.unresolvedThreads.length)
+    return false;
+  // Reconfirm blocker eligibility, full check provenance and review state
+  // at the final claim. The earlier checks alone cannot confer readiness.
+  if (reads[4].issueId !== policy.issueId ||
+      reads[4].status !== observations.issue.status ||
+      reads[4].blockersComplete !== observations.issue.blockersComplete ||
+      reads[4].unresolvedCount !== observations.unresolvedThreads.length ||
+      reads[4].checkRunCount !== finalChecks.length) return false;
+  return true;
+}
+
 /**
  * Offline fixtures can demonstrate contract behavior but CANNOT authenticate
  * GitHub, Linear, the CI workflow, or their claimed evidence.
@@ -271,6 +361,8 @@ export function evaluateOffline(input) {
     }
     if (!Array.isArray(o.unresolvedThreads) || o.unresolvedThreads.length !== 0)
       return hold("UNRESOLVED_REVIEW_THREADS");
+    if (!freshSyntheticReads(capture, o, p))
+      return missing("CAPTURE_STALE_OR_UNORDERED");
 
     const snapshot = {
       schema: "shadow-review-envelope/0.1",

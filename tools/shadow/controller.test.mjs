@@ -8,11 +8,38 @@ const file = (path = "src/domain/types.ts", kind = "text") =>
   kind === "text" ? { path, status: "modified", kind, patchDigest: digest("a") } :
     { path, status: "modified", kind, objectDigest: digest("b") };
 const clone = (v) => structuredClone(v);
+// One fixed test-run clock keeps cross-fixture digests reproducible while
+// exercising the time-sensitive source-claim freshness gate.
+const testClock = Date.now();
+const at = (secondsBefore = 0) => new Date(testClock - secondsBefore * 1000).toISOString();
 
 function fixture(strategy = "squash") {
   const head = sha("1"), tip = sha("2"), base = sha("3"), ancestor = sha("4");
+  const check = { name: "Verify", sha: tip, appId: 15368, workflowRevision: sha("6"),
+    workflowPath: ".github/workflows/ci.yml", runId: 400, attempt: 1,
+    status: "completed", conclusion: "success" };
+  const reads = ["merge", "checks", "issue", "threads", "final"].map((kind, index) => ({
+    kind, sequence: index + 1, observedAt: at(4 - index),
+    complete: true, tipSha: tip,
+  }));
+  const checkClaim = { name: check.name, runId: check.runId,
+    attempt: check.attempt, status: check.status, conclusion: check.conclusion,
+    sha: check.sha, appId: check.appId,
+    workflowRevision: check.workflowRevision, workflowPath: check.workflowPath };
+  reads[1].checkRuns = [clone(checkClaim)];
+  reads[2].issueId = "S-32";
+  reads[2].status = "Verification";
+  reads[2].blockersComplete = true;
+  reads[3].unresolvedCount = 0;
+  reads[4].issueId = "S-32";
+  reads[4].status = "Verification";
+  reads[4].unresolvedCount = 0;
+  reads[4].checkRunCount = 1;
+  reads[4].blockersComplete = true;
+  reads[4].checkRuns = [clone(checkClaim)];
   return {
-    capture: { source: "synthetic-fixture", complete: true, producer: "test-harness", capturedAt: "2026-10-21T00:00:00Z" },
+    capture: { source: "synthetic-fixture", complete: true, producer: "test-harness",
+      capturedAt: at(), reads },
     event: { action: "closed", merged: true, repositoryId: 123, prNumber: 115, baseRef: "main" },
     policy: {
       repositoryId: 123, baseRef: "main", issueId: "S-32",
@@ -28,11 +55,7 @@ function fixture(strategy = "squash") {
       integratedChange: { fromSha: base, toSha: tip, complete: true, files: [file()] },
       issue: { id: "S-32", linkedIds: ["S-32"], status: "Verification", blockersComplete: true },
       unresolvedThreads: [],
-      checks: [{
-        name: "Verify", sha: tip, appId: 15368, workflowRevision: sha("6"),
-        workflowPath: ".github/workflows/ci.yml", runId: 400, attempt: 1,
-        status: "completed", conclusion: "success",
-      }],
+      checks: [check],
     },
   };
 }
@@ -461,6 +484,8 @@ test("workflow provenance accepts only direct .yml/.yaml workflow files", () => 
   assert.equal(code((f) => {
     f.policy.workflowPath = ".github/workflows/verify.yaml";
     f.observations.checks[0].workflowPath = ".github/workflows/verify.yaml";
+    f.capture.reads[1].checkRuns[0].workflowPath = ".github/workflows/verify.yaml";
+    f.capture.reads[4].checkRuns[0].workflowPath = ".github/workflows/verify.yaml";
   }), "SIMULATED_PREREQUISITES_ONLY");
 });
 test("array-wrapped hashes and digests cannot pass string validation", () => {
@@ -519,15 +544,178 @@ test("capture timestamp must be a string and must parse as a date", () => {
   const valid = evaluateOffline(fixture());
   assert.equal(valid.state, "SHADOW_EVIDENCE_READY");
   assert.equal(typeof valid.envelope.manifest.capture.capturedAt, "string");
+  // Valid RFC3339 alone must never imply freshness/completeness.
   for (const timestamp of [
     "2024-02-29T23:59:59Z", "2026-10-21T00:00:00.123Z",
     "2026-10-21T12:30:59+05:30", "2026-10-21T12:30:59-04:00",
   ]) {
     const f = fixture();
     f.capture.capturedAt = timestamp;
-    assert.equal(evaluateOffline(f).state, "SHADOW_EVIDENCE_READY");
+    assert.equal(evaluateOffline(f).code, "CAPTURE_STALE_OR_UNORDERED");
   }
 });
+
+test("independently discovered P2: year-2000 snapshot cannot report ready", () => {
+  const f = fixture();
+  f.capture.capturedAt = "2000-01-01T00:00:00Z";
+  f.capture.reads.forEach((read) => { read.observedAt = "2000-01-01T00:00:00Z"; });
+  const result = evaluateOffline(f);
+  assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  assert.equal(result.canWrite, false);
+});
+
+test("source claim missing, partial or disordered remains insufficient", () => {
+  assert.equal(code((f) => { delete f.capture.reads; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[1].complete = false; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[2].sequence = 1; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[3].observedAt = at(60); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].observedAt = at(1); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[2].tipSha = sha("8"); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[1].checkRuns = []; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[1].checkRuns[0].runId = 123; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[1].checkRuns[0].attempt = 2; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRunCount = 0; }), "CAPTURE_STALE_OR_UNORDERED");
+  // A final scan of the same cardinality is not evidence of same run.
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].runId = 401; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].attempt = 2; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].status = "queued"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].conclusion = "failure"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].appId = 999; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].sha = sha("9"); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].workflowRevision = sha("9"); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns[0].workflowPath = ".github/workflows/other.yml"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].checkRuns = []; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { delete f.capture.reads[4].checkRuns; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { delete f.capture.reads[4].blockersComplete; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].blockersComplete = false; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[2].status = "In Progress"; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[3].unresolvedCount = 1; }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.reads[4].issueId = "S-33"; }), "CAPTURE_STALE_OR_UNORDERED");
+});
+
+test("P2 exact final source reread catches same-count run replacement and blocker regression", () => {
+  for (const change of [
+    (f) => { f.capture.reads[4].checkRuns[0].runId = 500; },
+    (f) => { f.capture.reads[4].checkRuns[0].attempt = 3; },
+    (f) => { f.capture.reads[4].checkRuns[0].conclusion = "failure"; },
+    (f) => { f.capture.reads[4].blockersComplete = false; },
+  ]) {
+    const result = decide(change);
+    assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(result.canDispatch, false);
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+  }
+  const ready = evaluateOffline(fixture());
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(ready.envelope.authenticated, false);
+});
+
+test("P2 non-required runs must include complete check provenance in both scans", () => {
+  const auxiliary = {
+    name: "Optional audit", sha: sha("2"), appId: 15368,
+    workflowRevision: sha("6"), workflowPath: ".github/workflows/optional.yml",
+    runId: 601, attempt: 1, status: "completed", conclusion: "failure",
+  };
+  const addExtra = (f) => {
+    f.observations.checks.push(clone(auxiliary));
+    f.capture.reads[1].checkRuns.push(clone(auxiliary));
+    f.capture.reads[4].checkRuns.push(clone(auxiliary));
+    f.capture.reads[4].checkRunCount = 2;
+  };
+  // An OPTIONAL failed check is allowed as an observation; it is not a
+  // substitute for the required successful Verify, and remains untrusted.
+  const positive = decide(addExtra);
+  assert.equal(positive.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(positive.canWrite, false);
+  assert.equal(positive.canApprove, false);
+  assert.equal(positive.canDispatch, false);
+  for (const name of ["runId", "attempt", "status", "conclusion", "appId",
+    "workflowPath", "workflowRevision", "sha", "name"]) {
+    for (const omitFrom of ["all", "initial", "final"]) {
+      const result = decide((f) => {
+        addExtra(f);
+        if (omitFrom === "all") {
+          delete f.observations.checks[1][name];
+          delete f.capture.reads[1].checkRuns[1][name];
+          delete f.capture.reads[4].checkRuns[1][name];
+        } else if (omitFrom === "initial") {
+          delete f.capture.reads[1].checkRuns[1][name];
+        } else {
+          delete f.capture.reads[4].checkRuns[1][name];
+        }
+      });
+      assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED", name + "/" + omitFrom);
+      assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+      assert.equal(result.canWrite, false);
+      assert.equal(result.canApprove, false);
+      assert.equal(result.canDispatch, false);
+    }
+  }
+  // Explicit null conclusion is allowed for a pending auxiliary check;
+  // omission is NOT equivalent to the valid explicit unknown result.
+  const pending = decide((f) => {
+    addExtra(f);
+    for (const c of [
+      f.observations.checks[1],
+      f.capture.reads[1].checkRuns[1],
+      f.capture.reads[4].checkRuns[1],
+    ]) {
+      c.status = "in_progress";
+      c.conclusion = null;
+    }
+  });
+  assert.equal(pending.state, "SHADOW_EVIDENCE_READY");
+});
+
+test("source claims older than five minutes or future dated cannot become ready", () => {
+  assert.equal(code((f) => { f.capture.reads[0].observedAt = at(360); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.capturedAt = at(360); }), "CAPTURE_STALE_OR_UNORDERED");
+  assert.equal(code((f) => { f.capture.capturedAt = new Date(testClock + 360000).toISOString(); }), "CAPTURE_STALE_OR_UNORDERED");
+});
+
+test("fresh self-consistent synthetic scan is still never a live approval", () => {
+  const r = evaluateOffline(fixture());
+  assert.equal(r.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(r.envelope.authenticated, false);
+  assert.equal(r.envelope.manifest.sourceClass, "SYNTHETIC_UNATTESTED");
+  assert.equal(r.canApprove, false);
+  assert.equal(r.canDispatch, false);
+  assert.equal(r.canWrite, false);
+});
+
+test("independently discovered P2: Proxy cannot execute reflective traps", () => {
+  let traps = 0;
+  const adversarial = (target) => new Proxy(target, {
+    get(inner, key) { traps++; return Reflect.get(inner, key); },
+    ownKeys(inner) { traps++; return Reflect.ownKeys(inner); },
+    getPrototypeOf(inner) { traps++; return Reflect.getPrototypeOf(inner); },
+    getOwnPropertyDescriptor(inner, key) {
+      traps++;
+      return Reflect.getOwnPropertyDescriptor(inner, key);
+    },
+  });
+  const proxiedInput = adversarial(fixture());
+  assert.equal(evaluateOffline(proxiedInput).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  assert.equal(traps, 0);
+  const nested = fixture();
+  nested.capture.reads[1].checkRuns[0] = adversarial(nested.capture.reads[1].checkRuns[0]);
+  assert.equal(evaluateOffline(nested).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  assert.equal(traps, 0);
+  assert.throws(() => evidenceDigest(adversarial({ safe: true })), TypeError);
+  assert.equal(traps, 0);
+  assert.equal(reviewWithMock(adversarial(evaluateOffline(fixture())), {
+    verdict: "PASS",
+  }).state, "SHADOW_HOLD");
+  assert.equal(traps, 0);
+  assert.equal(reviewWithMock(evaluateOffline(fixture()), adversarial({
+    verdict: "PASS",
+  })).state, "SHADOW_HOLD");
+  assert.equal(traps, 0);
+});
+
 test("unattested source and malformed inputs fail closed", () => {
   assert.equal(state((f) => { f.capture.source = "github-live"; }), "SHADOW_INSUFFICIENT_EVIDENCE");
   assert.equal(evaluateOffline(null).state, "SHADOW_INSUFFICIENT_EVIDENCE");
@@ -671,7 +859,7 @@ test("large UTF-8 object keys consume the same byte budget as values", () => {
 });
 test("near-limit accepted fixture round-trips; oversized node input refuses READY", () => {
   const accepted = fixture();
-  for (let i = 0; i < 3990; i++) accepted.capture["padding" + i] = i;
+  for (let i = 0; i < 3820; i++) accepted.capture["padding" + i] = i;
   const ready = evaluateOffline(accepted);
   assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
   assert.equal(reviewWithMock(structuredClone(ready), {
