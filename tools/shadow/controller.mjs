@@ -262,8 +262,9 @@ function freshSyntheticReads(capture, observations, policy) {
     const identities = new StableSet();
     for (const run of runs) {
       if (!completeRun(run)) return false;
-      const key = stableStringify([run.appId, run.runId, run.attempt,
-        stableLowerCase(run.name)]);
+      // Primitive fields only: explicit length-prefixing avoids inherited toJSON.
+      const name = stableLowerCase(run.name);
+      const key = `${run.appId}:${run.runId}:${run.attempt}:${name.length}:${name}`;
       if (stableSetHas(identities, key)) return false;
       stableSetAdd(identities, key);
     }
