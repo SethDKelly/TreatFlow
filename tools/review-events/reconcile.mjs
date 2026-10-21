@@ -131,30 +131,33 @@ export function reconcileOffline(input = {}) {
       observed.unresolvedThreads < 0)
     return invalid("INCOMPLETE_SOURCE_OBSERVATION");
 
+  // Only own data properties may establish reviewer identity or terminal facts.
+  const own = (obj, key) => Object.getOwnPropertyDescriptor(obj, key)?.value;
   const current = nativeFilter(observed.reviews, (review) =>
-    review && review.appId === policy.reviewerAppId &&
-    sameSha(review.commitSha, policy.headSha));
+    review && own(review, "appId") === policy.reviewerAppId &&
+    sameSha(own(review, "commitSha"), policy.headSha));
   // Reject malformed same-app/current-head receipts before terminal filtering.
-  if (nativeSome(current, (review) => !safeId(review.id) ||
-      (review.state === "completed" &&
-       (review.source !== "provider-authored" ||
-        typeof review.hasFindings !== "boolean" ||
-        typeof review.unresolvedFindings !== "boolean"))))
+  if (nativeSome(current, (review) =>
+      (own(review, "state") === "completed" &&
+       (!safeId(own(review, "id")) ||
+        own(review, "source") !== "provider-authored" ||
+        typeof own(review, "hasFindings") !== "boolean" ||
+        typeof own(review, "unresolvedFindings") !== "boolean"))))
     return invalid("MALFORMED_CURRENT_REVIEW");
   for (let i = 0; i < current.length; i++) {
     for (let j = i + 1; j < current.length; j++) {
-      if (current[i].id === current[j].id) return invalid("DUPLICATE_REVIEW_ID");
+      if (own(current[i], "id") === own(current[j], "id")) return invalid("DUPLICATE_REVIEW_ID");
     }
   }
-  const dismissed = nativeSome(current, (review) => review.dismissed === true);
+  const dismissed = nativeSome(current, (review) => own(review, "dismissed") === true);
   if (dismissed) return result("HOLD_FINDINGS", "REVIEW_DISMISSED");
 
-  const terminal = nativeFilter(current, (review) => review.state === "completed" &&
-    review.source === "provider-authored" &&
-    typeof review.hasFindings === "boolean" &&
-    typeof review.unresolvedFindings === "boolean");
+  const terminal = nativeFilter(current, (review) => own(review, "state") === "completed" &&
+    own(review, "source") === "provider-authored" &&
+    typeof own(review, "hasFindings") === "boolean" &&
+    typeof own(review, "unresolvedFindings") === "boolean");
 
-  if (nativeSome(terminal, (review) => review.hasFindings || review.unresolvedFindings) ||
+  if (nativeSome(terminal, (review) => own(review, "hasFindings") || own(review, "unresolvedFindings")) ||
       observed.unresolvedThreads > 0)
     return result("HOLD_FINDINGS", "OPEN_REVIEW_FINDINGS");
   if (!terminal.length) {
@@ -164,7 +167,7 @@ export function reconcileOffline(input = {}) {
       : result("PENDING", "BOUNDED_RECHECK_REQUIRED");
   }
   // Conflicting terminal review records cannot be resolved by arrival order.
-  if (terminal.some((review, index) => terminal.findIndex((other) => other.id === review.id) !== index))
+  if (terminal.some((review, index) => terminal.findIndex((other) => own(other, "id") === own(review, "id")) !== index))
     return invalid("DUPLICATE_REVIEW_ID");
   // Historical receipts on earlier heads are normal. Ignore them when the
   // authenticated-source fixture contains a current-head terminal receipt;
@@ -196,8 +199,8 @@ export function reconcileOffline(input = {}) {
       !sameSha(first.headSha, policy.headSha) ||
       !sameSha(second.headSha, policy.headSha) ||
       first.afterReceipt !== true || second.afterReceipt !== true ||
-      !nativeSome(terminal, (review) => review.id === first.receiptId &&
-        review.id === second.receiptId) ||
+      !nativeSome(terminal, (review) => own(review, "id") === first.receiptId &&
+        own(review, "id") === second.receiptId) ||
       second.reviewThreadReadComplete !== true ||
       second.checkReadComplete !== true ||
       second.unresolvedThreads !== observed.unresolvedThreads)
