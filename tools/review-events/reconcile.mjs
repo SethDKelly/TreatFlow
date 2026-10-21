@@ -5,12 +5,13 @@ import { types } from "node:util";
 const nativeArrayPrototype = Array.prototype;
 const nativeFilter = Function.prototype.call.bind(Array.prototype.filter);
 const nativeSome = Function.prototype.call.bind(Array.prototype.some);
+const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
 const ownValue = (obj, key) => Object.getOwnPropertyDescriptor(obj, key)?.value;
 function detach(value) {
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) {
     const out = [];
-    for (let i = 0; i < value.length; i++) out.push(detach(ownValue(value, String(i))));
+    for (let i = 0; i < value.length; i++) out[out.length] = detach(ownValue(value, String(i)));
     return out;
   }
   const out = Object.create(null);
@@ -52,7 +53,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }
 }
 const safeId = (x) => Number.isSafeInteger(x) && x > 0;
 const sameSha = (a, b) => typeof a === "string" && typeof b === "string" &&
-  SHA.test(a) && SHA.test(b) && a.toLowerCase() === b.toLowerCase();
+  SHA.test(a) && SHA.test(b) && stableLowerCase(a) === stableLowerCase(b);
 const result = (state, reason) => Object.freeze({
   mode: "OFFLINE_SYNTHETIC_UNATTESTED", state, reason,
   canApprove: false, canWrite: false, canDispatch: false, canMerge: false,
