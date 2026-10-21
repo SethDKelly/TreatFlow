@@ -1137,3 +1137,34 @@ test("S-74: mutable regex matcher cannot bypass sensitive-path hold", () => {
     assert.equal(result.canApprove, false);
   } finally { RegExp.prototype.test = original; }
 });
+
+test("S-74: post-import descriptor reader cannot hide unresolved threads", () => {
+  const original = Object.getOwnPropertyDescriptor;
+  try {
+    Object.getOwnPropertyDescriptor = function(target, key) {
+      const descriptor = Reflect.apply(original, Object, [target, key]);
+      if (key === "unresolvedThreads" && descriptor && Array.isArray(descriptor.value))
+        return { ...descriptor, value: [] };
+      return descriptor;
+    };
+    const result = decide((f) => { f.observations.unresolvedThreads = [{ id: 99 }]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Object.getOwnPropertyDescriptor = original; }
+});
+
+test("S-74: post-import array predicates cannot bypass sensitive path hold", () => {
+  const original = Array.prototype.some;
+  try {
+    Array.prototype.some = function(predicate) {
+      if (this.length && this[0] && this[0].path) return false;
+      return Reflect.apply(original, this, [predicate]);
+    };
+    const result = decide((f) => {
+      f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+      f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype.some = original; }
+});
