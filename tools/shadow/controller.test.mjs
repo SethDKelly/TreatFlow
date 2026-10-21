@@ -791,12 +791,16 @@ test("S-74 P2: duplicate or conflicting complete check executions cannot claim r
     assert.equal(decide((f) => withExtra(f, records)).state,
       "SHADOW_EVIDENCE_READY");
   }
-  // Duplicated required Verify run must also be rejected; the existing
-  // required-check policy may already reject this, but the scan guard does too.
-  assert.equal(decide((f) => {
+  // A duplicated REQUIRED Verify is denied by the earlier required-check
+  // uniqueness policy (SHADOW_HOLD), before the generic complete scan runs.
+  const requiredDuplicate = decide((f) => {
     const required = clone(f.observations.checks[0]);
     withExtra(f, [required]);
-  }).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+  });
+  assert.equal(requiredDuplicate.state, "SHADOW_HOLD");
+  assert.equal(requiredDuplicate.canApprove, false);
+  assert.equal(requiredDuplicate.canWrite, false);
+  assert.equal(requiredDuplicate.canDispatch, false);
 });
 
 test("unattested source and malformed inputs fail closed", () => {
