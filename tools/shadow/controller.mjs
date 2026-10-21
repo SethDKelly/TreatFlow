@@ -222,7 +222,7 @@ function freshSyntheticReads(capture, observations, policy) {
     Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
     validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
     validSha(run.workflowRevision) && validPath(run.workflowPath) &&
-    /^\\.github\\/workflows\\/[^/]+\\.ya?ml$/.test(run.workflowPath) &&
+    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(run.workflowPath) &&
     ["queued", "in_progress", "completed", "waiting", "pending", "requested"].includes(run.status) &&
     Object.hasOwn(run, "conclusion") &&
     (run.status === "completed"
