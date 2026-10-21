@@ -10,6 +10,11 @@ const stableIsProxy = nativeIsProxy;
 // Capture the normalizer at trusted initialization, rather than invoking
 // post-initialization mutable String.prototype methods through evidence.
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
+// Duplicate identity comparison must not use post-initialization JSON/Set mutations.
+const stableStringify = JSON.stringify;
+const StableSet = Set;
+const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
+const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
@@ -254,13 +259,13 @@ function freshSyntheticReads(capture, observations, policy) {
   // one run. Ignore mutable result/provenance fields in the uniqueness key so
   // a duplicate with a conflicting result cannot masquerade as a new run.
   const uniqueExecutions = (runs) => {
-    const identities = new Set();
+    const identities = new StableSet();
     for (const run of runs) {
       if (!completeRun(run)) return false;
-      const key = JSON.stringify([run.appId, run.runId, run.attempt,
+      const key = stableStringify([run.appId, run.runId, run.attempt,
         stableLowerCase(run.name)]);
-      if (identities.has(key)) return false;
-      identities.add(key);
+      if (stableSetHas(identities, key)) return false;
+      stableSetAdd(identities, key);
     }
     return true;
   };
