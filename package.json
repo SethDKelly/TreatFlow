@@ -13,8 +13,9 @@
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit --pretty false",
     "lint": "eslint .",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run && npm run test:shadow",
+    "test:watch": "vitest",
+    "test:shadow": "node --test tools/shadow/*.test.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",
