@@ -24,6 +24,19 @@ const stableSplit = Function.prototype.call.bind(String.prototype.split);
 const stableStartsWith = Function.prototype.call.bind(String.prototype.startsWith);
 const stableIncludes = Function.prototype.call.bind(String.prototype.includes);
 const stableTrim = Function.prototype.call.bind(String.prototype.trim);
+const stableMap = Function.prototype.call.bind(Array.prototype.map);
+const stableFilter = Function.prototype.call.bind(Array.prototype.filter);
+const stableEvery = Function.prototype.call.bind(Array.prototype.every);
+const stableSome = Function.prototype.call.bind(Array.prototype.some);
+const stableJoin = Function.prototype.call.bind(Array.prototype.join);
+const stableArrayIncludes = Function.prototype.call.bind(Array.prototype.includes);
+const stableObjectKeys = Object.keys;
+const stableObjectValues = Object.values;
+const stableFreeze = Object.freeze;
+const stableSetUTCFullYear = Function.prototype.call.bind(Date.prototype.setUTCFullYear);
+const stableGetUTCFullYear = Function.prototype.call.bind(Date.prototype.getUTCFullYear);
+const stableGetUTCMonth = Function.prototype.call.bind(Date.prototype.getUTCMonth);
+const stableGetUTCDate = Function.prototype.call.bind(Date.prototype.getUTCDate);
 const stableRegexTest = Function.prototype.call.bind(RegExp.prototype.test);
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
@@ -113,12 +126,12 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
 function canonical(value) {
   if (value === null || typeof value === "string" || typeof value === "boolean") return stableStringify(value);
   if (typeof value === "number" && Number.isFinite(value)) return stableStringify(value);
-  if (stableArrayIsArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  if (stableArrayIsArray(value)) return "[" + stableJoin(stableMap(value, canonical), ",") + "]";
   if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === Object.prototype)) {
-    return "{" + Object.keys(value).sort().map((key) => {
+    return "{" + stableMap(stableSort(stableObjectKeys(value)), (key) => {
       if (value[key] === undefined) throw new TypeError("Undefined evidence field");
       return JSON.stringify(key) + ":" + canonical(value[key]);
-    }).join(",") + "}";
+    }), ",") + "}";
   }
   throw new TypeError("Evidence must be finite JSON values");
 }
@@ -129,8 +142,8 @@ export function evidenceDigest(value) {
 
 function frozen(value) {
   if (value && typeof value === "object") {
-    for (const child of Object.values(value)) frozen(child);
-    Object.freeze(value);
+    for (const child of stableObjectValues(value)) frozen(child);
+    stableFreeze(value);
   }
   return value;
 }
@@ -144,20 +157,19 @@ const missing = (code, detail) => outcome("SHADOW_INSUFFICIENT_EVIDENCE", code, 
 
 const validPath = (path) => typeof path === "string" && path.length > 0 &&
   !stableStartsWith(path, "/") && !stableIncludes(path, "\\") && !stableRegexTest(/[\u0000-\u001f]/, path) &&
-  path.split("/").every((part) => part !== "" && part !== "." && part !== "..");
+  stableEvery(stableSplit(path, "/"), (part) => part !== "" && part !== "." && part !== "..");
 
 function validFiles(change) {
   if (!change || change.complete !== true || !stableArrayIsArray(change.files) ||
       change.files.length === 0) return false;
-  if (new Set(change.files.map((file) => file.path)).size !== change.files.length)
+  if (new StableSet(stableMap(change.files, (file) => file.path)).size !== change.files.length)
     return false;
   // One source cannot be renamed to multiple destinations in a single diff.
   // A duplicated source needs explicit copy provenance, unsupported here.
-  const renameSources = change.files.filter((file) => file.status === "renamed")
-    .map((file) => file.previousPath);
-  if (new Set(renameSources).size !== renameSources.length) return false;
-  return change.files.every((f) =>
-    validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
+  const renameSources = stableMap(stableFilter(change.files, (file) => file.status === "renamed"), (file) => file.previousPath);
+  if (new StableSet(renameSources).size !== renameSources.length) return false;
+  return stableEvery(change.files, (f) =>
+    validPath(f.path) && stableArrayIncludes(["added", "modified", "deleted", "renamed"], f.status) &&
     (f.status !== "renamed" ||
       (validPath(f.previousPath) && f.previousPath !== f.path)) &&
     (f.kind === "text" ? validDigest(f.patchDigest) :
@@ -259,14 +271,14 @@ function freshSyntheticReads(capture, observations, policy) {
   // a newer attempt, a failed rerun or an untrusted workflow/check origin.
   // All of these are still caller-asserted synthetic claims, not live proofs.
   const completeRun = (run) => run &&
-    typeof run.name === "string" && run.name.trim() !== "" &&
-    run.name === run.name.trim() &&
+    typeof run.name === "string" && stableTrim(run.name) !== "" &&
+    run.name === stableTrim(run.name) &&
     Number.isSafeInteger(run.runId) && run.runId > 0 &&
     Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
     validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
     validSha(run.workflowRevision) && validPath(run.workflowPath) &&
     stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, run.workflowPath) &&
-    ["queued", "in_progress", "completed", "waiting", "pending", "requested"].includes(run.status) &&
+    stableArrayIncludes(["queued", "in_progress", "completed", "waiting", "pending", "requested"], run.status) &&
     stableHasOwn(run, "conclusion") &&
     (run.status === "completed"
       ? ["success", "failure", "cancelled", "skipped", "timed_out",
@@ -359,19 +371,19 @@ export function evaluateOffline(input) {
         !validSha(o.mergeBaseSha) || !validSha(o.preIntegrationBaseSha) ||
         !validSha(p.policySha) || !validSha(p.workflowRevision))
       return missing("UNPINNED_GIT_OR_POLICY");
-    if (!["merge", "squash", "rebase"].includes(o.mergeStrategy))
+    if (!stableArrayIncludes(["merge", "squash", "rebase"], o.mergeStrategy))
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
     if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
         !validPath(p.workflowPath) ||
         !stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, p.workflowPath) ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
     if (!stableArrayIsArray(o.parentShas) || o.parentShas.length === 0 ||
-        !o.parentShas.every((sha) => validSha(sha)))
+        !stableEvery(o.parentShas, (sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
     // Object ID spelling is case-insensitive; do not let uppercase aliases
     // evade self-parent or duplicate-parent checks.
-    const canonicalParents = o.parentShas.map((sha) => stableLowerCase(sha));
-    if (canonicalParents.includes(stableLowerCase(o.integratedTip)) ||
+    const canonicalParents = stableMap(o.parentShas, (sha) => stableLowerCase(sha));
+    if (stableArrayIncludes(canonicalParents, stableLowerCase(o.integratedTip)) ||
         new Set(canonicalParents).size !== canonicalParents.length)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
@@ -396,7 +408,7 @@ export function evaluateOffline(input) {
         !sameSha(o.integratedChange.fromSha, o.preIntegrationBaseSha) ||
         !sameSha(o.integratedChange.toSha, o.integratedTip))
       return missing("INCOMPLETE_OR_WRONG_DIFF");
-    if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
+    if (stableSome([...o.authoredChange.files, ...o.integratedChange.files], (f) =>
         stableRegexTest(SENSITIVE_PATH, f.path) || (f.previousPath && stableRegexTest(SENSITIVE_PATH, f.previousPath))))
       return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
     // Two-parent merges can add conflict-resolution edits or unrelated
@@ -413,11 +425,11 @@ export function evaluateOffline(input) {
     if (o.issue.status !== "Verification" || o.issue.blockersComplete !== true)
       return hold("ISSUE_NOT_ACCEPTANCE_ELIGIBLE");
     if (!stableArrayIsArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
-        !p.requiredChecks.every((name) => typeof name === "string" && name.trim().length > 0 && name === name.trim()) ||
+        !stableEvery(p.requiredChecks, (name) => typeof name === "string" && stableTrim(name).length > 0 && name === stableTrim(name)) ||
         new Set(p.requiredChecks).size !== p.requiredChecks.length ||
         !stableArrayIsArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
     for (const name of p.requiredChecks) {
-      const matches = o.checks.filter((c) => c.name === name);
+      const matches = stableFilter(o.checks, (c) => c.name === name);
       if (matches.length !== 1) return hold("MISSING_OR_DUPLICATE_REQUIRED_CHECK", name);
       const c = matches[0];
       if (!sameSha(c.sha, o.integratedTip) || c.appId !== p.checkAppId ||
@@ -444,7 +456,7 @@ export function evaluateOffline(input) {
       },
     };
     // Canonical deep copy prevents later fixture mutations affecting the frozen result.
-    const copied = JSON.parse(canonical(snapshot));
+    const copied = stableJSONParse(canonical(snapshot));
     const manifestDigest = evidenceDigest(copied);
     const workKey = workKeyFor(copied, manifestDigest);
     return outcome("SHADOW_EVIDENCE_READY", "SIMULATED_PREREQUISITES_ONLY", "",
@@ -496,7 +508,7 @@ export function reviewWithMock(shadow, mock) {
 
     const proposal = inertCopy(mock);
     if (proposal?.manifestDigest !== manifestDigest ||
-        !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(proposal.verdict))
+        !stableArrayIncludes(["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"], proposal.verdict))
       return hold("MOCK_RECEIPT_MISMATCH");
     return frozen({
       mode: "OFFLINE_SHADOW_ONLY",
