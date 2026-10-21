@@ -498,6 +498,24 @@ test("policy without required check definition is insufficient", () => {
 test("unresolved code-review thread blocks", () => {
   assert.equal(code((f) => { f.observations.unresolvedThreads = ["T1"]; }), "UNRESOLVED_REVIEW_THREADS");
 });
+test("capture timestamp must be a string and must parse as a date", () => {
+  for (const timestamp of [
+    [0], ["2026-10-21T00:00:00Z"], 0, 20261021, false, null,
+    { toString: "2026-10-21T00:00:00Z" }, "not-a-date",
+  ]) {
+    const f = fixture();
+    f.capture.capturedAt = timestamp;
+    const result = evaluateOffline(f);
+    assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(result.code, "CAPTURE_NOT_ATTESTED");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  }
+  const valid = evaluateOffline(fixture());
+  assert.equal(valid.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(typeof valid.envelope.manifest.capture.capturedAt, "string");
+});
 test("unattested source and malformed inputs fail closed", () => {
   assert.equal(state((f) => { f.capture.source = "github-live"; }), "SHADOW_INSUFFICIENT_EVIDENCE");
   assert.equal(evaluateOffline(null).state, "SHADOW_INSUFFICIENT_EVIDENCE");

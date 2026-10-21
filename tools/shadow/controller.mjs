@@ -172,6 +172,7 @@ export function evaluateOffline(input) {
     if (!event || !o || !p || !capture) return missing("MISSING_GROUP");
     if (capture.source !== "synthetic-fixture" || capture.complete !== true ||
         typeof capture.producer !== "string" || !capture.producer ||
+        typeof capture.capturedAt !== "string" ||
         !Number.isFinite(Date.parse(capture.capturedAt))) return missing("CAPTURE_NOT_ATTESTED");
     if (event.action !== "closed") return outcome("SHADOW_IGNORED", "NON_CLOSED_EVENT");
     if (event.merged !== true) return outcome("SHADOW_IGNORED", "NOT_MERGED");
