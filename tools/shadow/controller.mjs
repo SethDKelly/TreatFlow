@@ -14,12 +14,13 @@ const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCas
 const stableStringify = JSON.stringify;
 const stableSort = Function.prototype.call.bind(Array.prototype.sort);
 const stableDefineProperty = Object.defineProperty;
+const stableRegexTest = Function.prototype.call.bind(RegExp.prototype.test);
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
 
 const SHA = /^[a-f0-9]{40}$/i;
-const validSha = (value) => typeof value === "string" && SHA.test(value);
+const validSha = (value) => typeof value === "string" && stableRegexTest(SHA, value);
 const sameSha = (left, right) => typeof left === "string" &&
   typeof right === "string" && stableLowerCase(left) === stableLowerCase(right);
 const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
@@ -90,7 +91,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
       throw new TypeError("Non-inert evidence field");
-    Object.defineProperty(output, key, {
+    stableDefineProperty(output, key, {
       enumerable: true, configurable: true, writable: true,
       value: inertCopy(descriptor.value, seen, depth + 1, budget),
     });
@@ -386,7 +387,7 @@ export function evaluateOffline(input) {
         !sameSha(o.integratedChange.toSha, o.integratedTip))
       return missing("INCOMPLETE_OR_WRONG_DIFF");
     if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
-        SENSITIVE_PATH.test(f.path) || (f.previousPath && SENSITIVE_PATH.test(f.previousPath))))
+        stableRegexTest(SENSITIVE_PATH, f.path) || (f.previousPath && stableRegexTest(SENSITIVE_PATH, f.previousPath))))
       return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
     // Two-parent merges can add conflict-resolution edits or unrelated
     // landed content. Parent identity alone cannot authenticate equivalence.
