@@ -1,7 +1,40 @@
 // S-42 offline-only synthetic event/review reconciler.
 // No network, filesystem, credentials, webhook listener, actions, or status writes.
 // All observations are caller-controlled test data, NOT authenticated evidence.
+import { types } from "node:util";
+
 const SHA = /^[a-f0-9]{40}$/i;
+// Do not read Proxy/accessor fields before rejecting them. Non-inert objects
+// can cause arbitrary caller-side effects even in a "pure" test harness.
+function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }, depth = 0) {
+  if (++budget.nodes > 4096 || depth > 32) return false;
+  if (typeof value === "string") {
+    if (value.length > 786432) return false;
+    budget.bytes += Buffer.byteLength(value, "utf8");
+    return budget.bytes <= 786432;
+  }
+  if (value === null || typeof value === "boolean") return true;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value !== "object" || types.isProxy(value) || budget.seen.has(value))
+    return false;
+  budget.seen.add(value);
+  const array = Array.isArray(value);
+  if ((!array && Object.getPrototypeOf(value) !== Object.prototype) ||
+      (array && value.length > 256)) return false;
+  const keys = Reflect.ownKeys(value);
+  if (keys.length > 256 + (array ? 1 : 0)) return false;
+  if (array && keys.length !== value.length + 1) return false;
+  for (const key of keys) {
+    if (typeof key !== "string" || (array && key === "length")) continue;
+    if (typeof key !== "string") return false;
+    budget.bytes += Buffer.byteLength(key, "utf8");
+    if (budget.bytes > 786432) return false;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !("value" in descriptor) ||
+        !safeFixture(descriptor.value, budget, depth + 1)) return false;
+  }
+  return true;
+}
 const safeId = (x) => Number.isSafeInteger(x) && x > 0;
 const sameSha = (a, b) => typeof a === "string" && typeof b === "string" &&
   SHA.test(a) && SHA.test(b) && a.toLowerCase() === b.toLowerCase();
@@ -23,6 +56,8 @@ const actions = Object.freeze({
 // A delivery only wakes a later source reconciliation. Even a valid-looking
 // GitHub/Codex marker, reaction, or check_run event never creates a verdict.
 export function normalizeWakeHint(event, policy) {
+  if (!safeFixture(event) || !safeFixture(policy))
+    return invalid("NON_INERT_FIXTURE");
   if (!event || !policy || typeof event !== "object" || typeof policy !== "object" ||
       typeof event.event !== "string" ||
       !Object.hasOwn(actions, event.event) ||
@@ -43,7 +78,7 @@ export function normalizeWakeHint(event, policy) {
 // Models duplicates/out-of-order/missed wakeups. An absent webhook must not
 // block a separately scheduled, bounded post-request source recheck.
 export function coalesceWakeHints(events, policy) {
-  if (!Array.isArray(events) || events.length > 256)
+  if (!safeFixture(events) || !safeFixture(policy) || !Array.isArray(events) || events.length > 256)
     return Object.freeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
   const seen = new Set();
   let accepted = 0, duplicates = 0, rejected = 0;
@@ -60,7 +95,9 @@ export function coalesceWakeHints(events, policy) {
 // All inputs are synthetic fixtures. In a future live integration, only a
 // separate, authenticated source collector can construct observed facts;
 // no event/comment payload may be substituted for those observations.
-export function reconcileOffline({ policy, observed, retry } = {}) {
+export function reconcileOffline(input = {}) {
+  if (!safeFixture(input)) return invalid("NON_INERT_FIXTURE");
+  const { policy, observed, retry } = input;
   if (!policy || !observed || !retry || typeof policy !== "object" ||
       typeof observed !== "object" || typeof retry !== "object")
     return invalid("MISSING_GROUP");
@@ -69,6 +106,8 @@ export function reconcileOffline({ policy, observed, retry } = {}) {
       !sameSha(policy.headSha, policy.headSha) ||
       !sameSha(policy.workflowRevision, policy.workflowRevision))
     return invalid("INVALID_POLICY");
+  if (policy.workflowPath !== ".github/workflows/ci.yml")
+    return invalid("INVALID_WORKFLOW_POLICY");
   if (!Number.isSafeInteger(retry.attempt) || retry.attempt < 0 ||
       !Number.isSafeInteger(retry.maxAttempts) ||
       retry.maxAttempts < 1 || retry.maxAttempts > 12)
@@ -83,7 +122,8 @@ export function reconcileOffline({ policy, observed, retry } = {}) {
     return result("STALE_HEAD", "HEAD_CHANGED_REEVALUATE_POLICY");
   // Observations are not provenance attestations. Missing or contradictory
   // source facts remain unknown rather than being inferred from an event.
-  if (!Array.isArray(observed.reviews) || !Array.isArray(observed.checks) ||
+  if (!Array.isArray(observed.reviews) || observed.reviews.length > 256 ||
+      !Array.isArray(observed.checks) || observed.checks.length > 256 ||
       !Number.isSafeInteger(observed.unresolvedThreads) ||
       observed.unresolvedThreads < 0)
     return invalid("INCOMPLETE_SOURCE_OBSERVATION");
@@ -118,12 +158,33 @@ export function reconcileOffline({ policy, observed, retry } = {}) {
 
   const trustedChecks = observed.checks.filter((check) => check &&
     check.name === "Verify" && check.appId === policy.checkAppId &&
+    check.workflowPath === policy.workflowPath &&
+    safeId(check.runId) && safeId(check.attempt) &&
     sameSha(check.headSha, policy.headSha) &&
     sameSha(check.workflowRevision, policy.workflowRevision));
-  if (!trustedChecks.length) return invalid("TRUSTED_EXACT_HEAD_CI_MISSING");
+  // No ambiguity about the single explicitly scoped required run.
+  if (trustedChecks.length !== 1)
+    return invalid("TRUSTED_UNIQUE_CI_RUN_MISSING");
   if (trustedChecks.some((check) => check.status !== "completed" ||
       check.conclusion !== "success"))
     return result("HOLD_FINDINGS", "REQUIRED_CI_NOT_SUCCESSFUL");
+  // A terminal bot receipt can precede delayed inline findings. Require a
+  // second, strictly later source read after the receipt; absence is PENDING.
+  const reads = observed.postReceiptReads;
+  if (!Array.isArray(reads) || reads.length !== 2)
+    return result("PENDING", "SETTLING_RECHECK_REQUIRED");
+  const [first, second] = reads;
+  if (!first || !second || !safeId(first.generation) ||
+      !safeId(second.generation) || second.generation <= first.generation ||
+      !sameSha(first.headSha, policy.headSha) ||
+      !sameSha(second.headSha, policy.headSha) ||
+      first.afterReceipt !== true || second.afterReceipt !== true ||
+      !terminal.some((review) => review.id === first.receiptId &&
+        review.id === second.receiptId) ||
+      second.reviewThreadReadComplete !== true ||
+      second.checkReadComplete !== true ||
+      second.unresolvedThreads !== observed.unresolvedThreads)
+    return invalid("SETTLING_EVIDENCE_INCOMPLETE");
   // Even this positive fixture is not independent acceptance or permission.
   return result("READY_FOR_SPONSOR_DECISION", "OFFLINE_ONLY_SOURCE_RECHECK_REQUIRED");
 }
