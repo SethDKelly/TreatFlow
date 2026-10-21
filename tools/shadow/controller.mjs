@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 
 const SHA = /^[a-f0-9]{40}$/i;
-const SENSITIVE_PATH = /^(?:\.github\/|AGENTS\.md$|\.cursor\/|docs\/methodology\/agentic-development-governance\.md$|(?:infra|terraform|security)\/)/i;
+const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/agentic-development-governance\.md$|(?:infra|terraform|security)\/)|(?:^|\/)AGENTS\.md$/i;
 
 // Capture one detached, inert snapshot BEFORE validation and hashing.
 // Reject accessors, sparse arrays, exotic objects, cycles and oversized inputs.
@@ -74,7 +74,8 @@ const hold = (code, detail) => outcome("SHADOW_HOLD", code, detail);
 const missing = (code, detail) => outcome("SHADOW_INSUFFICIENT_EVIDENCE", code, detail);
 
 const validPath = (path) => typeof path === "string" && path.length > 0 &&
-  !path.startsWith("/") && !path.includes("..");
+  !path.startsWith("/") && !path.includes("\\") && !/[\u0000-\u001f]/.test(path) &&
+  path.split("/").every((part) => part !== "" && part !== "." && part !== "..");
 
 function validFiles(change) {
   return change && change.complete === true && Array.isArray(change.files) &&
@@ -148,6 +149,7 @@ export function evaluateOffline(input) {
     if (o.issue.status !== "Verification" || o.issue.blockersComplete !== true)
       return hold("ISSUE_NOT_ACCEPTANCE_ELIGIBLE");
     if (!Array.isArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
+        !p.requiredChecks.every((name) => typeof name === "string" && name.trim().length > 0 && name === name.trim()) ||
         new Set(p.requiredChecks).size !== p.requiredChecks.length ||
         !Array.isArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
     for (const name of p.requiredChecks) {
