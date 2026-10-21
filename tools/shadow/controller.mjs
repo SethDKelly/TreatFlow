@@ -6,7 +6,10 @@ const validSha = (value) => typeof value === "string" && SHA.test(value);
 const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
 // Conservatively protect all phase records: current or future phase authority
 // must not be downgraded just because a new numbered phase becomes active.
-const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/|tools\/shadow\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:AGENTS|CLAUDE)\.md$/i;
+// The check's execution policy includes package scripts/locks and runnable
+// scripts, not only the workflow YAML itself. Fail closed on changes to any
+// of these inputs until the separate pre-merge security gate is attested.
+const SENSITIVE_PATH = /^(?:\.github\/|\.cursor\/|docs\/methodology\/|docs\/phases\/|tools\/shadow\/|scripts\/|(?:infra|terraform|security)\/)|(?:^|\/)(?:(?:AGENTS|CLAUDE)\.md|package(?:-lock)?\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|yarn\.lock)$/i;
 const MAX_INPUT_NODES = 4096;
 const MAX_ENVELOPE_NODES = 8192;
 const MAX_EVIDENCE_BYTES = 1048576;
@@ -108,15 +111,21 @@ const validPath = (path) => typeof path === "string" && path.length > 0 &&
   path.split("/").every((part) => part !== "" && part !== "." && part !== "..");
 
 function validFiles(change) {
-  return change && change.complete === true && Array.isArray(change.files) &&
-    change.files.length > 0 &&
-    new Set(change.files.map((file) => file.path)).size === change.files.length &&
-    change.files.every((f) =>
-      validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
-      (f.status !== "renamed" ||
-        (validPath(f.previousPath) && f.previousPath !== f.path)) &&
-      (f.kind === "text" ? validDigest(f.patchDigest) :
-        f.kind === "nontext" && validDigest(f.objectDigest)));
+  if (!change || change.complete !== true || !Array.isArray(change.files) ||
+      change.files.length === 0) return false;
+  if (new Set(change.files.map((file) => file.path)).size !== change.files.length)
+    return false;
+  // One source cannot be renamed to multiple destinations in a single diff.
+  // A duplicated source needs explicit copy provenance, unsupported here.
+  const renameSources = change.files.filter((file) => file.status === "renamed")
+    .map((file) => file.previousPath);
+  if (new Set(renameSources).size !== renameSources.length) return false;
+  return change.files.every((f) =>
+    validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
+    (f.status !== "renamed" ||
+      (validPath(f.previousPath) && f.previousPath !== f.path)) &&
+    (f.kind === "text" ? validDigest(f.patchDigest) :
+      f.kind === "nontext" && validDigest(f.objectDigest)));
 }
 
 // This is strict synthetic *descriptor* correspondence, not authenticated
@@ -178,7 +187,8 @@ export function evaluateOffline(input) {
     if (!["merge", "squash", "rebase"].includes(o.mergeStrategy))
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
     if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
-        !validPath(p.workflowPath) || !p.workflowPath.startsWith(".github/workflows/") ||
+        !validPath(p.workflowPath) ||
+        !/^\.github\/workflows\/[^/]+\.ya?ml$/.test(p.workflowPath) ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
     if (!Array.isArray(o.parentShas) || o.parentShas.length === 0 ||
         !o.parentShas.every((sha) => validSha(sha)))

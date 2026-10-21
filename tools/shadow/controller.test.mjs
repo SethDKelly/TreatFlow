@@ -182,6 +182,42 @@ test("rename provenance and duplicate landed paths are conservatively checked", 
     f.observations.integratedChange.files = [file("src/one.ts"), file("src/one.ts")];
   }), "INCOMPLETE_OR_WRONG_DIFF");
 });
+test("CI package scripts and script entry points require protected review", () => {
+  for (const path of [
+    "package.json", "packages/secondary/package.json", "package-lock.json",
+    "npm-shrinkwrap.json", "pnpm-lock.yaml", "yarn.lock", "scripts/verify.mjs",
+  ]) {
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [file(path)];
+      f.observations.integratedChange.files = [file(path)];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(code((f) => {
+      f.observations.authoredChange.files = [{
+        ...file("src/renamed-script.ts"), status: "renamed", previousPath: path,
+      }];
+    }), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  }
+});
+test("duplicate rename sources fail closed even with unique destinations", () => {
+  const descriptors = [
+    { ...file("src/a.ts"), status: "renamed", previousPath: "src/original.ts" },
+    { ...file("src/b.ts"), status: "renamed", previousPath: "src/original.ts" },
+  ];
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = descriptors;
+    f.observations.integratedChange.files = descriptors;
+  }), "INCOMPLETE_OR_WRONG_DIFF");
+  assert.equal(code((f) => {
+    f.observations.authoredChange.files = [
+      { ...file("src/a.ts"), status: "renamed", previousPath: "src/original.ts" },
+      { ...file("src/b.ts"), status: "renamed", previousPath: "src/other.ts" },
+    ];
+    f.observations.integratedChange.files = [
+      { ...file("src/a.ts"), status: "renamed", previousPath: "src/original.ts" },
+      { ...file("src/b.ts"), status: "renamed", previousPath: "src/other.ts" },
+    ];
+  }), "SIMULATED_PREREQUISITES_ONLY");
+});
 test("privileged policy/workflow paths require separate premerge gate", () => {
   for (const path of [".github/workflows/ci.yml", "AGENTS.md", "terraform/roles.tf", "docs/methodology/agentic-development-governance.md"]) {
     assert.equal(code((f) => { f.observations.integratedChange.files = [file(path)]; }), "PREMERGE_SECURITY_GATE_UNATTESTED");
@@ -248,6 +284,21 @@ test("workflow path traversal is rejected as untrusted provenance", () => {
     f.policy.workflowPath = ".github/workflows/../untrusted.yml";
     f.observations.checks[0].workflowPath = ".github/workflows/../untrusted.yml";
   }), "UNTRUSTED_CHECK_POLICY_SOURCE");
+});
+test("workflow provenance accepts only direct .yml/.yaml workflow files", () => {
+  for (const path of [
+    ".github/workflows/noop.txt", ".github/workflows/readme.md",
+    ".github/workflows/nested/verify.yml", ".github/workflows/ci.json",
+  ]) {
+    assert.equal(code((f) => {
+      f.policy.workflowPath = path;
+      f.observations.checks[0].workflowPath = path;
+    }), "UNTRUSTED_CHECK_POLICY_SOURCE");
+  }
+  assert.equal(code((f) => {
+    f.policy.workflowPath = ".github/workflows/verify.yaml";
+    f.observations.checks[0].workflowPath = ".github/workflows/verify.yaml";
+  }), "SIMULATED_PREREQUISITES_ONLY");
 });
 test("array-wrapped hashes and digests cannot pass string validation", () => {
   assert.equal(code((f) => { f.policy.policySha = [sha("5")]; }), "UNPINNED_GIT_OR_POLICY");
