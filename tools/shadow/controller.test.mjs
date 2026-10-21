@@ -613,6 +613,63 @@ test("P2 exact final source reread catches same-count run replacement and blocke
   assert.equal(ready.envelope.authenticated, false);
 });
 
+test("P2 non-required runs must include complete check provenance in both scans", () => {
+  const auxiliary = {
+    name: "Optional audit", sha: sha("2"), appId: 15368,
+    workflowRevision: sha("6"), workflowPath: ".github/workflows/optional.yml",
+    runId: 601, attempt: 1, status: "completed", conclusion: "failure",
+  };
+  const addExtra = (f) => {
+    f.observations.checks.push(clone(auxiliary));
+    f.capture.reads[1].checkRuns.push(clone(auxiliary));
+    f.capture.reads[4].checkRuns.push(clone(auxiliary));
+    f.capture.reads[4].checkRunCount = 2;
+  };
+  // An OPTIONAL failed check is allowed as an observation; it is not a
+  // substitute for the required successful Verify, and remains untrusted.
+  const positive = decide(addExtra);
+  assert.equal(positive.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(positive.canWrite, false);
+  assert.equal(positive.canApprove, false);
+  assert.equal(positive.canDispatch, false);
+  for (const name of ["runId", "attempt", "status", "conclusion", "appId",
+    "workflowPath", "workflowRevision", "sha", "name"]) {
+    for (const omitFrom of ["all", "initial", "final"]) {
+      const result = decide((f) => {
+        addExtra(f);
+        if (omitFrom === "all") {
+          delete f.observations.checks[1][name];
+          delete f.capture.reads[1].checkRuns[1][name];
+          delete f.capture.reads[4].checkRuns[1][name];
+        } else if (omitFrom === "initial") {
+          delete f.capture.reads[1].checkRuns[1][name];
+        } else {
+          delete f.capture.reads[4].checkRuns[1][name];
+        }
+      });
+      assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED", name + "/" + omitFrom);
+      assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+      assert.equal(result.canWrite, false);
+      assert.equal(result.canApprove, false);
+      assert.equal(result.canDispatch, false);
+    }
+  }
+  // Explicit null conclusion is allowed for a pending auxiliary check;
+  // omission is NOT equivalent to the valid explicit unknown result.
+  const pending = decide((f) => {
+    addExtra(f);
+    for (const c of [
+      f.observations.checks[1],
+      f.capture.reads[1].checkRuns[1],
+      f.capture.reads[4].checkRuns[1],
+    ]) {
+      c.status = "in_progress";
+      c.conclusion = null;
+    }
+  });
+  assert.equal(pending.state, "SHADOW_EVIDENCE_READY");
+});
+
 test("source claims older than five minutes or future dated cannot become ready", () => {
   assert.equal(code((f) => { f.capture.reads[0].observedAt = at(360); }), "CAPTURE_STALE_OR_UNORDERED");
   assert.equal(code((f) => { f.capture.capturedAt = at(360); }), "CAPTURE_STALE_OR_UNORDERED");
