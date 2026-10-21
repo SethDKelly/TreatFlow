@@ -131,8 +131,8 @@ function validFiles(change) {
 }
 
 // This is strict synthetic *descriptor* correspondence, not authenticated
-// Git patch/tree proof. Unreconciled squash/rebase transformations HOLD rather
-// than treating unrelated landed content as the reviewed change.
+// Git patch/tree proof. Unreconciled transformations for ALL three merge
+// strategies HOLD; parent ancestry alone never attests to landed content.
 function sameChangeDescriptors(authored, integrated) {
   if (authored.files.length !== integrated.files.length) return false;
   const normalize = (change) => change.files.map((file) => JSON.stringify([
@@ -226,8 +226,11 @@ export function evaluateOffline(input) {
     if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
         SENSITIVE_PATH.test(f.path) || (f.previousPath && SENSITIVE_PATH.test(f.previousPath))))
       return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
-    if (o.mergeStrategy !== "merge" &&
-        !sameChangeDescriptors(o.authoredChange, o.integratedChange))
+    // Two-parent merges can add conflict-resolution edits or unrelated
+    // landed content. Parent identity alone cannot authenticate equivalence.
+    // Until independently verified reconciliation exists, require exactly
+    // matching synthetic descriptors regardless of integration strategy.
+    if (!sameChangeDescriptors(o.authoredChange, o.integratedChange))
       return hold("LANDED_CHANGE_NOT_RECONCILED");
     if (!o.issue || typeof p.issueId !== "string" || !/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(p.issueId) ||
         typeof o.issue.id !== "string" || !Array.isArray(o.issue.linkedIds) ||

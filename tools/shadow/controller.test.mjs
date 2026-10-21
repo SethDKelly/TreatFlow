@@ -206,6 +206,56 @@ test("wrong range and missing binary identity fail closed", () => {
   }), "LANDED_CHANGE_NOT_RECONCILED");
   assert.equal(code((f) => { f.observations.integratedChange.files = [{ path: "figure.bin", kind: "nontext", status: "modified" }]; }), "INCOMPLETE_OR_WRONG_DIFF");
 });
+test("ordinary merge cannot land unrelated or conflict-resolution content without reconciliation", () => {
+  const mismatch = (change) => code((f) => { change(f); }, "merge");
+  assert.equal(mismatch((f) => {
+    f.observations.integratedChange.files = [file("src/unrelated.ts")];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(mismatch((f) => {
+    f.observations.integratedChange.files[0].patchDigest = digest("f");
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(mismatch((f) => {
+    f.observations.integratedChange.files[0].status = "added";
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(mismatch((f) => {
+    f.observations.authoredChange.files = [file("src/reviewed.ts")];
+    f.observations.integratedChange.files = [
+      file("src/reviewed.ts"), file("src/resolution.ts"),
+    ];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  assert.equal(mismatch((f) => {
+    f.observations.authoredChange.files = [file("assets/figure.bin", "nontext")];
+    f.observations.integratedChange.files = [{
+      ...file("assets/figure.bin", "nontext"), objectDigest: digest("e"),
+    }];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+  const renamed = (origin) => ({
+    ...file("src/new-name.ts"), status: "renamed", previousPath: origin,
+  });
+  assert.equal(mismatch((f) => {
+    f.observations.authoredChange.files = [renamed("src/old-name.ts")];
+    f.observations.integratedChange.files = [renamed("src/unrelated.ts")];
+  }), "LANDED_CHANGE_NOT_RECONCILED");
+});
+test("ordinary merge matching descriptors remain mock-replayable regardless of file order", () => {
+  const f = fixture("merge");
+  f.observations.authoredChange.files = [
+    file("src/one.ts"), file("assets/icon.bin", "nontext"),
+  ];
+  f.observations.integratedChange.files = [
+    file("assets/icon.bin", "nontext"), file("src/one.ts"),
+  ];
+  const ready = evaluateOffline(f);
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(ready.envelope.authenticated, false);
+  const review = reviewWithMock(structuredClone(ready), {
+    manifestDigest: ready.envelope.manifestDigest, verdict: "PASS",
+  });
+  assert.equal(review.state, "SHADOW_REVIEW_RECORDED");
+  assert.equal(review.canApprove, false);
+  assert.equal(review.canWrite, false);
+  assert.equal(review.canDispatch, false);
+});
 test("squash and rebase must not silently land unrelated changes", () => {
   assert.equal(code((f) => {
     f.observations.integratedChange.files = [file("src/unrelated.ts")];
