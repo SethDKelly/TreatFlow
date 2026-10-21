@@ -20,6 +20,7 @@ function detach(value) {
 }
 
 const SHA = /^[a-f0-9]{40}$/i;
+const stableRegexTest = Function.prototype.call.bind(RegExp.prototype.test);
 // Do not read Proxy/accessor fields before rejecting them. Non-inert objects
 // can cause arbitrary caller-side effects even in a "pure" test harness.
 function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }, depth = 0) {
@@ -53,7 +54,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }
 }
 const safeId = (x) => Number.isSafeInteger(x) && x > 0;
 const sameSha = (a, b) => typeof a === "string" && typeof b === "string" &&
-  SHA.test(a) && SHA.test(b) && stableLowerCase(a) === stableLowerCase(b);
+  stableRegexTest(SHA, a) && stableRegexTest(SHA, b) && stableLowerCase(a) === stableLowerCase(b);
 const result = (state, reason) => Object.freeze({
   mode: "OFFLINE_SYNTHETIC_UNATTESTED", state, reason,
   canApprove: false, canWrite: false, canDispatch: false, canMerge: false,
