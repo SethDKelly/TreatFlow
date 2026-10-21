@@ -71,7 +71,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
       const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
       if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
       chargeText(String(index), budget);
-      output.push(inertCopy(descriptor.value, seen, depth + 1, budget));
+      output[output.length] = inertCopy(descriptor.value, seen, depth + 1, budget);
     }
     seen.delete(value);
     return output;
@@ -169,7 +169,7 @@ function sameChangeDescriptors(authored, integrated) {
         const value = fields[j];
         key += value === null ? "N;" : `S${value.length}:${value}`;
       }
-      encoded.push(key);
+      encoded[encoded.length] = key;
     }
     return stableSort(encoded);
   };
