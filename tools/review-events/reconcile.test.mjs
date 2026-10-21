@@ -77,7 +77,7 @@ test("falsified Codex marker from wrong app/user never completes", () =>
   verdict("PENDING", (f) => { f.observed.reviews[0].appId = 999; }));
 
 test("user-authored response and reaction cannot impersonate the provider", () =>
-  verdict("PENDING", (f) => { f.observed.reviews[0].source = "issue-comment"; }));
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.reviews[0].source = "issue-comment"; }));
 
 test("real finding blocks even if Verify succeeds", () =>
   verdict("HOLD_FINDINGS", (f) => { f.observed.reviews[0].hasFindings = true; }));
