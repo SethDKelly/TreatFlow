@@ -156,15 +156,18 @@ export function reconcileOffline(input = {}) {
   // authenticated-source fixture contains a current-head terminal receipt;
   // stale-only history above remains PENDING and never confers clearance.
 
+  // Scope candidates before validating their provenance: malformed duplicates
+  // must not disappear from the candidate set and falsely confer readiness.
   const trustedChecks = observed.checks.filter((check) => check &&
     check.name === "Verify" && check.appId === policy.checkAppId &&
-    check.workflowPath === policy.workflowPath &&
-    safeId(check.runId) && safeId(check.attempt) &&
-    sameSha(check.headSha, policy.headSha) &&
-    sameSha(check.workflowRevision, policy.workflowRevision));
+    sameSha(check.headSha, policy.headSha));
   // No ambiguity about the single explicitly scoped required run.
   if (trustedChecks.length !== 1)
     return invalid("TRUSTED_UNIQUE_CI_RUN_MISSING");
+  if (trustedChecks[0].workflowPath !== policy.workflowPath ||
+      !sameSha(trustedChecks[0].workflowRevision, policy.workflowRevision) ||
+      !safeId(trustedChecks[0].runId) || !safeId(trustedChecks[0].attempt))
+    return invalid("INVALID_VERIFY_PROVENANCE");
   if (trustedChecks.some((check) => check.status !== "completed" ||
       check.conclusion !== "success"))
     return result("HOLD_FINDINGS", "REQUIRED_CI_NOT_SUCCESSFUL");
