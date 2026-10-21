@@ -1,0 +1,147 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { normalizeWakeHint, coalesceWakeHints, reconcileOffline } from "./reconcile.mjs";
+
+const SHA = "a".repeat(40);
+const WF = "b".repeat(40);
+const BASE = {
+  policy: { repositoryId: 75, prNumber: 116, headSha: SHA, reviewerAppId: 23, checkAppId: 15368, workflowRevision: WF },
+  observed: {
+    readStatus: "complete",
+    pr: { repositoryId: 75, number: 116, headSha: SHA },
+    reviews: [{ id: 1, appId: 23, source: "provider-authored", commitSha: SHA,
+      state: "completed", hasFindings: false, unresolvedFindings: false }],
+    checks: [{ name: "Verify", appId: 15368, headSha: SHA, workflowRevision: WF,
+      status: "completed", conclusion: "success" }],
+    unresolvedThreads: 0,
+  },
+  retry: { attempt: 0, maxAttempts: 3 },
+};
+const make = () => structuredClone(BASE);
+const checkSafe = (result) => {
+  assert.equal(result.mode, "OFFLINE_SYNTHETIC_UNATTESTED");
+  for (const key of ["canApprove", "canWrite", "canDispatch", "canMerge"]) {
+    assert.equal(result[key], false, key);
+  }
+  assert.equal(Object.isFrozen(result), true);
+};
+const verdict = (state, customize) => {
+  const fixture = make();
+  customize?.(fixture);
+  const got = reconcileOffline(fixture);
+  assert.equal(got.state, state, got.reason);
+  checkSafe(got);
+};
+const hint = (overrides = {}) => ({
+  event: "pull_request_review", action: "submitted", repositoryId: 75,
+  prNumber: 116, deliveryId: "gh_123", ...overrides,
+});
+
+test("clean current head + exact Verify is advisory only", () =>
+  verdict("READY_FOR_SPONSOR_DECISION"));
+
+test("review submitted before summary / findings: bounded PENDING", () =>
+  verdict("PENDING", (f) => { f.observed.reviews = [{ id: 1, appId: 23, state: "commented", commitSha: SHA }]; }));
+
+test("reaction-only clean review never completes", () =>
+  verdict("PENDING", (f) => { f.observed.reviews = []; }));
+
+test("missing delivery reaches stalled state at bounded retry ceiling", () =>
+  verdict("REVIEW_STALLED", (f) => {
+    f.observed.reviews = [];
+    f.retry.attempt = f.retry.maxAttempts;
+  }));
+
+test("missing authenticated source read is unknown", () =>
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.readStatus = "forbidden"; }));
+
+test("wrong repository or PR fails", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.pr.repositoryId = 76; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.pr.number = 117; });
+});
+
+test("new head invalidates previous positive outcome", () =>
+  verdict("STALE_HEAD", (f) => { f.observed.pr.headSha = "c".repeat(40); }));
+
+test("older-head clean receipt without current receipt is pending, not approved", () =>
+  verdict("PENDING", (f) => { f.observed.reviews[0].commitSha = "c".repeat(40); }));
+
+test("falsified Codex marker from wrong app/user never completes", () =>
+  verdict("PENDING", (f) => { f.observed.reviews[0].appId = 999; }));
+
+test("user-authored response and reaction cannot impersonate the provider", () =>
+  verdict("PENDING", (f) => { f.observed.reviews[0].source = "issue-comment"; }));
+
+test("real finding blocks even if Verify succeeds", () =>
+  verdict("HOLD_FINDINGS", (f) => { f.observed.reviews[0].hasFindings = true; }));
+
+test("new unresolved thread blocks even with a clean bot summary", () =>
+  verdict("HOLD_FINDINGS", (f) => { f.observed.unresolvedThreads = 1; }));
+
+test("dismissal makes the previous review unsafe", () =>
+  verdict("HOLD_FINDINGS", (f) => { f.observed.reviews[0].dismissed = true; }));
+
+test("wrong check app, stale SHA and mismatched workflow revision all hold", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks[0].appId = 99; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks[0].headSha = "c".repeat(40); });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks[0].workflowRevision = "c".repeat(40); });
+});
+
+test("failed or in-progress CI is not review clearance", () => {
+  verdict("HOLD_FINDINGS", (f) => { f.observed.checks[0].conclusion = "failure"; });
+  verdict("HOLD_FINDINGS", (f) => { f.observed.checks[0].status = "queued"; });
+});
+
+test("missing/ambiguous facts do not become PASS", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { delete f.observed.unresolvedThreads; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.observed.checks = null; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.policy.headSha = "head"; });
+  verdict("INSUFFICIENT_EVIDENCE", (f) => { f.retry.maxAttempts = 1000000; });
+});
+
+test("duplicate provider review IDs cannot be double-counted", () =>
+  verdict("INSUFFICIENT_EVIDENCE", (f) => {
+    f.observed.reviews.push(structuredClone(f.observed.reviews[0]));
+  }));
+
+test("review event is only a wake hint with no approval capability", () => {
+  const got = normalizeWakeHint(hint(), BASE.policy);
+  assert.equal(got.state, "WAKE_RECONCILIATION");
+  checkSafe(got);
+});
+
+test("untrusted source / wrong target cannot trigger accepted wake", () => {
+  for (const e of [
+    hint({ event: "issue_comment", action: "created" }),
+    hint({ repositoryId: 999 }),
+    hint({ prNumber: 20 }),
+    hint({ deliveryId: "" }),
+    hint({ event: "push", action: "created" }),
+    hint({ event: "pull_request_review", action: "approved" }),
+  ]) {
+    const got = normalizeWakeHint(e, BASE.policy);
+    assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+    checkSafe(got);
+  }
+  assert.equal(normalizeWakeHint(hint({ event: "issue_comment", action: "edited", isPullRequest: true }), BASE.policy).state, "WAKE_RECONCILIATION");
+});
+
+test("duplicate and out-of-order hints are coalesced but never adjudicate", () => {
+  const got = coalesceWakeHints([
+    hint({ deliveryId: "second" }), hint({ deliveryId: "first" }),
+    hint({ deliveryId: "second" }), hint({ deliveryId: "bad", repositoryId: 77 }),
+  ], BASE.policy);
+  assert.deepEqual(got, { accepted: 2, duplicates: 1, rejected: 1, needsRecheck: true });
+});
+
+test("no webhook event still requires bounded reconciliation", () => {
+  assert.deepEqual(coalesceWakeHints([], BASE.policy),
+    { accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
+  verdict("READY_FOR_SPONSOR_DECISION");
+});
+
+test("adversarially large or malformed event batches never cause dispatch", () => {
+  const got = coalesceWakeHints(Array(257).fill(hint()), BASE.policy);
+  assert.equal(got.needsRecheck, true);
+  assert.equal(got.accepted, 0);
+});
