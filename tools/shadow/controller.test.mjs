@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateOffline, evidenceDigest, reviewWithMock } from "./controller.mjs";
 import { types } from "node:util";
+import { createRequire, syncBuiltinESMExports } from "node:module";
 
 const sha = (c) => c.repeat(40);
 const digest = (c) => c.repeat(64);
@@ -748,6 +749,35 @@ test("S-74 P2: monkey-patched shared util.types.isProxy cannot open proxy traps"
     assert.equal(traps, 0);
   } finally {
     types.isProxy = original;
+  }
+});
+
+
+test("S-74 P2: syncBuiltinESMExports cannot replace module-captured proxy guard", () => {
+  const localRequire = createRequire(import.meta.url);
+  const liveTypes = localRequire("node:util/types");
+  const original = liveTypes.isProxy;
+  let traps = 0;
+  const proxy = new Proxy({ innocent: true }, {
+    getPrototypeOf(obj) { traps++; return Reflect.getPrototypeOf(obj); },
+    ownKeys(obj) { traps++; return Reflect.ownKeys(obj); },
+    getOwnPropertyDescriptor(obj, key) {
+      traps++;
+      return Reflect.getOwnPropertyDescriptor(obj, key);
+    },
+  });
+  try {
+    liveTypes.isProxy = () => false;
+    syncBuiltinESMExports();
+    assert.throws(() => evidenceDigest(proxy), TypeError);
+    const nested = fixture();
+    nested.capture.reads[4].checkRuns[0] = proxy;
+    assert.equal(evaluateOffline(nested).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(reviewWithMock(proxy, { verdict: "PASS" }).state, "SHADOW_HOLD");
+    assert.equal(traps, 0);
+  } finally {
+    liveTypes.isProxy = original;
+    syncBuiltinESMExports();
   }
 });
 
