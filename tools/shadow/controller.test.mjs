@@ -112,6 +112,53 @@ test("integration commit may not appear in its own parent list", () => {
     f.observations.parentShas = [sha("3"), sha("3")];
   }, "merge"), "INCONSISTENT_PARENT_GRAPH");
 });
+test("mixed-case SHA aliases cannot evade self-parent or duplicate-parent guards", () => {
+  assert.equal(code((f) => {
+    f.observations.integratedTip = sha("a");
+    f.observations.integratedChange.toSha = sha("a");
+    f.observations.checks[0].sha = sha("a");
+    f.observations.parentShas = [sha("A")];
+    f.observations.preIntegrationBaseSha = sha("A");
+    f.observations.integratedChange.fromSha = sha("A");
+  }, "squash"), "INCONSISTENT_PARENT_GRAPH");
+  assert.equal(code((f) => {
+    f.observations.parentShas = [sha("a"), sha("A")];
+    f.observations.preIntegrationBaseSha = sha("a");
+    f.observations.integratedChange.fromSha = sha("a");
+  }, "merge"), "INCONSISTENT_PARENT_GRAPH");
+  assert.equal(code((f) => {
+    f.observations.integratedTip = sha("a");
+    f.observations.integratedChange.toSha = sha("a");
+    f.observations.checks[0].sha = sha("a");
+    f.observations.reviewedHead = sha("a");
+    f.observations.authoredChange.toSha = sha("a");
+    f.observations.parentShas = [sha("3"), sha("A")];
+  }, "merge"), "INCONSISTENT_PARENT_GRAPH");
+});
+test("declared nonempty diffs cannot have identical endpoints", () => {
+  for (const strategy of ["squash", "merge", "rebase"]) {
+    assert.equal(code((f) => {
+      f.observations.mergeBaseSha = f.observations.reviewedHead;
+      f.observations.authoredChange.fromSha = f.observations.reviewedHead;
+      if (strategy === "rebase") {
+        f.observations.rebaseRangeProven = true;
+        f.observations.integratedChange.rangeProven = true;
+      }
+    }, strategy), "ZERO_LENGTH_DECLARED_DIFF");
+  }
+  assert.equal(code((f) => {
+    f.observations.rebaseRangeProven = true;
+    f.observations.integratedChange.rangeProven = true;
+    f.observations.preIntegrationBaseSha = f.observations.integratedTip;
+    f.observations.integratedChange.fromSha = f.observations.integratedTip;
+  }, "rebase"), "ZERO_LENGTH_DECLARED_DIFF");
+  assert.equal(code((f) => {
+    f.observations.reviewedHead = sha("a");
+    f.observations.authoredChange.toSha = sha("a");
+    f.observations.mergeBaseSha = sha("A");
+    f.observations.authoredChange.fromSha = sha("A");
+  }), "ZERO_LENGTH_DECLARED_DIFF");
+});
 test("ordinary merge must have two parents", () => {
   assert.equal(code((f) => { f.observations.parentShas = [sha("3")]; }, "merge"), "INCONSISTENT_PARENT_GRAPH");
 });

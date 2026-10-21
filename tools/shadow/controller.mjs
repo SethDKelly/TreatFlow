@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && SHA.test(value);
+const sameSha = (left, right) => typeof left === "string" &&
+  typeof right === "string" && left.toLowerCase() === right.toLowerCase();
 const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
 // Conservatively protect all phase records: current or future phase authority
 // must not be downgraded just because a new numbered phase becomes active.
@@ -193,27 +195,33 @@ export function evaluateOffline(input) {
     if (!Array.isArray(o.parentShas) || o.parentShas.length === 0 ||
         !o.parentShas.every((sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
-    // A commit cannot be its own ancestor. Enforce graph consistency before
-    // accepting synthetic merge/squash/rebase evidence.
-    if (o.parentShas.includes(o.integratedTip) ||
-        new Set(o.parentShas).size !== o.parentShas.length)
+    // Object ID spelling is case-insensitive; do not let uppercase aliases
+    // evade self-parent or duplicate-parent checks.
+    const canonicalParents = o.parentShas.map((sha) => sha.toLowerCase());
+    if (canonicalParents.includes(o.integratedTip.toLowerCase()) ||
+        new Set(canonicalParents).size !== canonicalParents.length)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
         o.mergeStrategy === "squash" && o.parentShas.length !== 1 ||
         o.mergeStrategy === "rebase" && o.parentShas.length !== 1)
       return hold("INCONSISTENT_PARENT_GRAPH");
-    if (o.mergeStrategy !== "rebase" && o.parentShas[0] !== o.preIntegrationBaseSha)
+    if (o.mergeStrategy !== "rebase" && !sameSha(o.parentShas[0], o.preIntegrationBaseSha))
       return hold("WRONG_PRE_INTEGRATION_PARENT");
-    if (o.mergeStrategy === "merge" && o.parentShas[1] !== o.reviewedHead)
+    if (o.mergeStrategy === "merge" && !sameSha(o.parentShas[1], o.reviewedHead))
       return hold("WRONG_MERGE_SECOND_PARENT");
+    // The fixture declares a nonempty file diff on BOTH ranges; equal
+    // endpoints (including differently cased SHA spellings) are impossible.
+    if (sameSha(o.mergeBaseSha, o.reviewedHead) ||
+        sameSha(o.preIntegrationBaseSha, o.integratedTip))
+      return hold("ZERO_LENGTH_DECLARED_DIFF");
     if (o.mergeStrategy === "rebase" &&
         (o.rebaseRangeProven !== true || o.integratedChange.rangeProven !== true))
       return missing("REBASE_LANDING_RANGE_UNPROVEN");
     if (!validFiles(o.authoredChange) || !validFiles(o.integratedChange) ||
-        o.authoredChange.fromSha !== o.mergeBaseSha ||
-        o.authoredChange.toSha !== o.reviewedHead ||
-        o.integratedChange.fromSha !== o.preIntegrationBaseSha ||
-        o.integratedChange.toSha !== o.integratedTip)
+        !sameSha(o.authoredChange.fromSha, o.mergeBaseSha) ||
+        !sameSha(o.authoredChange.toSha, o.reviewedHead) ||
+        !sameSha(o.integratedChange.fromSha, o.preIntegrationBaseSha) ||
+        !sameSha(o.integratedChange.toSha, o.integratedTip))
       return missing("INCOMPLETE_OR_WRONG_DIFF");
     if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
         SENSITIVE_PATH.test(f.path) || (f.previousPath && SENSITIVE_PATH.test(f.previousPath))))
@@ -236,8 +244,8 @@ export function evaluateOffline(input) {
       const matches = o.checks.filter((c) => c.name === name);
       if (matches.length !== 1) return hold("MISSING_OR_DUPLICATE_REQUIRED_CHECK", name);
       const c = matches[0];
-      if (c.sha !== o.integratedTip || c.appId !== p.checkAppId ||
-          c.workflowRevision !== p.workflowRevision || c.workflowPath !== p.workflowPath ||
+      if (!sameSha(c.sha, o.integratedTip) || c.appId !== p.checkAppId ||
+          !sameSha(c.workflowRevision, p.workflowRevision) || c.workflowPath !== p.workflowPath ||
           !Number.isSafeInteger(c.runId) || c.runId <= 0 ||
           !Number.isSafeInteger(c.attempt) || c.attempt <= 0 ||
           c.status !== "completed" || c.conclusion !== "success")
