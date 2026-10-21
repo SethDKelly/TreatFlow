@@ -156,10 +156,12 @@ function validFiles(change) {
 // strategies HOLD; parent ancestry alone never attests to landed content.
 function sameChangeDescriptors(authored, integrated) {
   if (authored.files.length !== integrated.files.length) return false;
-  const normalize = (change) => change.files.map((file) => JSON.stringify([
-    file.path, file.status, file.status === "renamed" ? file.previousPath : null,
-    file.kind, stableLowerCase(file.kind === "text" ? file.patchDigest : file.objectDigest),
-  ])).sort();
+  const normalize = (change) => change.files.map((file) => {
+    const fields = [file.path, file.status,
+      file.status === "renamed" ? file.previousPath : null,
+      file.kind, stableLowerCase(file.kind === "text" ? file.patchDigest : file.objectDigest)];
+    return fields.map((value) => value === null ? "N;" : `S${value.length}:${value}`).join("");
+  }).sort();
   const expected = normalize(authored), actual = normalize(integrated);
   return expected.every((entry, index) => entry === actual[index]);
 }
