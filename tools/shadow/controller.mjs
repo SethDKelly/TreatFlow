@@ -193,6 +193,11 @@ export function evaluateOffline(input) {
     if (!Array.isArray(o.parentShas) || o.parentShas.length === 0 ||
         !o.parentShas.every((sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
+    // A commit cannot be its own ancestor. Enforce graph consistency before
+    // accepting synthetic merge/squash/rebase evidence.
+    if (o.parentShas.includes(o.integratedTip) ||
+        new Set(o.parentShas).size !== o.parentShas.length)
+      return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
         o.mergeStrategy === "squash" && o.parentShas.length !== 1 ||
         o.mergeStrategy === "rebase" && o.parentShas.length !== 1)

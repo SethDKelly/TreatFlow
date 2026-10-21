@@ -89,6 +89,29 @@ test("unpinned graph and policy never advance", () => {
 test("unsupported merge strategy stops", () => {
   assert.equal(code((f) => { f.observations.mergeStrategy = "indirect"; }), "UNSUPPORTED_INTEGRATION_STRATEGY");
 });
+test("integration commit may not appear in its own parent list", () => {
+  assert.equal(code((f) => {
+    f.observations.integratedTip = sha("1");
+    f.observations.integratedChange.toSha = sha("1");
+    f.observations.checks[0].sha = sha("1");
+    f.observations.parentShas = [sha("3"), sha("1")];
+  }, "merge"), "INCONSISTENT_PARENT_GRAPH");
+  assert.equal(code((f) => {
+    f.observations.integratedTip = sha("3");
+    f.observations.integratedChange.toSha = sha("3");
+    f.observations.checks[0].sha = sha("3");
+  }, "squash"), "INCONSISTENT_PARENT_GRAPH");
+  assert.equal(code((f) => {
+    f.observations.rebaseRangeProven = true;
+    f.observations.integratedChange.rangeProven = true;
+    f.observations.integratedTip = sha("3");
+    f.observations.integratedChange.toSha = sha("3");
+    f.observations.checks[0].sha = sha("3");
+  }, "rebase"), "INCONSISTENT_PARENT_GRAPH");
+  assert.equal(code((f) => {
+    f.observations.parentShas = [sha("3"), sha("3")];
+  }, "merge"), "INCONSISTENT_PARENT_GRAPH");
+});
 test("ordinary merge must have two parents", () => {
   assert.equal(code((f) => { f.observations.parentShas = [sha("3")]; }, "merge"), "INCONSISTENT_PARENT_GRAPH");
 });
