@@ -92,6 +92,14 @@ test("unsupported merge strategy stops", () => {
 test("ordinary merge must have two parents", () => {
   assert.equal(code((f) => { f.observations.parentShas = [sha("3")]; }, "merge"), "INCONSISTENT_PARENT_GRAPH");
 });
+test("ordinary merge second parent must be the reviewed head", () => {
+  assert.equal(code((f) => { f.observations.parentShas[1] = sha("9"); }, "merge"), "WRONG_MERGE_SECOND_PARENT");
+});
+test("missing check source policy is insufficient even if observed check field is missing too", () => {
+  assert.equal(code((f) => { delete f.policy.checkAppId; delete f.observations.checks[0].appId; }), "UNTRUSTED_CHECK_POLICY_SOURCE");
+  assert.equal(code((f) => { delete f.policy.workflowPath; delete f.observations.checks[0].workflowPath; }), "UNTRUSTED_CHECK_POLICY_SOURCE");
+  assert.equal(code((f) => { f.policy.checkAppId = 0; }), "UNTRUSTED_CHECK_POLICY_SOURCE");
+});
 test("first parent mismatch stops for squash", () => {
   assert.equal(code((f) => { f.observations.parentShas = [sha("9")]; }), "WRONG_PRE_INTEGRATION_PARENT");
 });
@@ -158,6 +166,12 @@ test("mock PASS remains untrusted, never grants status writes", () => {
   const result = reviewWithMock(ready, { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" });
   assert.equal(result.state, "SHADOW_REVIEW_RECORDED");
   assert.equal(result.detail, "PASS");
+  assert.equal(result.envelope.manifestDigest, ready.envelope.manifestDigest);
+  assert.equal(result.envelope.workKey, ready.envelope.workKey);
+  assert.equal(result.envelope.authenticated, false);
+  const other = evaluateOffline(fixture("merge"));
+  const second = reviewWithMock(other, { manifestDigest: other.envelope.manifestDigest, verdict: "PASS" });
+  assert.notEqual(result.envelope.manifestDigest, second.envelope.manifestDigest);
   assert.equal(result.canWrite, false);
   assert.equal(result.canDispatch, false);
   assert.equal(result.canApprove, false);
