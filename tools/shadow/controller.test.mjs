@@ -181,6 +181,18 @@ test("ambiguous leading-dot or backslash paths cannot evade sensitive-path check
   assert.equal(code((f) => { f.observations.authoredChange.files = [{ ...file("src/new.ts"), status: "renamed", previousPath: "./.github/workflows/ci.yml" }]; }), "INCOMPLETE_OR_WRONG_DIFF");
   assert.equal(code((f) => { f.observations.integratedChange.files = [file("src\\file.ts")]; }), "INCOMPLETE_OR_WRONG_DIFF");
 });
+test("workflow path traversal is rejected as untrusted provenance", () => {
+  assert.equal(code((f) => {
+    f.policy.workflowPath = ".github/workflows/../untrusted.yml";
+    f.observations.checks[0].workflowPath = ".github/workflows/../untrusted.yml";
+  }), "UNTRUSTED_CHECK_POLICY_SOURCE");
+});
+test("array-wrapped hashes and digests cannot pass string validation", () => {
+  assert.equal(code((f) => { f.policy.policySha = [sha("5")]; }), "UNPINNED_GIT_OR_POLICY");
+  assert.equal(code((f) => { f.observations.parentShas = [[sha("3")]]; }), "MISSING_GIT_GRAPH");
+  assert.equal(code((f) => { f.observations.authoredChange.files[0].patchDigest = [digest("a")]; }), "INCOMPLETE_OR_WRONG_DIFF");
+  assert.equal(code((f) => { f.observations.integratedChange.files = [{ ...file("assets/image.bin", "nontext"), objectDigest: [digest("b")] }]; }), "INCOMPLETE_OR_WRONG_DIFF");
+});
 test("required check identities must be nonempty, configured names", () => {
   assert.equal(code((f) => { f.policy.requiredChecks = [""]; f.observations.checks[0].name = ""; }), "REQUIRED_CHECK_POLICY_MISSING");
   assert.equal(code((f) => { f.policy.requiredChecks = ["   "]; f.observations.checks[0].name = "   "; }), "REQUIRED_CHECK_POLICY_MISSING");
