@@ -211,3 +211,20 @@ test("malformed duplicate Verify cannot be filtered into readiness", () => {
     f.observed.checks.push(duplicate);
   });
 });
+
+
+test("malformed same-head duplicate receipt cannot bypass terminal validation", () => {
+  verdict("INSUFFICIENT_EVIDENCE", (f) => {
+    f.observed.reviews.push({ id: 1, appId: 23, source: "provider-authored",
+      commitSha: SHA, state: "completed", hasFindings: true });
+  });
+});
+
+test("nonstandard array prototype cannot fabricate a terminal review", () => {
+  const f = make();
+  f.observed.reviews = [];
+  Object.setPrototypeOf(f.observed.reviews, { filter() { return [BASE.observed.reviews[0]]; } });
+  const got = reconcileOffline(f);
+  assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+  checkSafe(got);
+});
