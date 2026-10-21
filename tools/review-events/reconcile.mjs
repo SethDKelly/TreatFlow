@@ -2,6 +2,9 @@
 // No network, filesystem, credentials, webhook listener, actions, or status writes.
 // All observations are caller-controlled test data, NOT authenticated evidence.
 import { types } from "node:util";
+const nativeArrayPrototype = Array.prototype;
+const nativeFilter = Function.prototype.call.bind(Array.prototype.filter);
+const nativeSome = Function.prototype.call.bind(Array.prototype.some);
 
 const SHA = /^[a-f0-9]{40}$/i;
 // Do not read Proxy/accessor fields before rejecting them. Non-inert objects
@@ -20,7 +23,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }
   budget.seen.add(value);
   const array = Array.isArray(value);
   if ((!array && Object.getPrototypeOf(value) !== Object.prototype) ||
-      (array && value.length > 256)) return false;
+      (array && (Object.getPrototypeOf(value) !== nativeArrayPrototype || value.length > 256))) return false;
   const keys = Reflect.ownKeys(value);
   if (keys.length > 256 + (array ? 1 : 0)) return false;
   if (array && keys.length !== value.length + 1) return false;
@@ -128,19 +131,19 @@ export function reconcileOffline(input = {}) {
       observed.unresolvedThreads < 0)
     return invalid("INCOMPLETE_SOURCE_OBSERVATION");
 
-  const current = observed.reviews.filter((review) =>
+  const current = nativeFilter(observed.reviews, (review) =>
     review && safeId(review.id) &&
     review.appId === policy.reviewerAppId &&
     sameSha(review.commitSha, policy.headSha));
-  const dismissed = current.some((review) => review.dismissed === true);
+  const dismissed = nativeSome(current, (review) => review.dismissed === true);
   if (dismissed) return result("HOLD_FINDINGS", "REVIEW_DISMISSED");
 
-  const terminal = current.filter((review) => review.state === "completed" &&
+  const terminal = nativeFilter(current, (review) => review.state === "completed" &&
     review.source === "provider-authored" &&
     typeof review.hasFindings === "boolean" &&
     typeof review.unresolvedFindings === "boolean");
 
-  if (terminal.some((review) => review.hasFindings || review.unresolvedFindings) ||
+  if (nativeSome(terminal, (review) => review.hasFindings || review.unresolvedFindings) ||
       observed.unresolvedThreads > 0)
     return result("HOLD_FINDINGS", "OPEN_REVIEW_FINDINGS");
   if (!terminal.length) {
@@ -150,7 +153,7 @@ export function reconcileOffline(input = {}) {
       : result("PENDING", "BOUNDED_RECHECK_REQUIRED");
   }
   // Conflicting terminal review records cannot be resolved by arrival order.
-  if (new Set(terminal.map((review) => review.id)).size !== terminal.length)
+  if (terminal.some((review, index) => terminal.findIndex((other) => other.id === review.id) !== index))
     return invalid("DUPLICATE_REVIEW_ID");
   // Historical receipts on earlier heads are normal. Ignore them when the
   // authenticated-source fixture contains a current-head terminal receipt;
@@ -158,7 +161,7 @@ export function reconcileOffline(input = {}) {
 
   // Scope candidates before validating their provenance: malformed duplicates
   // must not disappear from the candidate set and falsely confer readiness.
-  const trustedChecks = observed.checks.filter((check) => check &&
+  const trustedChecks = nativeFilter(observed.checks, (check) => check &&
     check.name === "Verify" && check.appId === policy.checkAppId &&
     sameSha(check.headSha, policy.headSha));
   // No ambiguity about the single explicitly scoped required run.
@@ -168,7 +171,7 @@ export function reconcileOffline(input = {}) {
       !sameSha(trustedChecks[0].workflowRevision, policy.workflowRevision) ||
       !safeId(trustedChecks[0].runId) || !safeId(trustedChecks[0].attempt))
     return invalid("INVALID_VERIFY_PROVENANCE");
-  if (trustedChecks.some((check) => check.status !== "completed" ||
+  if (nativeSome(trustedChecks, (check) => check.status !== "completed" ||
       check.conclusion !== "success"))
     return result("HOLD_FINDINGS", "REQUIRED_CI_NOT_SUCCESSFUL");
   // A terminal bot receipt can precede delayed inline findings. Require a
@@ -182,7 +185,7 @@ export function reconcileOffline(input = {}) {
       !sameSha(first.headSha, policy.headSha) ||
       !sameSha(second.headSha, policy.headSha) ||
       first.afterReceipt !== true || second.afterReceipt !== true ||
-      !terminal.some((review) => review.id === first.receiptId &&
+      !nativeSome(terminal, (review) => review.id === first.receiptId &&
         review.id === second.receiptId) ||
       second.reviewThreadReadComplete !== true ||
       second.checkReadComplete !== true ||
