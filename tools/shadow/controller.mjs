@@ -33,6 +33,8 @@ const stableArrayIncludes = Function.prototype.call.bind(Array.prototype.include
 const stableObjectKeys = Object.keys;
 const stableObjectValues = Object.values;
 const stableFreeze = Object.freeze;
+const stableDateNow = Date.now;
+const stableDateParse = Date.parse;
 const stableSetUTCFullYear = Function.prototype.call.bind(Date.prototype.setUTCFullYear);
 const stableGetUTCFullYear = Function.prototype.call.bind(Date.prototype.getUTCFullYear);
 const stableGetUTCMonth = Function.prototype.call.bind(Date.prototype.getUTCMonth);
@@ -228,7 +230,7 @@ function validCaptureTimestamp(value) {
   date.setUTCFullYear(year, month - 1, day);
   if (date.getUTCFullYear() !== year ||
       date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
-  return Number.isFinite(Date.parse(value));
+  return Number.isFinite(stableDateParse(value));
 }
 
 // Time-bounded SOURCE-CLAIM ordering for synthetic replay, not a trusted clock,
@@ -240,8 +242,8 @@ const FUTURE_SKEW_MS = 30 * 1000;
 const READ_STAGES = ["merge", "checks", "issue", "threads", "final"];
 
 function freshSyntheticReads(capture, observations, policy) {
-  const now = Date.now();
-  const snapshotAt = Date.parse(capture.capturedAt);
+  const now = stableDateNow();
+  const snapshotAt = stableDateParse(capture.capturedAt);
   if (!Number.isFinite(snapshotAt) ||
       snapshotAt < now - MAX_SNAPSHOT_AGE_MS ||
       snapshotAt > now + FUTURE_SKEW_MS) return false;
@@ -254,7 +256,7 @@ function freshSyntheticReads(capture, observations, policy) {
         read.sequence !== index + 1 || read.complete !== true ||
         !sameSha(read.tipSha, observations.integratedTip) ||
         !validCaptureTimestamp(read.observedAt)) return false;
-    const observedAt = Date.parse(read.observedAt);
+    const observedAt = stableDateParse(read.observedAt);
     if (!Number.isFinite(observedAt) ||
         observedAt < now - MAX_SNAPSHOT_AGE_MS ||
         observedAt > now + FUTURE_SKEW_MS ||
@@ -409,9 +411,16 @@ export function evaluateOffline(input) {
         !sameSha(o.integratedChange.fromSha, o.preIntegrationBaseSha) ||
         !sameSha(o.integratedChange.toSha, o.integratedTip))
       return missing("INCOMPLETE_OR_WRONG_DIFF");
-    if (stableSome([...o.authoredChange.files, ...o.integratedChange.files], (f) =>
-        stableRegexTest(SENSITIVE_PATH, f.path) || (f.previousPath && stableRegexTest(SENSITIVE_PATH, f.previousPath))))
-      return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
+    // Inspect both source arrays by index; spreading would invoke a mutable
+    // Array.prototype iterator after trusted module initialization.
+    for (const files of [o.authoredChange.files, o.integratedChange.files]) {
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (stableRegexTest(SENSITIVE_PATH, f.path) ||
+            (f.previousPath && stableRegexTest(SENSITIVE_PATH, f.previousPath)))
+          return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
+      }
+    }
     // Two-parent merges can add conflict-resolution edits or unrelated
     // landed content. Parent identity alone cannot authenticate equivalence.
     // Until independently verified reconciliation exists, require exactly
