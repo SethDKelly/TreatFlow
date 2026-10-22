@@ -524,3 +524,26 @@ test("S-42: inherited PR and check provenance never qualifies", () => {
     else delete Array.prototype.repositoryId;
   }
 });
+
+test("S-42: full inherited PR and Verify fields cannot qualify an otherwise clean review", () => {
+  const fixture = make();
+  const pr = fixture.observed.pr;
+  const check = fixture.observed.checks[0];
+  const fields = { ...pr, ...check };
+  fixture.observed.pr = [];
+  fixture.observed.checks = [[]];
+  const previous = Object.getOwnPropertyDescriptors(Array.prototype);
+  try {
+    for (const [key, value] of Object.entries(fields)) {
+      Object.defineProperty(Array.prototype, key, {configurable: true, writable: true, value});
+    }
+    const result = reconcileOffline(fixture);
+    assert.notEqual(result.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(result);
+  } finally {
+    for (const key of Object.keys(fields)) {
+      if (Object.hasOwn(previous, key)) Object.defineProperty(Array.prototype, key, previous[key]);
+      else delete Array.prototype[key];
+    }
+  }
+});
