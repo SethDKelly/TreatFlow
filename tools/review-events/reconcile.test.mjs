@@ -491,8 +491,9 @@ test("S-42: revoked proxies fail closed at all exported entry points", () => {
     const result = normalizeWakeHint(event, policy);
     assert.notEqual(result.state, "READY_FOR_SPONSOR_DECISION");
   }
-  const result = coalesceWakeHints([], revoked());
-  assert.notEqual(result.state, "READY_FOR_SPONSOR_DECISION");
+  const result = coalesceWakeHints([hint()], revoked());
+  assert.deepEqual(result, { accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
+  assert.equal(Object.isFrozen(result), true);
 });
 
 test("S-42: post-import RegExp.exec cannot validate forged SHA", () => {
