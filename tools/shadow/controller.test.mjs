@@ -1289,3 +1289,80 @@ test("S-74: mutable array species cannot hide a duplicate required check", () =>
     assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
   } finally { if (original) Object.defineProperty(Array, Symbol.species, original); else delete Array[Symbol.species]; }
 });
+
+test("S-74: live Object.create cannot inject inherited capture source", () => {
+  const input = fixture();
+  delete input.capture.source;
+  const originalCreate = Object.create;
+  const prior = Object.getOwnPropertyDescriptor(Object.prototype, "source");
+  try {
+    Object.create = () => ({});
+    Object.defineProperty(Object.prototype, "source", {configurable: true, value: "synthetic-fixture"});
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally {
+    Object.create = originalCreate;
+    if (prior) Object.defineProperty(Object.prototype, "source", prior);
+    else delete Object.prototype.source;
+  }
+});
+
+test("S-74: mutated UTC calendar methods cannot normalize invalid dates", () => {
+  const input = fixture();
+  const methods = ["setUTCFullYear", "getUTCFullYear", "getUTCMonth", "getUTCDate"];
+  const prior = methods.map((name) => [name, Date.prototype[name]]);
+  try {
+    Date.prototype.setUTCFullYear = function() { return 0; };
+    Date.prototype.getUTCFullYear = () => 2026;
+    Date.prototype.getUTCMonth = () => 1;
+    Date.prototype.getUTCDate = () => 29;
+    for (const read of input.capture.reads) read.observedAt = "2026-02-29T12:00:00Z";
+    input.capture.capturedAt = "2026-02-29T12:00:00Z";
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { for (const [name, fn] of prior) Date.prototype[name] = fn; }
+});
+
+test("S-74: inherited descriptor value cannot convert accessor evidence into clean data", () => {
+  const input = fixture();
+  Object.defineProperty(input.observations, "unresolvedThreads", {enumerable: true, configurable: true, get: () => [{id: 99}]});
+  const prior = Object.getOwnPropertyDescriptor(Object.prototype, "value");
+  try {
+    Object.defineProperty(Object.prototype, "value", {configurable: true, get() { return []; }});
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally {
+    if (prior) Object.defineProperty(Object.prototype, "value", prior);
+    else delete Object.prototype.value;
+  }
+});
+
+test("S-74: live WeakSet add cannot rewrite failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = WeakSet.prototype.add;
+  try {
+    WeakSet.prototype.add = function(value) {
+      if (value && value.name === "Verify") value.conclusion = "success";
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { WeakSet.prototype.add = original; }
+});
+
+test("S-74: live Set size cannot conceal duplicate merge parents", () => {
+  const input = fixture("merge");
+  input.observations.parentShas = [sha("a"), sha("A")];
+  const prior = Object.getOwnPropertyDescriptor(Set.prototype, "size");
+  try {
+    Object.defineProperty(Set.prototype, "size", {configurable: true, get() { return 2; }});
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Object.defineProperty(Set.prototype, "size", prior); }
+});
