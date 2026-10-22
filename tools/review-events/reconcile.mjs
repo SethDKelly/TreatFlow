@@ -12,6 +12,10 @@ const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnPropert
 const stableIncludes = Function.prototype.call.bind(Array.prototype.includes);
 const stableRegexTest = Function.prototype.call.bind(RegExp.prototype.test);
 const StableSet = Set;
+const StableWeakSet = WeakSet;
+const stableWeakSetHas = Function.prototype.call.bind(WeakSet.prototype.has);
+const stableWeakSetAdd = Function.prototype.call.bind(WeakSet.prototype.add);
+const stableFreeze = Object.freeze;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
 const nativeArrayPrototype = Array.prototype;
@@ -34,7 +38,7 @@ function detach(value) {
 const SHA = /^[a-f0-9]{40}$/i;
 // Do not read Proxy/accessor fields before rejecting them. Non-inert objects
 // can cause arbitrary caller-side effects even in a "pure" test harness.
-function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }, depth = 0) {
+function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakSet() }, depth = 0) {
   if (++budget.nodes > 4096 || depth > 32) return false;
   if (typeof value === "string") {
     if (value.length > 786432) return false;
@@ -43,9 +47,9 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }
   }
   if (value === null || typeof value === "boolean") return true;
   if (typeof value === "number") return Number.isFinite(value);
-  if (typeof value !== "object" || stableIsProxy(value) || budget.seen.has(value))
+  if (typeof value !== "object" || stableIsProxy(value) || stableWeakSetHas(budget.seen, value))
     return false;
-  budget.seen.add(value);
+  stableWeakSetAdd(budget.seen, value);
   const array = stableArrayIsArray(value);
   if ((!array && stableGetPrototype(value) !== Object.prototype) ||
       (array && (stableGetPrototype(value) !== nativeArrayPrototype || value.length > 256))) return false;
@@ -66,13 +70,13 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new WeakSet() }
 const safeId = (x) => Number.isSafeInteger(x) && x > 0;
 const sameSha = (a, b) => typeof a === "string" && typeof b === "string" &&
   stableRegexTest(SHA, a) && stableRegexTest(SHA, b) && stableLowerCase(a) === stableLowerCase(b);
-const result = (state, reason) => Object.freeze({
+const result = (state, reason) => stableFreeze({
   mode: "OFFLINE_SYNTHETIC_UNATTESTED", state, reason,
   canApprove: false, canWrite: false, canDispatch: false, canMerge: false,
 });
 const invalid = (why) => result("INSUFFICIENT_EVIDENCE", why);
 
-const actions = Object.freeze({
+const actions = stableFreeze({
   pull_request: ["synchronize", "closed", "reopened"],
   pull_request_review: ["submitted", "edited", "dismissed"],
   pull_request_review_comment: ["created", "edited", "deleted"],
@@ -109,7 +113,7 @@ export function normalizeWakeHint(event, policy) {
 // block a separately scheduled, bounded post-request source recheck.
 export function coalesceWakeHints(events, policy) {
   if (!safeFixture(events) || !safeFixture(policy) || !stableArrayIsArray(events) || events.length > 256)
-    return Object.freeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
+    return stableFreeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
   const seen = new StableSet();
   let accepted = 0, duplicates = 0, rejected = 0;
   for (const event of events) {
@@ -119,14 +123,14 @@ export function coalesceWakeHints(events, policy) {
     stableSetAdd(seen, event.deliveryId);
     accepted++;
   }
-  return Object.freeze({ accepted, duplicates, rejected, needsRecheck: true });
+  return stableFreeze({ accepted, duplicates, rejected, needsRecheck: true });
 }
 
 // All inputs are synthetic fixtures. In a future live integration, only a
 // separate, authenticated source collector can construct observed facts;
 // no event/comment payload may be substituted for those observations.
 export function reconcileOffline(input = {}) {
-  if (!safeFixture(input)) return invalid("NON_INERT_FIXTURE");
+  if (input === null || typeof input !== "object" || !safeFixture(input)) return invalid("NON_INERT_FIXTURE");
   input = detach(input);
   const { policy, observed, retry } = input;
   if (!policy || !observed || !retry || typeof policy !== "object" ||
