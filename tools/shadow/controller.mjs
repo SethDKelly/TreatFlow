@@ -13,6 +13,7 @@ const stablePlainPrototype = Object.prototype;
 const StableWeakSet = WeakSet;
 const stableByteLength = Buffer.byteLength;
 const stableString = String;
+const stableNumber = Number;
 const stableIsFinite = Number.isFinite;
 // Capture the normalizer at trusted initialization, rather than invoking
 // post-initialization mutable String.prototype methods through evidence.
@@ -258,7 +259,7 @@ function validCaptureTimestamp(value) {
   if (typeof value !== "string") return false;
   const match = stableRegexExec(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/, value);
   if (!match) return false;
-  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  const year = stableNumber(match[1]), month = stableNumber(match[2]), day = stableNumber(match[3]);
   // Reject impossible calendar dates that some JS engines normalize.
   const date = new Date(0);
   stableSetUTCFullYear(date, year, month - 1, day);
