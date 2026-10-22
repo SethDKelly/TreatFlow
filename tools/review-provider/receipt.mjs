@@ -19,6 +19,9 @@ const stableIncludes = Array.prototype.includes;
 const stableRegexExec = RegExp.prototype.exec;
 const stableSlice = String.prototype.slice;
 const stablePadEnd = String.prototype.padEnd;
+const stableToLowerCase = String.prototype.toLowerCase;
+const MAX_COPY_NODES = 512;
+const MAX_COPY_DEPTH = 32;
 const arrayIndexPattern = /^(0|[1-9]\d*)$/;
 const stableNumberSafe = Number.isSafeInteger;
 const stableNumberFinite = Number.isFinite;
@@ -29,7 +32,8 @@ const shaPattern = /^[a-f0-9]{40}$/i;
 const timestampPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?Z$/;
 const sha = v => typeof v === "string" && stableCall(stableRegexExec, shaPattern, [v]) !== null;
 const own = (o,k) => stableCall(stableHasOwn,o,[k]);
-function copy(value, seen = new StableWeakSet()) {
+function copy(value, seen = new StableWeakSet(), budget = {nodes: 0}, depth = 0) {
+  if (++budget.nodes > MAX_COPY_NODES || depth > MAX_COPY_DEPTH) throw Error("copy budget");
   if (value === null || typeof value !== "object" || stableIsProxy(value)) {
     if (value !== null && typeof value === "object") throw Error("proxy");
     return value;
@@ -47,7 +51,7 @@ function copy(value, seen = new StableWeakSet()) {
     const d=descriptors[key];
     if (!own(d,"value") || !d.enumerable) throw Error("accessor or nonenumerable");
     if (array && stableCall(stableRegexExec, arrayIndexPattern, [key]) === null) throw Error("array key");
-    stableDefine(result,key,{value:copy(d.value,seen),enumerable:true,writable:true,configurable:true});
+    stableDefine(result,key,{value:copy(d.value,seen,budget,depth+1),enumerable:true,writable:true,configurable:true});
   }
   if (array && result.length !== value.length) throw Error("array holes");
   stableCall(stableWeakDelete,seen,[value]);
@@ -92,7 +96,7 @@ export function evaluateProviderAttempt(rawAttempt, rawSource) {
   if (!record(receipt) || !text(receipt.source) || !text(receipt.sourceUrl) || !sha(receipt.reviewedSha) ||
     !time(receipt.observedAt) || !stableCall(stableIncludes,["PASS","FINDINGS","ERROR","UNKNOWN"],[receipt.verdict]))
     return fail("INVALID_RECEIPT");
-  if (receipt.reviewedSha.toLowerCase()!==attempt.headSha.toLowerCase() || compareUtc(receipt.observedAt,attempt.dispatch.requestedAt)<0) return fail("SOURCE_MISMATCH");
+  if (stableCall(stableToLowerCase,receipt.reviewedSha,[])!==stableCall(stableToLowerCase,attempt.headSha,[]) || compareUtc(receipt.observedAt,attempt.dispatch.requestedAt)<0) return fail("SOURCE_MISMATCH");
   // Even matching caller-supplied authenticatedSource is NOT authenticated evidence.
   // S-75 must establish a non-forgeable collector provenance boundary first.
   return fail("UNVERIFIED_PROVIDER_SOURCE");
