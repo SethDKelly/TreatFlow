@@ -403,3 +403,27 @@ test("S-42: mutable array species cannot erase finding flags during selection", 
     else delete Array.prototype.constructor;
   }
 });
+
+test("S-42: sparse receipt arrays with extra keys fail closed", () => {
+  const fixture = make();
+  const clean = fixture.observed.reviews[0];
+  fixture.observed.reviews = [clean, { id: 999, hasFindings: true }];
+  fixture.observed.reviews.extra = fixture.observed.reviews[1];
+  delete fixture.observed.reviews[1];
+  const got = reconcileOffline(fixture);
+  assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+});
+
+test("S-42: mutable iterator cannot clear findings during fixture traversal", () => {
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  const original = Array.prototype[Symbol.iterator];
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      fixture.observed.reviews[0].hasFindings = false;
+      yield* Reflect.apply(original, this, []);
+    };
+    const got = reconcileOffline(fixture);
+    assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
