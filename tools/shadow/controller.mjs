@@ -39,7 +39,8 @@ const stableSetUTCFullYear = Function.prototype.call.bind(Date.prototype.setUTCF
 const stableGetUTCFullYear = Function.prototype.call.bind(Date.prototype.getUTCFullYear);
 const stableGetUTCMonth = Function.prototype.call.bind(Date.prototype.getUTCMonth);
 const stableGetUTCDate = Function.prototype.call.bind(Date.prototype.getUTCDate);
-const stableRegexTest = Function.prototype.call.bind(RegExp.prototype.test);
+const stableRegexExec = Function.prototype.call.bind(RegExp.prototype.exec);
+const stableRegexTest = (pattern, value) => stableRegexExec(pattern, value) !== null;
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
