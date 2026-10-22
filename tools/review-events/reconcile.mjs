@@ -4,6 +4,7 @@
 import { types } from "node:util";
 const stableGetDescriptor = Object.getOwnPropertyDescriptor;
 const stableDefineProperty = Object.defineProperty;
+const stableCreate = Object.create;
 const stableOwnKeys = Reflect.ownKeys;
 const stableGetPrototype = Object.getPrototypeOf;
 const stableArrayIsArray = Array.isArray;
@@ -19,7 +20,13 @@ const stableFreeze = Object.freeze;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
 const nativeArrayPrototype = Array.prototype;
-const nativeFilter = Function.prototype.call.bind(Array.prototype.filter);
+const nativeFilter = (values, predicate) => {
+  const out = [];
+  for (let i = 0; i < values.length; i++) {
+    if (predicate(values[i], i)) stableDefineProperty(out, String(out.length), { value: values[i], writable: true, enumerable: true, configurable: true });
+  }
+  return out;
+};
 const nativeSome = Function.prototype.call.bind(Array.prototype.some);
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
 const ownValue = (obj, key) => stableGetDescriptor(obj, key)?.value;
@@ -30,7 +37,7 @@ function detach(value) {
     for (let i = 0; i < value.length; i++) stableDefineProperty(out, String(i), {value: detach(ownValue(value, String(i))), enumerable: true, writable: true, configurable: true});
     return out;
   }
-  const out = Object.create(null);
+  const out = stableCreate(null);
   for (const key of stableOwnKeys(value)) stableDefineProperty(out, key, {value: detach(ownValue(value, key)), enumerable: true, writable: true, configurable: true});
   return out;
 }
@@ -62,7 +69,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
     budget.bytes += Buffer.byteLength(key, "utf8");
     if (budget.bytes > 786432) return false;
     const descriptor = stableGetDescriptor(value, key);
-    if (!descriptor || !("value" in descriptor) ||
+    if (!descriptor || !stableHasOwn(descriptor, "value") ||
         !safeFixture(descriptor.value, budget, depth + 1)) return false;
   }
   return true;
