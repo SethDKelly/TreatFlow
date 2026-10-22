@@ -1,3 +1,9 @@
+---
+type: design
+status: draft
+title: S-77 review provider contract (offline design baseline)
+---
+
 # S-77 — Review provider contract (offline design baseline)
 
 Status: **design / offline qualification only**. The current executable evaluator always returns HOLD for caller-supplied provider sources, including matching `authenticated: true` assertions. No trusted collector capability or receipt authentication exists yet. This document is not a verified live provider adapter, authorization, CI check, or security-exit acceptance.
