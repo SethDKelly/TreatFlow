@@ -104,8 +104,9 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   if (stableGetPrototype(value) !== Object.prototype && stableGetPrototype(value) !== null)
     throw new TypeError("Non-plain evidence object");
   const keys = stableOwnKeys(value);
-  for (let i = 0; i < keys.length; i++) if (typeof keys[i] !== "string") throw new TypeError("Non-string evidence key");
-    throw new TypeError("Non-string evidence key");
+  for (let i = 0; i < keys.length; i++) {
+    if (typeof keys[i] !== "string") throw new TypeError("Non-string evidence key");
+  }
   // Enforce the same byte cap on property names BEFORE collecting all
   // descriptors and doing potentially expensive canonicalization/sorting.
   for (const key of keys) chargeText(key, budget);
