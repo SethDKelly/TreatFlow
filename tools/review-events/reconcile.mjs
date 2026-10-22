@@ -8,6 +8,7 @@ const stableCreate = Object.create;
 const stableOwnKeys = Reflect.ownKeys;
 const stableGetPrototype = Object.getPrototypeOf;
 const stableArrayIsArray = Array.isArray;
+const stableIsArray = (value) => stableIsProxy(value) || stableArrayIsArray(value);
 const stableIsSafeInteger = Number.isSafeInteger;
 const stableIsFinite = Number.isFinite;
 const stableByteLength = Buffer.byteLength;
@@ -39,7 +40,7 @@ const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCas
 const ownValue = (obj, key) => stableGetDescriptor(obj, key)?.value;
 function detach(value) {
   if (value === null || typeof value !== "object") return value;
-  if (stableArrayIsArray(value)) {
+  if (stableIsArray(value)) {
     const out = [];
     for (let i = 0; i < value.length; i++) stableDefineProperty(out, stableString(i), {value: detach(ownValue(value, stableString(i))), enumerable: true, writable: true, configurable: true});
     return out;
@@ -68,7 +69,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
   if (typeof value !== "object" || stableIsProxy(value) || stableWeakSetHas(budget.seen, value))
     return false;
   stableWeakSetAdd(budget.seen, value);
-  const array = stableArrayIsArray(value);
+  const array = stableIsArray(value);
   if ((!array && stableGetPrototype(value) !== stablePlainPrototype) ||
       (array && (stableGetPrototype(value) !== nativeArrayPrototype || value.length > 256))) return false;
   const keys = stableOwnKeys(value);
@@ -114,7 +115,7 @@ const actions = stableFreeze({
 // A delivery only wakes a later source reconciliation. Even a valid-looking
 // GitHub/Codex marker, reaction, or check_run event never creates a verdict.
 export function normalizeWakeHint(event, policy) {
-  if (stableArrayIsArray(event) || stableArrayIsArray(policy) || !safeFixture(event) || !safeFixture(policy))
+  if (stableIsArray(event) || stableIsArray(policy) || !safeFixture(event) || !safeFixture(policy))
     return invalid("NON_INERT_FIXTURE");
   event = detach(event);
   policy = detach(policy);
@@ -138,7 +139,7 @@ export function normalizeWakeHint(event, policy) {
 // Models duplicates/out-of-order/missed wakeups. An absent webhook must not
 // block a separately scheduled, bounded post-request source recheck.
 export function coalesceWakeHints(events, policy) {
-  if (stableArrayIsArray(policy) || !safeFixture(events) || !safeFixture(policy) || !stableArrayIsArray(events) || events.length > 256)
+  if (stableIsArray(policy) || !safeFixture(events) || !safeFixture(policy) || !stableIsArray(events) || events.length > 256)
     return stableFreeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
   const seen = new StableSet();
   let accepted = 0, duplicates = 0, rejected = 0;
@@ -157,12 +158,12 @@ export function coalesceWakeHints(events, policy) {
 // separate, authenticated source collector can construct observed facts;
 // no event/comment payload may be substituted for those observations.
 export function reconcileOffline(input = {}) {
-  if (input === null || typeof input !== "object" || stableArrayIsArray(input) || !safeFixture(input)) return invalid("NON_INERT_FIXTURE");
+  if (input === null || typeof input !== "object" || stableIsArray(input) || !safeFixture(input)) return invalid("NON_INERT_FIXTURE");
   input = detach(input);
   const { policy, observed, retry } = input;
   if (!policy || !observed || !retry || typeof policy !== "object" ||
       typeof observed !== "object" || typeof retry !== "object" ||
-      stableArrayIsArray(policy) || stableArrayIsArray(observed) || stableArrayIsArray(retry))
+      stableIsArray(policy) || stableIsArray(observed) || stableIsArray(retry))
     return invalid("MISSING_GROUP");
   if (!safeId(policy.repositoryId) || !safeId(policy.prNumber) ||
       !safeId(policy.reviewerAppId) || !safeId(policy.checkAppId) ||
@@ -178,7 +179,7 @@ export function reconcileOffline(input = {}) {
   if (observed.readStatus !== "complete")
     return invalid("SOURCE_READ_NOT_COMPLETE");
   const pr = observed.pr;
-  if (!pr || typeof pr !== "object" || stableArrayIsArray(pr)) return invalid("PR_SOURCE_MISMATCH");
+  if (!pr || typeof pr !== "object" || stableIsArray(pr)) return invalid("PR_SOURCE_MISMATCH");
   if (!pr || ownValue(pr, "repositoryId") !== policy.repositoryId ||
       ownValue(pr, "number") !== policy.prNumber ||
       !sameSha(ownValue(pr, "headSha"), ownValue(pr, "headSha"))) return invalid("PR_SOURCE_MISMATCH");
@@ -186,8 +187,8 @@ export function reconcileOffline(input = {}) {
     return result("STALE_HEAD", "HEAD_CHANGED_REEVALUATE_POLICY");
   // Observations are not provenance attestations. Missing or contradictory
   // source facts remain unknown rather than being inferred from an event.
-  if (!stableArrayIsArray(observed.reviews) || observed.reviews.length > 256 ||
-      !stableArrayIsArray(observed.checks) || observed.checks.length > 256 ||
+  if (!stableIsArray(observed.reviews) || observed.reviews.length > 256 ||
+      !stableIsArray(observed.checks) || observed.checks.length > 256 ||
       !stableIsSafeInteger(observed.unresolvedThreads) ||
       observed.unresolvedThreads < 0)
     return invalid("INCOMPLETE_SOURCE_OBSERVATION");
@@ -235,7 +236,7 @@ export function reconcileOffline(input = {}) {
 
   // Scope candidates before validating their provenance: malformed duplicates
   // must not disappear from the candidate set and falsely confer readiness.
-  const trustedChecks = nativeFilter(observed.checks, (check) => check && typeof check === "object" && !stableArrayIsArray(check) &&
+  const trustedChecks = nativeFilter(observed.checks, (check) => check && typeof check === "object" && !stableIsArray(check) &&
     ownValue(check, "name") === "Verify" && ownValue(check, "appId") === policy.checkAppId &&
     sameSha(ownValue(check, "headSha"), policy.headSha));
   // No ambiguity about the single explicitly scoped required run.
@@ -251,10 +252,10 @@ export function reconcileOffline(input = {}) {
   // A terminal bot receipt can precede delayed inline findings. Require a
   // second, strictly later source read after the receipt; absence is PENDING.
   const reads = observed.postReceiptReads;
-  if (!stableArrayIsArray(reads) || reads.length !== 2)
+  if (!stableIsArray(reads) || reads.length !== 2)
     return result("PENDING", "SETTLING_RECHECK_REQUIRED");
   const first = reads[0], second = reads[1];
-  if (!first || !second || typeof first !== "object" || typeof second !== "object" || stableArrayIsArray(first) || stableArrayIsArray(second)) return invalid("SETTLING_EVIDENCE_INCOMPLETE");
+  if (!first || !second || typeof first !== "object" || typeof second !== "object" || stableIsArray(first) || stableIsArray(second)) return invalid("SETTLING_EVIDENCE_INCOMPLETE");
   if (!first || !second || !safeId(ownValue(first, "generation")) ||
       !safeId(ownValue(second, "generation")) || ownValue(second, "generation") <= ownValue(first, "generation") ||
       !sameSha(ownValue(first, "headSha"), policy.headSha) ||
