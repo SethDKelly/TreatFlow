@@ -1,45 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateProviderAttempt } from "./receipt.mjs";
-const SHA = "a".repeat(40);
-const attempt = () => ({
-  schemaVersion: 1, repository: "SethDKelly/TreatFlow", pullRequest: 120, headSha: SHA,
-  provider: "codex", purpose: "standard", attemptId: "test-1",
-  dispatch: {mechanism: "github-comment", requestUrl: "https://github.com/example/request", requestedAt: "2026-10-22T04:00:00Z"},
-  receipt: {source: "provider-authored", sourceUrl: "https://github.com/example/review", reviewedSha: SHA, observedAt: "2026-10-22T04:01:00Z", verdict: "PASS"},
-});
-const source = () => ({authenticated: true, repository: "SethDKelly/TreatFlow", pullRequest: 120,
-  provider: "codex", sourceUrl: "https://github.com/example/review", reviewedSha: SHA, verdict: "PASS"});
-test("valid source receipt remains advisory only", () => {
-  const result = evaluateProviderAttempt(attempt(), source());
-  assert.equal(result.state, "RECEIPT_OBSERVED");
-  assert.equal(result.canApprove, false);
-  assert.equal(result.canMerge, false);
-  assert.equal(Object.isFrozen(result), true);
-});
-test("missing receipt fails closed", () => {
-  const a = attempt(); delete a.receipt;
-  assert.equal(evaluateProviderAttempt(a, source()).state, "HOLD");
-});
-test("spoofed sender and stale SHA fail closed", () => {
-  const s = source(); s.authenticated = false;
-  assert.equal(evaluateProviderAttempt(attempt(), s).state, "HOLD");
-  const a = attempt(); a.receipt.reviewedSha = "b".repeat(40);
-  assert.equal(evaluateProviderAttempt(a, source()).state, "HOLD");
-});
-test("provider mismatch and purpose mismatch fail closed", () => {
-  const a = attempt(); a.provider = "cursor-agent";
-  assert.equal(evaluateProviderAttempt(a, source()).state, "HOLD");
-  a.purpose = "targeted-adversarial";
-  assert.equal(evaluateProviderAttempt(a, source()).state, "HOLD");
-});
-test("findings and quota errors never count as clean receipts", () => {
-  for (const verdict of ["FINDINGS", "ERROR", "UNKNOWN"]) {
-    const a = attempt(); const s = source(); a.receipt.verdict = verdict; s.verdict = verdict;
-    assert.equal(evaluateProviderAttempt(a, s).state, "HOLD");
-  }
-});
-test("duplicate receipt input cannot pass as a record", () => {
-  const a = attempt(); a.receipt = [a.receipt, a.receipt];
-  assert.equal(evaluateProviderAttempt(a, source()).state, "HOLD");
-});
+const SHA="a".repeat(40);
+const attempt=()=>({schemaVersion:1,repository:"SethDKelly/TreatFlow",pullRequest:120,headSha:SHA,provider:"codex",purpose:"standard",attemptId:"test-1",dispatch:{mechanism:"github-comment",requestUrl:"https://github.com/example/request",requestedAt:"2026-10-22T04:00:00Z"},receipt:{source:"provider-authored",sourceUrl:"https://github.com/example/review",reviewedSha:SHA,observedAt:"2026-10-22T04:01:00Z",verdict:"PASS"}});
+const source=()=>({authenticated:true,repository:"SethDKelly/TreatFlow",pullRequest:120,provider:"codex",sourceUrl:"https://github.com/example/review",reviewedSha:SHA,verdict:"PASS"});
+const hold=(a=attempt(),s=source())=>{const r=evaluateProviderAttempt(a,s);assert.equal(r.state,"HOLD");assert.equal(r.canApprove,false);assert.equal(r.canMerge,false);assert.equal(r.canDispatch,false);assert.equal(Object.isFrozen(r),true);return r;};
+test("matching caller-forged source cannot authenticate provider",()=>assert.equal(hold().reason,"UNVERIFIED_PROVIDER_SOURCE"));
+test("missing receipt fails closed",()=>{const a=attempt();delete a.receipt;hold(a);});
+test("wrong SHA and invalid provider fail closed",()=>{const a=attempt();a.receipt.reviewedSha="b".repeat(40);hold(a);const b=attempt();b.provider="attacker";hold(b);});
+test("non-PASS verdicts never authorize",()=>{for(const v of ["FINDINGS","ERROR","UNKNOWN"]){const a=attempt();a.receipt.verdict=v;hold(a);}});
+test("duplicate receipt arrays fail closed",()=>{const a=attempt();a.receipt=[a.receipt,a.receipt];hold(a);});
+test("inherited source and provider facts fail closed",()=>{const a=attempt();delete a.provider;Object.prototype.provider="codex";try{hold(a);}finally{delete Object.prototype.provider;}});
+test("accessor-backed fields never execute",()=>{const a=attempt();let calls=0;Object.defineProperty(a,"provider",{enumerable:true,get(){calls++;return "codex";}});hold(a);assert.equal(calls,0);});
+test("malformed and impossible RFC3339 timestamps fail closed",()=>{for(const v of ["0Z","2026-1-1Z","2026-02-30T00:00:00Z","2026-10-22 04:00:00Z"]){const a=attempt();a.dispatch.requestedAt=v;hold(a);}});
+test("post-import mutable intrinsics cannot forge result",()=>{const oldFreeze=Object.freeze,oldHas=Set.prototype.has,oldTest=RegExp.prototype.test;try{Object.freeze=x=>x;Set.prototype.has=()=>true;RegExp.prototype.test=()=>true;const r=hold();assert.equal(Object.isFrozen(r),true);}finally{Object.freeze=oldFreeze;Set.prototype.has=oldHas;RegExp.prototype.test=oldTest;}});
+test("post-import mutable global WeakSet cannot modify receipt",()=>{const original=globalThis.WeakSet;try{globalThis.WeakSet=class{constructor(){throw Error("poison");}};hold();}finally{globalThis.WeakSet=original;}});
+test("proxied evidence rejects without traps",()=>{let calls=0;const a=new Proxy(attempt(),{get(){calls++;throw Error("trap");}});hold(a);assert.equal(calls,0);});
