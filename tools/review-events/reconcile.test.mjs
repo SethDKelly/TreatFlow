@@ -427,3 +427,16 @@ test("S-42: mutable iterator cannot clear findings during fixture traversal", ()
     assert.notEqual(got.state, "READY_FOR_SPONSOR_DECISION");
   } finally { Array.prototype[Symbol.iterator] = original; }
 });
+
+test("S-42: scalar byte-length mutation cannot clear review findings", () => {
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  const original = Buffer.byteLength;
+  try {
+    Buffer.byteLength = (...args) => {
+      fixture.observed.reviews[0].hasFindings = false;
+      return Reflect.apply(original, Buffer, args);
+    };
+    assert.notEqual(reconcileOffline(fixture).state, "READY_FOR_SPONSOR_DECISION");
+  } finally { Buffer.byteLength = original; }
+});
