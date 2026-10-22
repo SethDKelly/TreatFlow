@@ -13,6 +13,7 @@ const stableIsFinite = Number.isFinite;
 const stableByteLength = Buffer.byteLength;
 const stablePlainPrototype = Object.prototype;
 const stableNumber = Number;
+const stableString = String;
 const stableIsProxy = types.isProxy;
 const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const stableIncludes = Function.prototype.call.bind(Array.prototype.includes);
@@ -39,7 +40,7 @@ function detach(value) {
   if (value === null || typeof value !== "object") return value;
   if (stableArrayIsArray(value)) {
     const out = [];
-    for (let i = 0; i < value.length; i++) stableDefineProperty(out, String(i), {value: detach(ownValue(value, String(i))), enumerable: true, writable: true, configurable: true});
+    for (let i = 0; i < value.length; i++) stableDefineProperty(out, stableString(i), {value: detach(ownValue(value, stableString(i))), enumerable: true, writable: true, configurable: true});
     return out;
   }
   const out = stableCreate(null);
@@ -74,7 +75,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
   if (array) {
     if (keys.length !== value.length + 1) return false;
     for (let i = 0; i < value.length; i++) {
-      const descriptor = stableGetDescriptor(value, String(i));
+      const descriptor = stableGetDescriptor(value, stableString(i));
       if (!descriptor || !stableHasOwn(descriptor, "value")) return false;
     }
   }
