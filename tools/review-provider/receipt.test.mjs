@@ -44,6 +44,12 @@ test("invalid SHA fails attempt validation", () => {
   const a = attempt(); a.headSha = "not-a-sha";
   hold(a, source(), "INVALID_ATTEMPT");
 });
+test("equivalent uppercase and lowercase SHA spellings reach provenance HOLD", () => {
+  const a = attempt(); a.headSha = "A".repeat(40);
+  hold(a, source(), "UNVERIFIED_PROVIDER_SOURCE");
+  a.headSha = SHA; a.receipt.reviewedSha = "A".repeat(40);
+  hold(a, source(), "UNVERIFIED_PROVIDER_SOURCE");
+});
 test("mismatched reviewed SHA is rejected before provenance", () => {
   const a = attempt(); a.receipt.reviewedSha = "b".repeat(40);
   hold(a, source(), "SOURCE_MISMATCH");
