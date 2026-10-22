@@ -464,3 +464,18 @@ test("S-42: global String cannot collapse multiple filtered receipt slots", () =
     assert.notEqual(reconcileOffline(fixture).state, "READY_FOR_SPONSOR_DECISION");
   } finally { globalThis.String = original; }
 });
+
+test("S-42: polluted Array.prototype cannot supply top-level reconciliation records", () => {
+  const fixture = make();
+  const descriptors = ["policy", "observed", "retry"].map((key) => [key, Object.getOwnPropertyDescriptor(Array.prototype, key)]);
+  try {
+    for (const [key] of descriptors) Object.defineProperty(Array.prototype, key, { configurable: true, value: fixture[key] });
+    assert.notEqual(reconcileOffline([]).state, "READY_FOR_SPONSOR_DECISION");
+    assert.equal(reconcileOffline([]).state, "INSUFFICIENT_EVIDENCE");
+  } finally {
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(Array.prototype, key, descriptor);
+      else delete Array.prototype[key];
+    }
+  }
+});
