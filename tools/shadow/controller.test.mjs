@@ -1466,3 +1466,31 @@ test("S-74: descriptor index collision cannot hide first mismatched file", () =>
     assert.equal(result.canApprove, false);
   } finally { globalThis.String = original; }
 });
+
+test("S-74: post-import Number replacement cannot accept impossible leap date", () => {
+  const input = fixture();
+  const invalid = "2026-02-29T12:00:00Z";
+  for (const read of input.capture.reads) read.observedAt = invalid;
+  input.capture.capturedAt = invalid;
+  const original = globalThis.Number;
+  try {
+    globalThis.Number = function(value) {
+      if (value === "2026") return 2024;
+      return Reflect.apply(original, undefined, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.equal(result.code, "CAPTURE_NOT_ATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { globalThis.Number = original; }
+});
+
+test("S-74: endpoint-aligned case aliases cannot evade duplicate parent detection", () => {
+  const input = fixture("merge");
+  input.observations.parentShas = [sha("a"), sha("A")];
+  input.observations.preIntegrationBaseSha = sha("a");
+  input.observations.reviewedHead = sha("A");
+  const result = evaluateOffline(input);
+  assert.equal(result.code, "INCONSISTENT_PARENT_GRAPH");
+  assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  assert.equal(result.canApprove, false);
+});
