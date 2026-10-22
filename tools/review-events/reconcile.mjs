@@ -9,6 +9,10 @@ const stableOwnKeys = Reflect.ownKeys;
 const stableGetPrototype = Object.getPrototypeOf;
 const stableArrayIsArray = Array.isArray;
 const stableIsSafeInteger = Number.isSafeInteger;
+const stableIsFinite = Number.isFinite;
+const stableByteLength = Buffer.byteLength;
+const stablePlainPrototype = Object.prototype;
+const stableNumber = Number;
 const stableIsProxy = types.isProxy;
 const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const stableIncludes = Function.prototype.call.bind(Array.prototype.includes);
@@ -54,16 +58,16 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
   if (++budget.nodes > 4096 || depth > 32) return false;
   if (typeof value === "string") {
     if (value.length > 786432) return false;
-    budget.bytes += Buffer.byteLength(value, "utf8");
+    budget.bytes += stableByteLength(value, "utf8");
     return budget.bytes <= 786432;
   }
   if (value === null || typeof value === "boolean") return true;
-  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "number") return stableIsFinite(value);
   if (typeof value !== "object" || stableIsProxy(value) || stableWeakSetHas(budget.seen, value))
     return false;
   stableWeakSetAdd(budget.seen, value);
   const array = stableArrayIsArray(value);
-  if ((!array && stableGetPrototype(value) !== Object.prototype) ||
+  if ((!array && stableGetPrototype(value) !== stablePlainPrototype) ||
       (array && (stableGetPrototype(value) !== nativeArrayPrototype || value.length > 256))) return false;
   const keys = stableOwnKeys(value);
   if (keys.length > 256 + (array ? 1 : 0)) return false;
@@ -76,10 +80,10 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
   }
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (array && key !== "length" && (!/^(0|[1-9][0-9]*)$/.test(key) || !stableIsSafeInteger(Number(key)) || Number(key) >= value.length)) return false;
+    if (array && key !== "length" && (!stableRegexTest(/^(0|[1-9][0-9]*)$/, key) || !stableIsSafeInteger(stableNumber(key)) || stableNumber(key) >= value.length)) return false;
     if (array && key === "length") continue;
     if (typeof key !== "string") return false;
-    budget.bytes += Buffer.byteLength(key, "utf8");
+    budget.bytes += stableByteLength(key, "utf8");
     if (budget.bytes > 786432) return false;
     const descriptor = stableGetDescriptor(value, key);
     if (!descriptor || !stableHasOwn(descriptor, "value") ||
@@ -136,7 +140,8 @@ export function coalesceWakeHints(events, policy) {
     return stableFreeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
   const seen = new StableSet();
   let accepted = 0, duplicates = 0, rejected = 0;
-  for (const event of events) {
+  for (let eventIndex = 0; eventIndex < events.length; eventIndex++) {
+    const event = events[eventIndex];
     const normalized = normalizeWakeHint(event, policy);
     if (normalized.state !== "WAKE_RECONCILIATION") { rejected++; continue; }
     if (stableSetHas(seen, event.deliveryId)) { duplicates++; continue; }
