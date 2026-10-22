@@ -76,7 +76,7 @@ export function evaluateProviderAttempt(rawAttempt, rawSource) {
   if (!record(receipt) || !text(receipt.source) || !text(receipt.sourceUrl) || !sha(receipt.reviewedSha) ||
     !time(receipt.observedAt) || !stableCall(stableIncludes,["PASS","FINDINGS","ERROR","UNKNOWN"],[receipt.verdict]))
     return fail("INVALID_RECEIPT");
-  if (receipt.reviewedSha!==attempt.headSha || receipt.observedAt<attempt.dispatch.requestedAt) return fail("SOURCE_MISMATCH");
+  if (receipt.reviewedSha!==attempt.headSha || stableCall(stableParse,stableDate,[receipt.observedAt])<stableCall(stableParse,stableDate,[attempt.dispatch.requestedAt])) return fail("SOURCE_MISMATCH");
   // Even matching caller-supplied authenticatedSource is NOT authenticated evidence.
   // S-75 must establish a non-forgeable collector provenance boundary first.
   return fail("UNVERIFIED_PROVIDER_SOURCE");
