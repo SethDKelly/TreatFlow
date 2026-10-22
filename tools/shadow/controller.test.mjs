@@ -1252,3 +1252,28 @@ test("S-74: mutated RegExp.exec cannot bypass sensitive path hold", () => {
     assert.equal(result.canApprove, false);
   } finally { RegExp.prototype.exec = original; }
 });
+
+test("S-74: numeric validator mutation cannot authorize fractional repository identity", () => {
+  const original = Number.isSafeInteger;
+  try {
+    Number.isSafeInteger = () => true;
+    const result = decide((f) => { f.event.repositoryId = 1.5; f.policy.repositoryId = 1.5; f.observations.repositoryId = 1.5; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Number.isSafeInteger = original; }
+});
+
+test("S-74: mutable set input iterator cannot hide duplicate required checks", () => {
+  const original = Array.prototype[Symbol.iterator];
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      if (this.length === 2 && this[0] === "Verify" && this[1] === "Verify") {
+        yield "Verify"; yield "Other"; return;
+      }
+      yield* Reflect.apply(original, this, []);
+    };
+    const result = decide((f) => { f.policy.requiredChecks = ["Verify", "Verify"]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
