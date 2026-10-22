@@ -8,6 +8,7 @@ const stableCreate = Object.create;
 const stableOwnKeys = Reflect.ownKeys;
 const stableGetPrototype = Object.getPrototypeOf;
 const stableArrayIsArray = Array.isArray;
+const stableIsSafeInteger = Number.isSafeInteger;
 const stableIsProxy = types.isProxy;
 const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const stableIncludes = Function.prototype.call.bind(Array.prototype.includes);
@@ -38,7 +39,11 @@ function detach(value) {
     return out;
   }
   const out = stableCreate(null);
-  for (const key of stableOwnKeys(value)) stableDefineProperty(out, key, {value: detach(ownValue(value, key)), enumerable: true, writable: true, configurable: true});
+  const keys = stableOwnKeys(value);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    stableDefineProperty(out, key, {value: detach(ownValue(value, key)), enumerable: true, writable: true, configurable: true});
+  }
   return out;
 }
 
@@ -62,8 +67,16 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
       (array && (stableGetPrototype(value) !== nativeArrayPrototype || value.length > 256))) return false;
   const keys = stableOwnKeys(value);
   if (keys.length > 256 + (array ? 1 : 0)) return false;
-  if (array && keys.length !== value.length + 1) return false;
-  for (const key of keys) {
+  if (array) {
+    if (keys.length !== value.length + 1) return false;
+    for (let i = 0; i < value.length; i++) {
+      const descriptor = stableGetDescriptor(value, String(i));
+      if (!descriptor || !stableHasOwn(descriptor, "value")) return false;
+    }
+  }
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (array && key !== "length" && (!/^(0|[1-9][0-9]*)$/.test(key) || !stableIsSafeInteger(Number(key)) || Number(key) >= value.length)) return false;
     if (array && key === "length") continue;
     if (typeof key !== "string") return false;
     budget.bytes += Buffer.byteLength(key, "utf8");
@@ -74,7 +87,7 @@ function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakS
   }
   return true;
 }
-const safeId = (x) => Number.isSafeInteger(x) && x > 0;
+const safeId = (x) => stableIsSafeInteger(x) && x > 0;
 const sameSha = (a, b) => typeof a === "string" && typeof b === "string" &&
   stableRegexTest(SHA, a) && stableRegexTest(SHA, b) && stableLowerCase(a) === stableLowerCase(b);
 const result = (state, reason) => stableFreeze({
@@ -150,8 +163,8 @@ export function reconcileOffline(input = {}) {
     return invalid("INVALID_POLICY");
   if (policy.workflowPath !== ".github/workflows/ci.yml")
     return invalid("INVALID_WORKFLOW_POLICY");
-  if (!Number.isSafeInteger(retry.attempt) || retry.attempt < 0 ||
-      !Number.isSafeInteger(retry.maxAttempts) ||
+  if (!stableIsSafeInteger(retry.attempt) || retry.attempt < 0 ||
+      !stableIsSafeInteger(retry.maxAttempts) ||
       retry.maxAttempts < 1 || retry.maxAttempts > 12)
     return invalid("INVALID_RETRY_BUDGET");
   if (observed.readStatus !== "complete")
@@ -166,7 +179,7 @@ export function reconcileOffline(input = {}) {
   // source facts remain unknown rather than being inferred from an event.
   if (!stableArrayIsArray(observed.reviews) || observed.reviews.length > 256 ||
       !stableArrayIsArray(observed.checks) || observed.checks.length > 256 ||
-      !Number.isSafeInteger(observed.unresolvedThreads) ||
+      !stableIsSafeInteger(observed.unresolvedThreads) ||
       observed.unresolvedThreads < 0)
     return invalid("INCOMPLETE_SOURCE_OBSERVATION");
 
