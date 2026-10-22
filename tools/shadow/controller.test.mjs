@@ -1429,3 +1429,40 @@ test("S-74: mutable Object.prototype getter cannot change later failed Verify", 
     assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
   } finally { globalThis.Object = original; }
 });
+
+test("S-74: mock path uses captured WeakSet constructor before copying", () => {
+  const input = fixture();
+  const ready = evaluateOffline(input);
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  const mock = { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" };
+  const original = globalThis.WeakSet;
+  try {
+    globalThis.WeakSet = function(...args) {
+      mock.verdict = "REJECT";
+      return new original(...args);
+    };
+    const result = reviewWithMock(ready, mock);
+    assert.equal(result.state, "SHADOW_REVIEW_RECORDED");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  } finally { globalThis.WeakSet = original; }
+});
+
+test("S-74: descriptor index collision cannot hide first mismatched file", () => {
+  const input = fixture("merge");
+  const first = file("src/first.ts");
+  const second = file("src/second.ts");
+  input.observations.authoredChange.files = [first, second];
+  input.observations.integratedChange.files = [{ ...first, patchDigest: digest("e") }, second];
+  const original = globalThis.String;
+  try {
+    globalThis.String = function(value) {
+      if (typeof value === "number") return "0";
+      return Reflect.apply(original, undefined, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { globalThis.String = original; }
+});
