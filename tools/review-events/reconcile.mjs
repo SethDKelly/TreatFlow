@@ -1,0 +1,272 @@
+// S-42 offline-only synthetic event/review reconciler.
+// No network, filesystem, credentials, webhook listener, actions, or status writes.
+// All observations are caller-controlled test data, NOT authenticated evidence.
+import { types } from "node:util";
+const stableGetDescriptor = Object.getOwnPropertyDescriptor;
+const stableDefineProperty = Object.defineProperty;
+const stableCreate = Object.create;
+const stableOwnKeys = Reflect.ownKeys;
+const stableGetPrototype = Object.getPrototypeOf;
+const stableArrayIsArray = Array.isArray;
+const stableIsArray = (value) => stableIsProxy(value) || stableArrayIsArray(value);
+const stableIsSafeInteger = Number.isSafeInteger;
+const stableIsFinite = Number.isFinite;
+const stableByteLength = Buffer.byteLength;
+const stablePlainPrototype = Object.prototype;
+const stableNumber = Number;
+const stableString = String;
+const stableIsProxy = types.isProxy;
+const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const stableIncludes = Function.prototype.call.bind(Array.prototype.includes);
+const stableRegexExec = Function.prototype.call.bind(RegExp.prototype.exec);
+const stableRegexTest = (pattern, value) => stableRegexExec(pattern, value) !== null;
+const StableSet = Set;
+const StableWeakSet = WeakSet;
+const stableWeakSetHas = Function.prototype.call.bind(WeakSet.prototype.has);
+const stableWeakSetAdd = Function.prototype.call.bind(WeakSet.prototype.add);
+const stableFreeze = Object.freeze;
+const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
+const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
+const nativeArrayPrototype = Array.prototype;
+const nativeFilter = (values, predicate) => {
+  const out = [];
+  for (let i = 0; i < values.length; i++) {
+    if (predicate(values[i], i)) stableDefineProperty(out, stableString(out.length), { value: values[i], writable: true, enumerable: true, configurable: true });
+  }
+  return out;
+};
+const nativeSome = Function.prototype.call.bind(Array.prototype.some);
+const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
+const ownValue = (obj, key) => stableGetDescriptor(obj, key)?.value;
+function detach(value) {
+  if (value === null || typeof value !== "object") return value;
+  if (stableIsArray(value)) {
+    const out = [];
+    for (let i = 0; i < value.length; i++) stableDefineProperty(out, stableString(i), {value: detach(ownValue(value, stableString(i))), enumerable: true, writable: true, configurable: true});
+    return out;
+  }
+  const out = stableCreate(null);
+  const keys = stableOwnKeys(value);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    stableDefineProperty(out, key, {value: detach(ownValue(value, key)), enumerable: true, writable: true, configurable: true});
+  }
+  return out;
+}
+
+const SHA = /^[a-f0-9]{40}$/i;
+// Do not read Proxy/accessor fields before rejecting them. Non-inert objects
+// can cause arbitrary caller-side effects even in a "pure" test harness.
+function safeFixture(value, budget = { nodes: 0, bytes: 0, seen: new StableWeakSet() }, depth = 0) {
+  if (++budget.nodes > 4096 || depth > 32) return false;
+  if (typeof value === "string") {
+    if (value.length > 786432) return false;
+    budget.bytes += stableByteLength(value, "utf8");
+    return budget.bytes <= 786432;
+  }
+  if (value === null || typeof value === "boolean") return true;
+  if (typeof value === "number") return stableIsFinite(value);
+  if (typeof value !== "object" || stableIsProxy(value) || stableWeakSetHas(budget.seen, value))
+    return false;
+  stableWeakSetAdd(budget.seen, value);
+  const array = stableIsArray(value);
+  if ((!array && stableGetPrototype(value) !== stablePlainPrototype) ||
+      (array && (stableGetPrototype(value) !== nativeArrayPrototype || value.length > 256))) return false;
+  const keys = stableOwnKeys(value);
+  if (keys.length > 256 + (array ? 1 : 0)) return false;
+  if (array) {
+    if (keys.length !== value.length + 1) return false;
+    for (let i = 0; i < value.length; i++) {
+      const descriptor = stableGetDescriptor(value, stableString(i));
+      if (!descriptor || !stableHasOwn(descriptor, "value")) return false;
+    }
+  }
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (array && key !== "length" && (!stableRegexTest(/^(0|[1-9][0-9]*)$/, key) || !stableIsSafeInteger(stableNumber(key)) || stableNumber(key) >= value.length)) return false;
+    if (array && key === "length") continue;
+    if (typeof key !== "string") return false;
+    budget.bytes += stableByteLength(key, "utf8");
+    if (budget.bytes > 786432) return false;
+    const descriptor = stableGetDescriptor(value, key);
+    if (!descriptor || !stableHasOwn(descriptor, "value") ||
+        !safeFixture(descriptor.value, budget, depth + 1)) return false;
+  }
+  return true;
+}
+const safeId = (x) => stableIsSafeInteger(x) && x > 0;
+const sameSha = (a, b) => typeof a === "string" && typeof b === "string" &&
+  stableRegexTest(SHA, a) && stableRegexTest(SHA, b) && stableLowerCase(a) === stableLowerCase(b);
+const result = (state, reason) => stableFreeze({
+  mode: "OFFLINE_SYNTHETIC_UNATTESTED", state, reason,
+  canApprove: false, canWrite: false, canDispatch: false, canMerge: false,
+});
+const invalid = (why) => result("INSUFFICIENT_EVIDENCE", why);
+
+const actions = stableFreeze({
+  pull_request: ["synchronize", "closed", "reopened"],
+  pull_request_review: ["submitted", "edited", "dismissed"],
+  pull_request_review_comment: ["created", "edited", "deleted"],
+  issue_comment: ["created", "edited"],
+  workflow_run: ["completed"],
+  check_run: ["completed"],
+});
+
+// A delivery only wakes a later source reconciliation. Even a valid-looking
+// GitHub/Codex marker, reaction, or check_run event never creates a verdict.
+export function normalizeWakeHint(event, policy) {
+  if (stableIsArray(event) || stableIsArray(policy) || !safeFixture(event) || !safeFixture(policy))
+    return invalid("NON_INERT_FIXTURE");
+  event = detach(event);
+  policy = detach(policy);
+  if (!event || !policy || typeof event !== "object" || typeof policy !== "object" ||
+      typeof event.event !== "string" ||
+      !stableHasOwn(actions, event.event) ||
+      !stableIncludes(actions[event.event], event.action)) return invalid("UNRECOGNIZED_SIGNAL");
+  if (!safeId(event.repositoryId) || !safeId(event.prNumber) ||
+      event.repositoryId !== policy.repositoryId ||
+      event.prNumber !== policy.prNumber) return invalid("WRONG_TARGET");
+  if (typeof event.deliveryId !== "string" ||
+      !stableRegexTest(/^[A-Za-z0-9_-]{1,128}$/, event.deliveryId))
+    return invalid("INVALID_DELIVERY_ID");
+  // A comment event on an issue is not a PR event unless proven by source.
+  if (event.event === "issue_comment" && event.isPullRequest !== true)
+    return invalid("NOT_PR_CONVERSATION");
+  // These are untrusted synthetic hints; no HMAC/installation attestation here.
+  return result("WAKE_RECONCILIATION", "SOURCE_RECHECK_REQUIRED");
+}
+
+// Models duplicates/out-of-order/missed wakeups. An absent webhook must not
+// block a separately scheduled, bounded post-request source recheck.
+export function coalesceWakeHints(events, policy) {
+  if (stableIsArray(policy) || !safeFixture(events) || !safeFixture(policy) || !stableIsArray(events) || events.length > 256)
+    return stableFreeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
+  const seen = new StableSet();
+  let accepted = 0, duplicates = 0, rejected = 0;
+  for (let eventIndex = 0; eventIndex < events.length; eventIndex++) {
+    const event = events[eventIndex];
+    const normalized = normalizeWakeHint(event, policy);
+    if (normalized.state !== "WAKE_RECONCILIATION") { rejected++; continue; }
+    if (stableSetHas(seen, event.deliveryId)) { duplicates++; continue; }
+    stableSetAdd(seen, event.deliveryId);
+    accepted++;
+  }
+  return stableFreeze({ accepted, duplicates, rejected, needsRecheck: true });
+}
+
+// All inputs are synthetic fixtures. In a future live integration, only a
+// separate, authenticated source collector can construct observed facts;
+// no event/comment payload may be substituted for those observations.
+export function reconcileOffline(input = {}) {
+  if (input === null || typeof input !== "object" || stableIsArray(input) || !safeFixture(input)) return invalid("NON_INERT_FIXTURE");
+  input = detach(input);
+  const { policy, observed, retry } = input;
+  if (!policy || !observed || !retry || typeof policy !== "object" ||
+      typeof observed !== "object" || typeof retry !== "object" ||
+      stableIsArray(policy) || stableIsArray(observed) || stableIsArray(retry))
+    return invalid("MISSING_GROUP");
+  if (!safeId(policy.repositoryId) || !safeId(policy.prNumber) ||
+      !safeId(policy.reviewerAppId) || !safeId(policy.checkAppId) ||
+      !sameSha(policy.headSha, policy.headSha) ||
+      !sameSha(policy.workflowRevision, policy.workflowRevision))
+    return invalid("INVALID_POLICY");
+  if (policy.workflowPath !== ".github/workflows/ci.yml")
+    return invalid("INVALID_WORKFLOW_POLICY");
+  if (!stableIsSafeInteger(retry.attempt) || retry.attempt < 0 ||
+      !stableIsSafeInteger(retry.maxAttempts) ||
+      retry.maxAttempts < 1 || retry.maxAttempts > 12)
+    return invalid("INVALID_RETRY_BUDGET");
+  if (observed.readStatus !== "complete")
+    return invalid("SOURCE_READ_NOT_COMPLETE");
+  const pr = observed.pr;
+  if (!pr || typeof pr !== "object" || stableIsArray(pr)) return invalid("PR_SOURCE_MISMATCH");
+  if (!pr || ownValue(pr, "repositoryId") !== policy.repositoryId ||
+      ownValue(pr, "number") !== policy.prNumber ||
+      !sameSha(ownValue(pr, "headSha"), ownValue(pr, "headSha"))) return invalid("PR_SOURCE_MISMATCH");
+  if (!sameSha(ownValue(pr, "headSha"), policy.headSha))
+    return result("STALE_HEAD", "HEAD_CHANGED_REEVALUATE_POLICY");
+  // Observations are not provenance attestations. Missing or contradictory
+  // source facts remain unknown rather than being inferred from an event.
+  if (!stableIsArray(observed.reviews) || observed.reviews.length > 256 ||
+      !stableIsArray(observed.checks) || observed.checks.length > 256 ||
+      !stableIsSafeInteger(observed.unresolvedThreads) ||
+      observed.unresolvedThreads < 0)
+    return invalid("INCOMPLETE_SOURCE_OBSERVATION");
+
+  // Only own data properties may establish reviewer identity or terminal facts.
+  const own = ownValue;
+  const current = nativeFilter(observed.reviews, (review) =>
+    review && own(review, "appId") === policy.reviewerAppId &&
+    sameSha(own(review, "commitSha"), policy.headSha));
+  // Reject malformed same-app/current-head receipts before terminal filtering.
+  if (nativeSome(current, (review) =>
+      (own(review, "state") === "completed" &&
+       (!safeId(own(review, "id")) ||
+        own(review, "source") !== "provider-authored" ||
+        typeof own(review, "hasFindings") !== "boolean" ||
+        typeof own(review, "unresolvedFindings") !== "boolean"))))
+    return invalid("MALFORMED_CURRENT_REVIEW");
+  for (let i = 0; i < current.length; i++) {
+    for (let j = i + 1; j < current.length; j++) {
+      if (own(current[i], "id") === own(current[j], "id")) return invalid("DUPLICATE_REVIEW_ID");
+    }
+  }
+  const dismissed = nativeSome(current, (review) => own(review, "dismissed") === true);
+  if (dismissed) return result("HOLD_FINDINGS", "REVIEW_DISMISSED");
+
+  const terminal = nativeFilter(current, (review) => own(review, "state") === "completed" &&
+    own(review, "source") === "provider-authored" &&
+    typeof own(review, "hasFindings") === "boolean" &&
+    typeof own(review, "unresolvedFindings") === "boolean");
+
+  if (nativeSome(terminal, (review) => own(review, "hasFindings") || own(review, "unresolvedFindings")) ||
+      observed.unresolvedThreads > 0)
+    return result("HOLD_FINDINGS", "OPEN_REVIEW_FINDINGS");
+  if (!terminal.length) {
+    // Reaction-only and missing event deliveries are never proof of PASS.
+    return retry.attempt >= retry.maxAttempts
+      ? result("REVIEW_STALLED", "RETRY_CEILING_REACHED")
+      : result("PENDING", "BOUNDED_RECHECK_REQUIRED");
+  }
+  // Conflicting terminal review records cannot be resolved by arrival order.
+  // Duplicate IDs were rejected pairwise in current reviews above.
+  // Historical receipts on earlier heads are normal. Ignore them when the
+  // authenticated-source fixture contains a current-head terminal receipt;
+  // stale-only history above remains PENDING and never confers clearance.
+
+  // Scope candidates before validating their provenance: malformed duplicates
+  // must not disappear from the candidate set and falsely confer readiness.
+  const trustedChecks = nativeFilter(observed.checks, (check) => check && typeof check === "object" && !stableIsArray(check) &&
+    ownValue(check, "name") === "Verify" && ownValue(check, "appId") === policy.checkAppId &&
+    sameSha(ownValue(check, "headSha"), policy.headSha));
+  // No ambiguity about the single explicitly scoped required run.
+  if (trustedChecks.length !== 1)
+    return invalid("TRUSTED_UNIQUE_CI_RUN_MISSING");
+  if (ownValue(trustedChecks[0], "workflowPath") !== policy.workflowPath ||
+      !sameSha(ownValue(trustedChecks[0], "workflowRevision"), policy.workflowRevision) ||
+      !safeId(ownValue(trustedChecks[0], "runId")) || !safeId(ownValue(trustedChecks[0], "attempt")))
+    return invalid("INVALID_VERIFY_PROVENANCE");
+  if (nativeSome(trustedChecks, (check) => ownValue(check, "status") !== "completed" ||
+      ownValue(check, "conclusion") !== "success"))
+    return result("HOLD_FINDINGS", "REQUIRED_CI_NOT_SUCCESSFUL");
+  // A terminal bot receipt can precede delayed inline findings. Require a
+  // second, strictly later source read after the receipt; absence is PENDING.
+  const reads = observed.postReceiptReads;
+  if (!stableIsArray(reads) || reads.length !== 2)
+    return result("PENDING", "SETTLING_RECHECK_REQUIRED");
+  const first = reads[0], second = reads[1];
+  if (!first || !second || typeof first !== "object" || typeof second !== "object" || stableIsArray(first) || stableIsArray(second)) return invalid("SETTLING_EVIDENCE_INCOMPLETE");
+  if (!first || !second || !safeId(ownValue(first, "generation")) ||
+      !safeId(ownValue(second, "generation")) || ownValue(second, "generation") <= ownValue(first, "generation") ||
+      !sameSha(ownValue(first, "headSha"), policy.headSha) ||
+      !sameSha(ownValue(second, "headSha"), policy.headSha) ||
+      ownValue(first, "afterReceipt") !== true || ownValue(second, "afterReceipt") !== true ||
+      !nativeSome(terminal, (review) => own(review, "id") === ownValue(first, "receiptId") &&
+        own(review, "id") === ownValue(second, "receiptId")) ||
+      ownValue(second, "reviewThreadReadComplete") !== true ||
+      ownValue(second, "checkReadComplete") !== true ||
+      ownValue(second, "unresolvedThreads") !== observed.unresolvedThreads)
+    return invalid("SETTLING_EVIDENCE_INCOMPLETE");
+  // Even this positive fixture is not independent acceptance or permission.
+  return result("READY_FOR_SPONSOR_DECISION", "OFFLINE_ONLY_SOURCE_RECHECK_REQUIRED");
+}
