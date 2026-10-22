@@ -453,3 +453,14 @@ test("S-42: mutated global String cannot erase findings during array detachment"
     assert.notEqual(reconcileOffline(fixture).state, "READY_FOR_SPONSOR_DECISION");
   } finally { globalThis.String = original; }
 });
+
+test("S-42: global String cannot collapse multiple filtered receipt slots", () => {
+  const fixture = make();
+  const first = fixture.observed.reviews[0];
+  fixture.observed.reviews = [{ ...first, hasFindings: true }, { ...first, id: first.id + 1, hasFindings: false }];
+  const original = globalThis.String;
+  try {
+    globalThis.String = () => "0";
+    assert.notEqual(reconcileOffline(fixture).state, "READY_FOR_SPONSOR_DECISION");
+  } finally { globalThis.String = original; }
+});
