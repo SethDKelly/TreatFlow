@@ -167,7 +167,8 @@ export function evidenceDigest(value) {
 
 function frozen(value) {
   if (value && typeof value === "object") {
-    for (const child of stableObjectValues(value)) frozen(child);
+    const children = stableObjectValues(value);
+    for (let i = 0; i < children.length; i++) frozen(children[i]);
     stableFreeze(value);
   }
   return value;
@@ -435,7 +436,8 @@ export function evaluateOffline(input) {
       return missing("INCOMPLETE_OR_WRONG_DIFF");
     // Inspect both source arrays by index; spreading would invoke a mutable
     // Array.prototype iterator after trusted module initialization.
-    for (const files of [o.authoredChange.files, o.integratedChange.files]) {
+    for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
+      const files = groupIndex === 0 ? o.authoredChange.files : o.integratedChange.files;
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
         if (stableRegexTest(SENSITIVE_PATH, f.path) ||
