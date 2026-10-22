@@ -1215,3 +1215,22 @@ test("S-74: mutated Date.parse cannot reclassify invalid timestamp", () => {
     assert.equal(result.canApprove, false);
   } finally { Date.parse = original; }
 });
+
+test("S-74: mutable required-check iterator cannot suppress failed Verify", () => {
+  const original = Array.prototype[Symbol.iterator];
+  const changed = (f) => { f.observations.checks[0].conclusion = "failure"; };
+  assert.equal(code(changed), "CI_PROVENANCE_OR_RESULT_MISMATCH");
+  let visits = 0;
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      if (this.length === 1 && this[0] === "Verify") {
+        visits++;
+        if (visits > 1) return;
+      }
+      yield* Reflect.apply(original, this, []);
+    };
+    const result = decide(changed);
+    assert.equal(result.code, "CI_PROVENANCE_OR_RESULT_MISMATCH");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
