@@ -1169,3 +1169,49 @@ test("S-74: post-import array predicates cannot bypass sensitive path hold", () 
     assert.equal(result.canApprove, false);
   } finally { Array.prototype.some = original; }
 });
+
+test("S-74: mutated array iterator cannot suppress sensitive workflow files", () => {
+  const original = Array.prototype[Symbol.iterator];
+  const changed = (f) => {
+    f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+    f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+  };
+  assert.equal(code(changed), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      if (this.length && this[0]?.path === ".github/workflows/evil.yml") return;
+      yield* Reflect.apply(original, this, []);
+    };
+    const result = decide(changed);
+    assert.equal(result.code, "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
+
+test("S-74: mutated Date.now cannot make stale capture fresh", () => {
+  const changed = (f) => {
+    f.capture.capturedAt = at(3600);
+    for (let i = 0; i < f.capture.reads.length; i++)
+      f.capture.reads[i].observedAt = at(3604 - i);
+  };
+  assert.equal(code(changed), "CAPTURE_STALE_OR_UNORDERED");
+  const original = Date.now;
+  try {
+    Date.now = () => testClock - 3600 * 1000;
+    const result = decide(changed);
+    assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(result.canApprove, false);
+  } finally { Date.now = original; }
+});
+
+test("S-74: mutated Date.parse cannot reclassify invalid timestamp", () => {
+  const changed = (f) => { f.capture.capturedAt = "not-a-date"; };
+  assert.notEqual(state(changed), "SHADOW_EVIDENCE_READY");
+  const original = Date.parse;
+  try {
+    Date.parse = () => testClock;
+    const result = decide(changed);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Date.parse = original; }
+});
