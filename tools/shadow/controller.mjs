@@ -7,6 +7,10 @@ import { isProxy as nativeIsProxy } from "node:util/types";
 // Node builtin ESM named exports can be live-synchronized by another module's
 // syncBuiltinESMExports(). Capture the function ONCE, at module evaluation.
 const stableIsProxy = nativeIsProxy;
+const stableCreateHash = createHash;
+const stableByteLength = Buffer.byteLength;
+const stableString = String;
+const stableIsFinite = Number.isFinite;
 // Capture the normalizer at trusted initialization, rather than invoking
 // post-initialization mutable String.prototype methods through evidence.
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
@@ -25,11 +29,15 @@ const stableSplit = Function.prototype.call.bind(String.prototype.split);
 const stableStartsWith = Function.prototype.call.bind(String.prototype.startsWith);
 const stableIncludes = Function.prototype.call.bind(String.prototype.includes);
 const stableTrim = Function.prototype.call.bind(String.prototype.trim);
-const stableMap = Function.prototype.call.bind(Array.prototype.map);
+const stableMap = (values, mapper) => {
+  const output = [];
+  for (let i = 0; i < values.length; i++) stableDefineProperty(output, stableString(i), {value: mapper(values[i], i), enumerable: true, writable: true, configurable: true});
+  return output;
+};
 const stableFilter = (values, predicate) => {
   const output = [];
   for (let i = 0; i < values.length; i++) {
-    if (predicate(values[i], i)) stableDefineProperty(output, String(output.length), {value: values[i], enumerable: true, writable: true, configurable: true});
+    if (predicate(values[i], i)) stableDefineProperty(output, stableString(output.length), {value: values[i], enumerable: true, writable: true, configurable: true});
   }
   return output;
 };
@@ -76,7 +84,7 @@ const MAX_INPUT_BYTES = 786432;
 function chargeText(value, budget) {
   // Account for actual UTF-8 JSON encoding, including escaped characters.
   // Both keys and values are charged before an evidence object is copied.
-  budget.bytes += Buffer.byteLength(stableStringify(value), "utf8");
+  budget.bytes += stableByteLength(stableStringify(value), "utf8");
   if (budget.bytes > (budget.maxBytes ?? MAX_EVIDENCE_BYTES))
     throw new TypeError("Evidence size budget exceeded");
 }
@@ -94,7 +102,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
     return value;
   }
   if (value === null || typeof value === "boolean") return value;
-  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "number" && stableIsFinite(value)) return value;
   // Use the module-local function snapshot, not a live built-in export or
   // util.types.isProxy: a caller can
   // replace the latter's shared mutable property. The intrinsic must run
@@ -142,7 +150,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
 
 function canonical(value) {
   if (value === null || typeof value === "string" || typeof value === "boolean") return stableStringify(value);
-  if (typeof value === "number" && Number.isFinite(value)) return stableStringify(value);
+  if (typeof value === "number" && stableIsFinite(value)) return stableStringify(value);
   if (stableArrayIsArray(value)) return "[" + stableJoin(stableMap(value, canonical), ",") + "]";
   if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === Object.prototype)) {
     return "{" + stableJoin(stableMap(stableSort(stableObjectKeys(value)), (key) => {
@@ -154,7 +162,7 @@ function canonical(value) {
 }
 
 export function evidenceDigest(value) {
-  return createHash("sha256").update(canonical(inertCopy(value)), "utf8").digest("hex");
+  return stableCreateHash("sha256").update(canonical(inertCopy(value)), "utf8").digest("hex");
 }
 
 function frozen(value) {
@@ -244,7 +252,7 @@ function validCaptureTimestamp(value) {
   date.setUTCFullYear(year, month - 1, day);
   if (date.getUTCFullYear() !== year ||
       date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
-  return Number.isFinite(stableDateParse(value));
+  return stableIsFinite(stableDateParse(value));
 }
 
 // Time-bounded SOURCE-CLAIM ordering for synthetic replay, not a trusted clock,
@@ -258,7 +266,7 @@ const READ_STAGES = ["merge", "checks", "issue", "threads", "final"];
 function freshSyntheticReads(capture, observations, policy) {
   const now = stableDateNow();
   const snapshotAt = stableDateParse(capture.capturedAt);
-  if (!Number.isFinite(snapshotAt) ||
+  if (!stableIsFinite(snapshotAt) ||
       snapshotAt < now - MAX_SNAPSHOT_AGE_MS ||
       snapshotAt > now + FUTURE_SKEW_MS) return false;
   const reads = capture.reads;
@@ -271,7 +279,7 @@ function freshSyntheticReads(capture, observations, policy) {
         !sameSha(read.tipSha, observations.integratedTip) ||
         !validCaptureTimestamp(read.observedAt)) return false;
     const observedAt = stableDateParse(read.observedAt);
-    if (!Number.isFinite(observedAt) ||
+    if (!stableIsFinite(observedAt) ||
         observedAt < now - MAX_SNAPSHOT_AGE_MS ||
         observedAt > now + FUTURE_SKEW_MS ||
         observedAt > snapshotAt ||
