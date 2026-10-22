@@ -306,3 +306,49 @@ test("post-import numeric setter cannot change detached finding flags", () => {
     else delete Array.prototype[0];
   }
 });
+
+test("null input returns frozen fail-closed evidence instead of throwing", () => {
+  const got = reconcileOffline(null);
+  assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+  checkSafe(got);
+});
+
+test("post-import WeakSet tampering cannot clear observed findings", () => {
+  const original = WeakSet.prototype.add;
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  fixture.observed.reviews[0].unresolvedFindings = true;
+  let invoked = 0;
+  try {
+    WeakSet.prototype.add = function(value) {
+      invoked++;
+      if (value && typeof value === "object" && value.hasFindings === true) {
+        value.hasFindings = false;
+        value.unresolvedFindings = false;
+      }
+      return Reflect.apply(original, this, [value]);
+    };
+    const got = reconcileOffline(fixture);
+    assert.equal(got.state, "HOLD_FINDINGS");
+    assert.equal(invoked, 0);
+    checkSafe(got);
+  } finally { WeakSet.prototype.add = original; }
+});
+
+test("post-import Object.freeze mutation cannot grant advisory capabilities", () => {
+  const original = Object.freeze;
+  try {
+    Object.freeze = function(value) {
+      if (value && value.mode === "OFFLINE_SYNTHETIC_UNATTESTED") {
+        value.canApprove = true;
+        value.canMerge = true;
+      }
+      return value;
+    };
+    const got = reconcileOffline({});
+    assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+    assert.equal(got.canApprove, false);
+    assert.equal(got.canMerge, false);
+    assert.equal(Object.isFrozen(got), true);
+  } finally { Object.freeze = original; }
+});
