@@ -6,6 +6,10 @@ okf_version: "0.2"
 
 TreatFlow uses an observation-first concept design: **effortless private recording and review** is the independently sufficient primary success; optional protected community reporting and qualified exploratory research are secondary and tertiary. The repository may contain **sponsor-authorized local-only synthetic Track L source** under [014-B](phases/014/014-b-local-first-implementation-plan.md). AWS deployment, CI/cloud writes, real participant data collection, protected disclosure and launch remain unauthorized.
 
+## Engineering review governance
+
+- [Independent review orchestration policy](review-orchestration-policy.md) — provider eligibility, exact-head evidence, HOLD, and sponsor merge authorization; implementation remains separately gated.
+
 ## Current design authority
 
 - [Project intake and affected parties](canonical/project/intake.md)
