@@ -438,7 +438,8 @@ export function evaluateOffline(input) {
         !stableEvery(p.requiredChecks, (name) => typeof name === "string" && stableTrim(name).length > 0 && name === stableTrim(name)) ||
         new StableSet(p.requiredChecks).size !== p.requiredChecks.length ||
         !stableArrayIsArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
-    for (const name of p.requiredChecks) {
+    for (let requiredIndex = 0; requiredIndex < p.requiredChecks.length; requiredIndex++) {
+      const name = p.requiredChecks[requiredIndex];
       const matches = stableFilter(o.checks, (c) => c.name === name);
       if (matches.length !== 1) return hold("MISSING_OR_DUPLICATE_REQUIRED_CHECK", name);
       const c = matches[0];
