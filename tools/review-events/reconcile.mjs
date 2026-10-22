@@ -178,10 +178,11 @@ export function reconcileOffline(input = {}) {
   if (observed.readStatus !== "complete")
     return invalid("SOURCE_READ_NOT_COMPLETE");
   const pr = observed.pr;
-  if (!pr || pr.repositoryId !== policy.repositoryId ||
-      pr.number !== policy.prNumber ||
-      !sameSha(pr.headSha, pr.headSha)) return invalid("PR_SOURCE_MISMATCH");
-  if (!sameSha(pr.headSha, policy.headSha))
+  if (!pr || typeof pr !== "object" || stableArrayIsArray(pr)) return invalid("PR_SOURCE_MISMATCH");
+  if (!pr || ownValue(pr, "repositoryId") !== policy.repositoryId ||
+      ownValue(pr, "number") !== policy.prNumber ||
+      !sameSha(ownValue(pr, "headSha"), ownValue(pr, "headSha"))) return invalid("PR_SOURCE_MISMATCH");
+  if (!sameSha(ownValue(pr, "headSha"), policy.headSha))
     return result("STALE_HEAD", "HEAD_CHANGED_REEVALUATE_POLICY");
   // Observations are not provenance attestations. Missing or contradictory
   // source facts remain unknown rather than being inferred from an event.
@@ -234,18 +235,18 @@ export function reconcileOffline(input = {}) {
 
   // Scope candidates before validating their provenance: malformed duplicates
   // must not disappear from the candidate set and falsely confer readiness.
-  const trustedChecks = nativeFilter(observed.checks, (check) => check &&
-    check.name === "Verify" && check.appId === policy.checkAppId &&
-    sameSha(check.headSha, policy.headSha));
+  const trustedChecks = nativeFilter(observed.checks, (check) => check && typeof check === "object" && !stableArrayIsArray(check) &&
+    ownValue(check, "name") === "Verify" && ownValue(check, "appId") === policy.checkAppId &&
+    sameSha(ownValue(check, "headSha"), policy.headSha));
   // No ambiguity about the single explicitly scoped required run.
   if (trustedChecks.length !== 1)
     return invalid("TRUSTED_UNIQUE_CI_RUN_MISSING");
-  if (trustedChecks[0].workflowPath !== policy.workflowPath ||
-      !sameSha(trustedChecks[0].workflowRevision, policy.workflowRevision) ||
-      !safeId(trustedChecks[0].runId) || !safeId(trustedChecks[0].attempt))
+  if (ownValue(trustedChecks[0], "workflowPath") !== policy.workflowPath ||
+      !sameSha(ownValue(trustedChecks[0], "workflowRevision"), policy.workflowRevision) ||
+      !safeId(ownValue(trustedChecks[0], "runId")) || !safeId(ownValue(trustedChecks[0], "attempt")))
     return invalid("INVALID_VERIFY_PROVENANCE");
-  if (nativeSome(trustedChecks, (check) => check.status !== "completed" ||
-      check.conclusion !== "success"))
+  if (nativeSome(trustedChecks, (check) => ownValue(check, "status") !== "completed" ||
+      ownValue(check, "conclusion") !== "success"))
     return result("HOLD_FINDINGS", "REQUIRED_CI_NOT_SUCCESSFUL");
   // A terminal bot receipt can precede delayed inline findings. Require a
   // second, strictly later source read after the receipt; absence is PENDING.
@@ -253,16 +254,17 @@ export function reconcileOffline(input = {}) {
   if (!stableArrayIsArray(reads) || reads.length !== 2)
     return result("PENDING", "SETTLING_RECHECK_REQUIRED");
   const first = reads[0], second = reads[1];
-  if (!first || !second || !safeId(first.generation) ||
-      !safeId(second.generation) || second.generation <= first.generation ||
-      !sameSha(first.headSha, policy.headSha) ||
-      !sameSha(second.headSha, policy.headSha) ||
-      first.afterReceipt !== true || second.afterReceipt !== true ||
-      !nativeSome(terminal, (review) => own(review, "id") === first.receiptId &&
-        own(review, "id") === second.receiptId) ||
-      second.reviewThreadReadComplete !== true ||
-      second.checkReadComplete !== true ||
-      second.unresolvedThreads !== observed.unresolvedThreads)
+  if (!first || !second || typeof first !== "object" || typeof second !== "object" || stableArrayIsArray(first) || stableArrayIsArray(second)) return invalid("SETTLING_EVIDENCE_INCOMPLETE");
+  if (!first || !second || !safeId(ownValue(first, "generation")) ||
+      !safeId(ownValue(second, "generation")) || ownValue(second, "generation") <= ownValue(first, "generation") ||
+      !sameSha(ownValue(first, "headSha"), policy.headSha) ||
+      !sameSha(ownValue(second, "headSha"), policy.headSha) ||
+      ownValue(first, "afterReceipt") !== true || ownValue(second, "afterReceipt") !== true ||
+      !nativeSome(terminal, (review) => own(review, "id") === ownValue(first, "receiptId") &&
+        own(review, "id") === ownValue(second, "receiptId")) ||
+      ownValue(second, "reviewThreadReadComplete") !== true ||
+      ownValue(second, "checkReadComplete") !== true ||
+      ownValue(second, "unresolvedThreads") !== observed.unresolvedThreads)
     return invalid("SETTLING_EVIDENCE_INCOMPLETE");
   // Even this positive fixture is not independent acceptance or permission.
   return result("READY_FOR_SPONSOR_DECISION", "OFFLINE_ONLY_SOURCE_RECHECK_REQUIRED");
