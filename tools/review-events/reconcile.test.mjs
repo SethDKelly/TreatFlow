@@ -440,3 +440,16 @@ test("S-42: scalar byte-length mutation cannot clear review findings", () => {
     assert.notEqual(reconcileOffline(fixture).state, "READY_FOR_SPONSOR_DECISION");
   } finally { Buffer.byteLength = original; }
 });
+
+test("S-42: mutated global String cannot erase findings during array detachment", () => {
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  const original = globalThis.String;
+  try {
+    globalThis.String = function(...args) {
+      fixture.observed.reviews[0].hasFindings = false;
+      return Reflect.apply(original, undefined, args);
+    };
+    assert.notEqual(reconcileOffline(fixture).state, "READY_FOR_SPONSOR_DECISION");
+  } finally { globalThis.String = original; }
+});
