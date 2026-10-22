@@ -1,6 +1,6 @@
 ---
 type: policy
-status: draft
+status: active
 title: TreatFlow independent review orchestration policy
 ---
 
