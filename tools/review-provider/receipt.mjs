@@ -22,7 +22,7 @@ const stableParse = Date.parse;
 const stableDate = Date;
 const plainPrototype = Object.prototype;
 const shaPattern = /^[a-f0-9]{40}$/i;
-const timestampPattern = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,9}))?Z$/;
+const timestampPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?Z$/;
 const sha = v => typeof v === "string" && stableCall(stableRegexExec, shaPattern, [v]) !== null;
 const own = (o,k) => stableCall(stableHasOwn,o,[k]);
 function copy(value, seen = new StableWeakSet()) {
@@ -42,7 +42,7 @@ function copy(value, seen = new StableWeakSet()) {
     if (typeof key !== "string" || (array && key === "length")) continue;
     const d=descriptors[key];
     if (!own(d,"value") || !d.enumerable) throw Error("accessor or nonenumerable");
-    if (array && !/^(0|[1-9]\\d*)$/.test(key)) throw Error("array key");
+    if (array && !/^(0|[1-9]\d*)$/.test(key)) throw Error("array key");
     stableDefine(result,key,{value:copy(d.value,seen),enumerable:true,writable:true,configurable:true});
   }
   if (array && result.length !== value.length) throw Error("array holes");
