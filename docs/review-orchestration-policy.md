@@ -1,3 +1,9 @@
+---
+type: policy
+status: draft
+title: TreatFlow independent review orchestration policy
+---
+
 # TreatFlow independent review orchestration policy (v1)
 
 ## Authority and scope
@@ -58,9 +64,8 @@ Effective for the **next TreatFlow review cycle**. Existing PR #117 and #119 rem
 - On failure: one bounded retry of the eligible provider, then switch to another verified provider. If no provider is operational, preserve the pending review and request manual intervention. CI success does not satisfy the missing independent review.
 - During a provider outage, preserve the queue of pending reviews; don't request Codex reviews until quota recovery is confirmed. Do not fabricate completion timestamps, review identities, or outcomes.
 
-### Temporary outage ledger (operator-declared)
-- Window: next 40 minutes from the current review-cycle request; exact wall-clock start/end must be recorded by the executing dispatcher.
-- Codex: unavailable (user-reported review quota exhaustion, approximately 43 minutes).
-- Cursor: preferred if dispatch capability is verified; otherwise `BLOCKED_NO_DISPATCH`.
-- Affected: PR #117 and PR #119, both still requiring exact-head independent review.
-- Status: policy only; no verified Cursor dispatch path has been established in this session.
+### Historical outage note (expired; non-operative)
+- The original operator-reported Codex outage and 40-minute Cursor preference had no recorded absolute start/end and **must not be interpreted as an active switch**.
+- On 2026-10-22, exact-head Codex review receipts were observed on PR #117 at `5a79f77d9f074fcc6dea2b99c0f8510165e29c2d` and PR #119 at `c5d08d9605c68f20c6b1fe56719e70fa926e3023`; these demonstrate recovery for those attempts, not future availability guarantees.
+- Cursor `@cursoragent` was also operational for prior exact-head HOLD reviews. This is a historical observation, not authorization to merge.
+- Any new timed override requires explicit absolute UTC start/end, a dispatch ledger and expiry enforcement; absent these it is **inactive**.
