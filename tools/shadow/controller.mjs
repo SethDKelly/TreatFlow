@@ -8,6 +8,7 @@ import { isProxy as nativeIsProxy } from "node:util/types";
 // syncBuiltinESMExports(). Capture the function ONCE, at module evaluation.
 const stableIsProxy = nativeIsProxy;
 const stableCreateHash = createHash;
+const stableCreate = Object.create;
 const stableByteLength = Buffer.byteLength;
 const stableString = String;
 const stableIsFinite = Number.isFinite;
@@ -138,7 +139,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   // Enforce the same byte cap on property names BEFORE collecting all
   // descriptors and doing potentially expensive canonicalization/sorting.
   for (let i = 0; i < keys.length; i++) chargeText(keys[i], budget);
-  const output = Object.create(null);
+  const output = stableCreate(null);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const descriptor = stableGetDescriptor(value, key);
@@ -257,9 +258,9 @@ function validCaptureTimestamp(value) {
   const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
   // Reject impossible calendar dates that some JS engines normalize.
   const date = new Date(0);
-  date.setUTCFullYear(year, month - 1, day);
-  if (date.getUTCFullYear() !== year ||
-      date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
+  stableSetUTCFullYear(date, year, month - 1, day);
+  if (stableGetUTCFullYear(date) !== year ||
+      stableGetUTCMonth(date) !== month - 1 || stableGetUTCDate(date) !== day) return false;
   return stableIsFinite(stableDateParse(value));
 }
 
