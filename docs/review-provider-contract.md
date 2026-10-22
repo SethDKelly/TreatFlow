@@ -1,6 +1,6 @@
 # S-77 — Review provider contract (offline design baseline)
 
-Status: **design / offline qualification only**. This document is not a verified live provider adapter, authorization, CI check, or security-exit acceptance.
+Status: **design / offline qualification only**. The current executable evaluator always returns HOLD for caller-supplied provider sources, including matching `authenticated: true` assertions. No trusted collector capability or receipt authentication exists yet. This document is not a verified live provider adapter, authorization, CI check, or security-exit acceptance.
 
 ## Boundaries
 - Standard providers: Codex and Cursor Bugbot (subject to individually verified dispatch).
@@ -37,7 +37,7 @@ Required fields:
   }
 }
 ```
-`receipt` is absent until verified. Text alone is never authentication; the collector must independently read trusted GitHub/provider identity and repository/head provenance. Unverified identities, mismatched SHAs, stale receipts, or missing source reads yield `UNKNOWN` / HOLD, never PASS.
+`receipt` is absent until verified. Text alone is never authentication; the collector must independently read trusted GitHub/provider identity and repository/head provenance. Unverified identities, mismatched SHAs, stale receipts, or missing source reads yield `UNKNOWN` / HOLD, never PASS. **A caller-provided `authenticatedSource` object is untrusted, regardless of its `authenticated` field; it cannot produce `RECEIPT_OBSERVED`.** A future S-75-qualified collector must derive provenance through an independently authenticated provider/GitHub read and a non-caller-forgeable boundary before a verified state is implemented. The executable tests are included in `npm test` and Verify CI.
 
 ## Adapter states
 `NOT_CONFIGURED -> CAPABILITY_VERIFIED -> REQUESTED -> ACKNOWLEDGED -> RECEIPT_VERIFIED` or `FAILED | RATE_LIMITED | TIMED_OUT | UNKNOWN`. State transitions must be monotonic per attempt; a new commit creates a new cycle. A reaction-only receipt is not sufficient without independently established provider-specific semantics.
