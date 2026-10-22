@@ -1,13 +1,85 @@
 // S-32-D: OFFLINE shadow harness. No IO, network, tokens or status writes.
 // Positive fixture qualification is time-bounded, not trusted or live.
 import { createHash } from "node:crypto";
-import { types } from "node:util";
+// Capture the node:util/types ESM export, not the mutable util.types object
+// property. Another in-process module may replace util.types.isProxy.
+import { isProxy as nativeIsProxy } from "node:util/types";
+// Node builtin ESM named exports can be live-synchronized by another module's
+// syncBuiltinESMExports(). Capture the function ONCE, at module evaluation.
+const stableIsProxy = nativeIsProxy;
+const stableCreateHash = createHash;
+const stableCreate = Object.create;
+const stablePlainPrototype = Object.prototype;
+const StableWeakSet = WeakSet;
+const stableByteLength = Buffer.byteLength;
+const stableString = String;
+const stableNumber = Number;
+const stableIsFinite = Number.isFinite;
+// Capture the normalizer at trusted initialization, rather than invoking
+// post-initialization mutable String.prototype methods through evidence.
+const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
+// Duplicate identity comparison must not use post-initialization JSON/Set mutations.
+const stableStringify = JSON.stringify;
+const stableSort = Function.prototype.call.bind(Array.prototype.sort);
+const stableDefineProperty = Object.defineProperty;
+const stableGetDescriptor = Object.getOwnPropertyDescriptor;
+const stableGetPrototype = Object.getPrototypeOf;
+const stableOwnKeys = Reflect.ownKeys;
+const stableArrayIsArray = Array.isArray;
+const stableIsSafeInteger = Number.isSafeInteger;
+const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const stableJSONParse = JSON.parse;
+const stableSplit = Function.prototype.call.bind(String.prototype.split);
+const stableStartsWith = Function.prototype.call.bind(String.prototype.startsWith);
+const stableIncludes = Function.prototype.call.bind(String.prototype.includes);
+const stableTrim = Function.prototype.call.bind(String.prototype.trim);
+const stableMap = (values, mapper) => {
+  const output = [];
+  for (let i = 0; i < values.length; i++) stableDefineProperty(output, stableString(i), {value: mapper(values[i], i), enumerable: true, writable: true, configurable: true});
+  return output;
+};
+const stableFilter = (values, predicate) => {
+  const output = [];
+  for (let i = 0; i < values.length; i++) {
+    if (predicate(values[i], i)) stableDefineProperty(output, stableString(output.length), {value: values[i], enumerable: true, writable: true, configurable: true});
+  }
+  return output;
+};
+const stableEvery = Function.prototype.call.bind(Array.prototype.every);
+const stableSome = Function.prototype.call.bind(Array.prototype.some);
+const stableJoin = Function.prototype.call.bind(Array.prototype.join);
+const stableArrayIncludes = Function.prototype.call.bind(Array.prototype.includes);
+const stableObjectKeys = Object.keys;
+const stableObjectValues = Object.values;
+const stableFreeze = Object.freeze;
+const stableDateNow = Date.now;
+const stableDateParse = Date.parse;
+const stableSetUTCFullYear = Function.prototype.call.bind(Date.prototype.setUTCFullYear);
+const stableGetUTCFullYear = Function.prototype.call.bind(Date.prototype.getUTCFullYear);
+const stableGetUTCMonth = Function.prototype.call.bind(Date.prototype.getUTCMonth);
+const stableGetUTCDate = Function.prototype.call.bind(Date.prototype.getUTCDate);
+const stableRegexExec = Function.prototype.call.bind(RegExp.prototype.exec);
+const stableRegexTest = (pattern, value) => stableRegexExec(pattern, value) !== null;
+const StableSet = Set;
+const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
+const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
+const stableSetSize = Function.prototype.call.bind(Object.getOwnPropertyDescriptor(Set.prototype, "size").get);
+const stableWeakSetHas = Function.prototype.call.bind(WeakSet.prototype.has);
+const stableWeakSetAdd = Function.prototype.call.bind(WeakSet.prototype.add);
+const stableWeakSetDelete = Function.prototype.call.bind(WeakSet.prototype.delete);
+const stableHashUpdate = Function.prototype.call.bind(Object.getPrototypeOf(createHash("sha256")).update);
+const stableHashDigest = Function.prototype.call.bind(Object.getPrototypeOf(createHash("sha256")).digest);
+const indexedUniqueCount = (items) => {
+  const seen = new StableSet();
+  for (let i = 0; i < items.length; i++) stableSetAdd(seen, items[i]);
+  return stableSetSize(seen);
+};
 
 const SHA = /^[a-f0-9]{40}$/i;
-const validSha = (value) => typeof value === "string" && SHA.test(value);
+const validSha = (value) => typeof value === "string" && stableRegexTest(SHA, value);
 const sameSha = (left, right) => typeof left === "string" &&
-  typeof right === "string" && left.toLowerCase() === right.toLowerCase();
-const validDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
+  typeof right === "string" && stableLowerCase(left) === stableLowerCase(right);
+const validDigest = (value) => typeof value === "string" && stableRegexTest(/^[a-f0-9]{64}$/i, value);
 // Conservatively protect all phase records: current or future phase authority
 // must not be downgraded just because a new numbered phase becomes active.
 // The check's execution policy includes package scripts/locks and runnable
@@ -22,14 +94,14 @@ const MAX_INPUT_BYTES = 786432;
 function chargeText(value, budget) {
   // Account for actual UTF-8 JSON encoding, including escaped characters.
   // Both keys and values are charged before an evidence object is copied.
-  budget.bytes += Buffer.byteLength(JSON.stringify(value), "utf8");
+  budget.bytes += stableByteLength(stableStringify(value), "utf8");
   if (budget.bytes > (budget.maxBytes ?? MAX_EVIDENCE_BYTES))
     throw new TypeError("Evidence size budget exceeded");
 }
 
 // Capture one detached, inert snapshot BEFORE validation and hashing.
 // Reject accessors, sparse arrays, exotic objects, cycles and oversized inputs.
-function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES }) {
+function inertCopy(value, seen = new StableWeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES }) {
   // Count every copied node, including duplicated references in a DAG. A
   // WeakSet of active ancestors alone catches cycles but not exponential
   // expansion from many shared subtrees.
@@ -40,69 +112,76 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
     return value;
   }
   if (value === null || typeof value === "boolean") return value;
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  // Node's native proxy check does not call Proxy traps. It must precede
-  // Array.isArray/Object.getPrototypeOf/Reflect.ownKeys/descriptor access:
-  // even "read-only" reflection can execute attacker-controlled JavaScript.
-  if (typeof value !== "object" || types.isProxy(value) || seen.has(value))
+  if (typeof value === "number" && stableIsFinite(value)) return value;
+  // Use the module-local function snapshot, not a live built-in export or
+  // util.types.isProxy: a caller can
+  // replace the latter's shared mutable property. The intrinsic must run
+  // before Array.isArray, prototype, own-key or descriptor reflection.
+  // A wholly compromised JS runtime before module loading is not trusted.
+  if (typeof value !== "object" || stableIsProxy(value) || stableWeakSetHas(seen, value))
     throw new TypeError("Invalid, proxied or cyclic evidence");
-  seen.add(value);
-  if (Array.isArray(value)) {
-    if (value.length > 10000 || Reflect.ownKeys(value).length !== value.length + 1)
+  stableWeakSetAdd(seen, value);
+  if (stableArrayIsArray(value)) {
+    if (value.length > 10000 || stableOwnKeys(value).length !== value.length + 1)
       throw new TypeError("Sparse or extended evidence array");
     const output = [];
     for (let index = 0; index < value.length; index++) {
-      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
-      if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
-      chargeText(String(index), budget);
-      output.push(inertCopy(descriptor.value, seen, depth + 1, budget));
+      const descriptor = stableGetDescriptor(value, stableString(index));
+      if (!descriptor || !stableHasOwn(descriptor, "value")) throw new TypeError("Non-inert array");
+      chargeText(stableString(index), budget);
+      stableDefineProperty(output, stableString(index), { value: inertCopy(descriptor.value, seen, depth + 1, budget), enumerable: true, writable: true, configurable: true });
     }
-    seen.delete(value);
+    stableWeakSetDelete(seen, value);
     return output;
   }
-  if (Object.getPrototypeOf(value) !== Object.prototype)
+  if (stableGetPrototype(value) !== stablePlainPrototype && stableGetPrototype(value) !== null)
     throw new TypeError("Non-plain evidence object");
-  const keys = Reflect.ownKeys(value);
-  if (keys.some((key) => typeof key !== "string"))
-    throw new TypeError("Non-string evidence key");
+  const keys = stableOwnKeys(value);
+  for (let i = 0; i < keys.length; i++) {
+    if (typeof keys[i] !== "string") throw new TypeError("Non-string evidence key");
+  }
   // Enforce the same byte cap on property names BEFORE collecting all
   // descriptors and doing potentially expensive canonicalization/sorting.
-  for (const key of keys) chargeText(key, budget);
-  const output = {};
-  for (const key of keys) {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
+  for (let i = 0; i < keys.length; i++) chargeText(keys[i], budget);
+  const output = stableCreate(null);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const descriptor = stableGetDescriptor(value, key);
+    if (!descriptor.enumerable || !stableHasOwn(descriptor, "value") || descriptor.value === undefined)
       throw new TypeError("Non-inert evidence field");
-    Object.defineProperty(output, key, {
+    stableDefineProperty(output, key, {
       enumerable: true, configurable: true, writable: true,
       value: inertCopy(descriptor.value, seen, depth + 1, budget),
     });
   }
-  seen.delete(value);
+  stableWeakSetDelete(seen, value);
   return output;
 }
 
 function canonical(value) {
-  if (value === null || typeof value === "string" || typeof value === "boolean") return JSON.stringify(value);
-  if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);
-  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
-  if (value && Object.getPrototypeOf(value) === Object.prototype) {
-    return "{" + Object.keys(value).sort().map((key) => {
+  if (value === null || typeof value === "string" || typeof value === "boolean") return stableStringify(value);
+  if (typeof value === "number" && stableIsFinite(value)) return stableStringify(value);
+  if (stableArrayIsArray(value)) return "[" + stableJoin(stableMap(value, canonical), ",") + "]";
+  if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === stablePlainPrototype)) {
+    return "{" + stableJoin(stableMap(stableSort(stableObjectKeys(value)), (key) => {
       if (value[key] === undefined) throw new TypeError("Undefined evidence field");
-      return JSON.stringify(key) + ":" + canonical(value[key]);
-    }).join(",") + "}";
+      return stableStringify(key) + ":" + canonical(value[key]);
+    }), ",") + "}";
   }
   throw new TypeError("Evidence must be finite JSON values");
 }
 
 export function evidenceDigest(value) {
-  return createHash("sha256").update(canonical(inertCopy(value)), "utf8").digest("hex");
+  const hash = stableCreateHash("sha256");
+  stableHashUpdate(hash, canonical(inertCopy(value)), "utf8");
+  return stableHashDigest(hash, "hex");
 }
 
 function frozen(value) {
   if (value && typeof value === "object") {
-    for (const child of Object.values(value)) frozen(child);
-    Object.freeze(value);
+    const children = stableObjectValues(value);
+    for (let i = 0; i < children.length; i++) frozen(children[i]);
+    stableFreeze(value);
   }
   return value;
 }
@@ -115,21 +194,20 @@ const hold = (code, detail) => outcome("SHADOW_HOLD", code, detail);
 const missing = (code, detail) => outcome("SHADOW_INSUFFICIENT_EVIDENCE", code, detail);
 
 const validPath = (path) => typeof path === "string" && path.length > 0 &&
-  !path.startsWith("/") && !path.includes("\\") && !/[\u0000-\u001f]/.test(path) &&
-  path.split("/").every((part) => part !== "" && part !== "." && part !== "..");
+  !stableStartsWith(path, "/") && !stableIncludes(path, "\\") && !stableRegexTest(/[\u0000-\u001f]/, path) &&
+  stableEvery(stableSplit(path, "/"), (part) => part !== "" && part !== "." && part !== "..");
 
 function validFiles(change) {
-  if (!change || change.complete !== true || !Array.isArray(change.files) ||
+  if (!change || change.complete !== true || !stableArrayIsArray(change.files) ||
       change.files.length === 0) return false;
-  if (new Set(change.files.map((file) => file.path)).size !== change.files.length)
+  if (indexedUniqueCount(stableMap(change.files, (file) => file.path)) !== change.files.length)
     return false;
   // One source cannot be renamed to multiple destinations in a single diff.
   // A duplicated source needs explicit copy provenance, unsupported here.
-  const renameSources = change.files.filter((file) => file.status === "renamed")
-    .map((file) => file.previousPath);
-  if (new Set(renameSources).size !== renameSources.length) return false;
-  return change.files.every((f) =>
-    validPath(f.path) && ["added", "modified", "deleted", "renamed"].includes(f.status) &&
+  const renameSources = stableMap(stableFilter(change.files, (file) => file.status === "renamed"), (file) => file.previousPath);
+  if (indexedUniqueCount(renameSources) !== renameSources.length) return false;
+  return stableEvery(change.files, (f) =>
+    validPath(f.path) && stableArrayIncludes(["added", "modified", "deleted", "renamed"], f.status) &&
     (f.status !== "renamed" ||
       (validPath(f.previousPath) && f.previousPath !== f.path)) &&
     (f.kind === "text" ? validDigest(f.patchDigest) :
@@ -141,12 +219,27 @@ function validFiles(change) {
 // strategies HOLD; parent ancestry alone never attests to landed content.
 function sameChangeDescriptors(authored, integrated) {
   if (authored.files.length !== integrated.files.length) return false;
-  const normalize = (change) => change.files.map((file) => JSON.stringify([
-    file.path, file.status, file.status === "renamed" ? file.previousPath : null,
-    file.kind, (file.kind === "text" ? file.patchDigest : file.objectDigest).toLowerCase(),
-  ])).sort();
+  const normalize = (change) => {
+    const encoded = [];
+    for (let i = 0; i < change.files.length; i++) {
+      const file = change.files[i];
+      const fields = [file.path, file.status,
+        file.status === "renamed" ? file.previousPath : null,
+        file.kind, stableLowerCase(file.kind === "text" ? file.patchDigest : file.objectDigest)];
+      let key = "";
+      for (let j = 0; j < fields.length; j++) {
+        const value = fields[j];
+        key += value === null ? "N;" : `S${value.length}:${value}`;
+      }
+      stableDefineProperty(encoded, stableString(encoded.length), { value: key, enumerable: true, writable: true, configurable: true });
+    }
+    return stableSort(encoded);
+  };
   const expected = normalize(authored), actual = normalize(integrated);
-  return expected.every((entry, index) => entry === actual[index]);
+  for (let i = 0; i < expected.length; i++) {
+    if (expected[i] !== actual[i]) return false;
+  }
+  return true;
 }
 
 // Derive the same work identity from the ACTUAL evidence content on both
@@ -164,15 +257,15 @@ function workKeyFor(manifest, manifestDigest) {
 // Date.parse alone coerces arrays and accepts legacy strings such as "0".
 function validCaptureTimestamp(value) {
   if (typeof value !== "string") return false;
-  const match = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.exec(value);
+  const match = stableRegexExec(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/, value);
   if (!match) return false;
-  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  const year = stableNumber(match[1]), month = stableNumber(match[2]), day = stableNumber(match[3]);
   // Reject impossible calendar dates that some JS engines normalize.
   const date = new Date(0);
-  date.setUTCFullYear(year, month - 1, day);
-  if (date.getUTCFullYear() !== year ||
-      date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
-  return Number.isFinite(Date.parse(value));
+  stableSetUTCFullYear(date, year, month - 1, day);
+  if (stableGetUTCFullYear(date) !== year ||
+      stableGetUTCMonth(date) !== month - 1 || stableGetUTCDate(date) !== day) return false;
+  return stableIsFinite(stableDateParse(value));
 }
 
 // Time-bounded SOURCE-CLAIM ordering for synthetic replay, not a trusted clock,
@@ -184,13 +277,13 @@ const FUTURE_SKEW_MS = 30 * 1000;
 const READ_STAGES = ["merge", "checks", "issue", "threads", "final"];
 
 function freshSyntheticReads(capture, observations, policy) {
-  const now = Date.now();
-  const snapshotAt = Date.parse(capture.capturedAt);
-  if (!Number.isFinite(snapshotAt) ||
+  const now = stableDateNow();
+  const snapshotAt = stableDateParse(capture.capturedAt);
+  if (!stableIsFinite(snapshotAt) ||
       snapshotAt < now - MAX_SNAPSHOT_AGE_MS ||
       snapshotAt > now + FUTURE_SKEW_MS) return false;
   const reads = capture.reads;
-  if (!Array.isArray(reads) || reads.length !== READ_STAGES.length) return false;
+  if (!stableArrayIsArray(reads) || reads.length !== READ_STAGES.length) return false;
   let lastObservedAt = 0;
   for (let index = 0; index < reads.length; index++) {
     const read = reads[index];
@@ -198,8 +291,8 @@ function freshSyntheticReads(capture, observations, policy) {
         read.sequence !== index + 1 || read.complete !== true ||
         !sameSha(read.tipSha, observations.integratedTip) ||
         !validCaptureTimestamp(read.observedAt)) return false;
-    const observedAt = Date.parse(read.observedAt);
-    if (!Number.isFinite(observedAt) ||
+    const observedAt = stableDateParse(read.observedAt);
+    if (!stableIsFinite(observedAt) ||
         observedAt < now - MAX_SNAPSHOT_AGE_MS ||
         observedAt > now + FUTURE_SKEW_MS ||
         observedAt > snapshotAt ||
@@ -216,18 +309,18 @@ function freshSyntheticReads(capture, observations, policy) {
   // a newer attempt, a failed rerun or an untrusted workflow/check origin.
   // All of these are still caller-asserted synthetic claims, not live proofs.
   const completeRun = (run) => run &&
-    typeof run.name === "string" && run.name.trim() !== "" &&
-    run.name === run.name.trim() &&
-    Number.isSafeInteger(run.runId) && run.runId > 0 &&
-    Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
-    validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
+    typeof run.name === "string" && stableTrim(run.name) !== "" &&
+    run.name === stableTrim(run.name) &&
+    stableIsSafeInteger(run.runId) && run.runId > 0 &&
+    stableIsSafeInteger(run.attempt) && run.attempt > 0 &&
+    validSha(run.sha) && stableIsSafeInteger(run.appId) && run.appId > 0 &&
     validSha(run.workflowRevision) && validPath(run.workflowPath) &&
-    /^\.github\/workflows\/[^/]+\.ya?ml$/.test(run.workflowPath) &&
-    ["queued", "in_progress", "completed", "waiting", "pending", "requested"].includes(run.status) &&
-    Object.hasOwn(run, "conclusion") &&
+    stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, run.workflowPath) &&
+    stableArrayIncludes(["queued", "in_progress", "completed", "waiting", "pending", "requested"], run.status) &&
+    stableHasOwn(run, "conclusion") &&
     (run.status === "completed"
-      ? ["success", "failure", "cancelled", "skipped", "timed_out",
-        "action_required", "neutral", "stale"].includes(run.conclusion)
+      ? stableArrayIncludes(["success", "failure", "cancelled", "skipped", "timed_out",
+        "action_required", "neutral", "stale"], run.conclusion)
       : run.conclusion === null);
   const sameRun = (claim, observed) => completeRun(claim) &&
     completeRun(observed) &&
@@ -239,10 +332,35 @@ function freshSyntheticReads(capture, observations, policy) {
     claim.workflowPath === observed.workflowPath;
   const initialChecks = reads[1].checkRuns;
   const finalChecks = reads[4].checkRuns;
+  // Run IDs identify workflow runs, not individual job/check records; include
+  // name and app plus attempt to distinguish legitimately separate checks in
+  // one run. Ignore mutable result/provenance fields in the uniqueness key so
+  // a duplicate with a conflicting result cannot masquerade as a new run.
+  const uniqueExecutions = (runs) => {
+    const identities = new StableSet();
+    for (let i = 0; i < runs.length; i++) {
+      const run = runs[i];
+      if (!completeRun(run)) return false;
+      // Primitive fields only: explicit length-prefixing avoids inherited toJSON.
+      const name = stableLowerCase(run.name);
+      const key = `${run.appId}:${run.runId}:${run.attempt}:${name.length}:${name}`;
+      if (stableSetHas(identities, key)) return false;
+      stableSetAdd(identities, key);
+    }
+    return true;
+  };
   const matchesCompleteScan = (claims) =>
-    Array.isArray(claims) && claims.length === observations.checks.length &&
-    claims.every((claim, index) => sameRun(claim, observations.checks[index]));
-  if (!matchesCompleteScan(initialChecks) ||
+    stableArrayIsArray(claims) && claims.length === observations.checks.length &&
+    uniqueExecutions(claims) &&
+    (() => {
+      for (let i = 0; i < claims.length; i++) {
+        if (!sameRun(claims[i], observations.checks[i])) return false;
+      }
+      return true;
+    })();
+  if (!stableArrayIsArray(observations.checks) ||
+      !uniqueExecutions(observations.checks) ||
+      !matchesCompleteScan(initialChecks) ||
       !matchesCompleteScan(finalChecks)) return false;
   if (reads[2].issueId !== policy.issueId ||
       reads[2].status !== observations.issue.status ||
@@ -269,7 +387,7 @@ export function evaluateOffline(input) {
     if (!input || typeof input !== "object") return missing("NO_INPUT");
     // Bound source inputs more tightly than output envelopes; the reserved
     // headroom guarantees every accepted READY snapshot remains replayable.
-    const captured = frozen(inertCopy(input, new WeakSet(), 0, {
+    const captured = frozen(inertCopy(input, new StableWeakSet(), 0, {
       nodes: 0, bytes: 0, maxDepth: 28, maxNodes: MAX_INPUT_NODES,
       maxBytes: MAX_INPUT_BYTES,
     }));
@@ -280,8 +398,8 @@ export function evaluateOffline(input) {
         !validCaptureTimestamp(capture.capturedAt)) return missing("CAPTURE_NOT_ATTESTED");
     if (event.action !== "closed") return outcome("SHADOW_IGNORED", "NON_CLOSED_EVENT");
     if (event.merged !== true) return outcome("SHADOW_IGNORED", "NOT_MERGED");
-    if (!Number.isSafeInteger(event.repositoryId) || event.repositoryId <= 0 ||
-        !Number.isSafeInteger(event.prNumber) || event.prNumber <= 0 ||
+    if (!stableIsSafeInteger(event.repositoryId) || event.repositoryId <= 0 ||
+        !stableIsSafeInteger(event.prNumber) || event.prNumber <= 0 ||
         event.repositoryId !== p.repositoryId || event.baseRef !== p.baseRef)
       return hold("UNAUTHORIZED_REPOSITORY_OR_BASE");
     if (o.repositoryId !== event.repositoryId || o.prNumber !== event.prNumber ||
@@ -291,20 +409,20 @@ export function evaluateOffline(input) {
         !validSha(o.mergeBaseSha) || !validSha(o.preIntegrationBaseSha) ||
         !validSha(p.policySha) || !validSha(p.workflowRevision))
       return missing("UNPINNED_GIT_OR_POLICY");
-    if (!["merge", "squash", "rebase"].includes(o.mergeStrategy))
+    if (!stableArrayIncludes(["merge", "squash", "rebase"], o.mergeStrategy))
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
-    if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
+    if (!stableIsSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
         !validPath(p.workflowPath) ||
-        !/^\.github\/workflows\/[^/]+\.ya?ml$/.test(p.workflowPath) ||
+        !stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, p.workflowPath) ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
-    if (!Array.isArray(o.parentShas) || o.parentShas.length === 0 ||
-        !o.parentShas.every((sha) => validSha(sha)))
+    if (!stableArrayIsArray(o.parentShas) || o.parentShas.length === 0 ||
+        !stableEvery(o.parentShas, (sha) => validSha(sha)))
       return missing("MISSING_GIT_GRAPH");
     // Object ID spelling is case-insensitive; do not let uppercase aliases
     // evade self-parent or duplicate-parent checks.
-    const canonicalParents = o.parentShas.map((sha) => sha.toLowerCase());
-    if (canonicalParents.includes(o.integratedTip.toLowerCase()) ||
-        new Set(canonicalParents).size !== canonicalParents.length)
+    const canonicalParents = stableMap(o.parentShas, (sha) => stableLowerCase(sha));
+    if (stableArrayIncludes(canonicalParents, stableLowerCase(o.integratedTip)) ||
+        indexedUniqueCount(canonicalParents) !== canonicalParents.length)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
         o.mergeStrategy === "squash" && o.parentShas.length !== 1 ||
@@ -328,38 +446,47 @@ export function evaluateOffline(input) {
         !sameSha(o.integratedChange.fromSha, o.preIntegrationBaseSha) ||
         !sameSha(o.integratedChange.toSha, o.integratedTip))
       return missing("INCOMPLETE_OR_WRONG_DIFF");
-    if ([...o.authoredChange.files, ...o.integratedChange.files].some((f) =>
-        SENSITIVE_PATH.test(f.path) || (f.previousPath && SENSITIVE_PATH.test(f.previousPath))))
-      return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
+    // Inspect both source arrays by index; spreading would invoke a mutable
+    // Array.prototype iterator after trusted module initialization.
+    for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
+      const files = groupIndex === 0 ? o.authoredChange.files : o.integratedChange.files;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (stableRegexTest(SENSITIVE_PATH, f.path) ||
+            (f.previousPath && stableRegexTest(SENSITIVE_PATH, f.previousPath)))
+          return hold("PREMERGE_SECURITY_GATE_UNATTESTED");
+      }
+    }
     // Two-parent merges can add conflict-resolution edits or unrelated
     // landed content. Parent identity alone cannot authenticate equivalence.
     // Until independently verified reconciliation exists, require exactly
     // matching synthetic descriptors regardless of integration strategy.
     if (!sameChangeDescriptors(o.authoredChange, o.integratedChange))
       return hold("LANDED_CHANGE_NOT_RECONCILED");
-    if (!o.issue || typeof p.issueId !== "string" || !/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/.test(p.issueId) ||
-        typeof o.issue.id !== "string" || !Array.isArray(o.issue.linkedIds) ||
+    if (!o.issue || typeof p.issueId !== "string" || !stableRegexTest(/^[A-Z][A-Z0-9]*-[1-9][0-9]*$/, p.issueId) ||
+        typeof o.issue.id !== "string" || !stableArrayIsArray(o.issue.linkedIds) ||
         o.issue.linkedIds.length !== 1 || o.issue.linkedIds[0] !== o.issue.id ||
         o.issue.id !== p.issueId)
       return hold("AMBIGUOUS_OR_WRONG_LINEAR_ISSUE");
     if (o.issue.status !== "Verification" || o.issue.blockersComplete !== true)
       return hold("ISSUE_NOT_ACCEPTANCE_ELIGIBLE");
-    if (!Array.isArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
-        !p.requiredChecks.every((name) => typeof name === "string" && name.trim().length > 0 && name === name.trim()) ||
-        new Set(p.requiredChecks).size !== p.requiredChecks.length ||
-        !Array.isArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
-    for (const name of p.requiredChecks) {
-      const matches = o.checks.filter((c) => c.name === name);
+    if (!stableArrayIsArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
+        !stableEvery(p.requiredChecks, (name) => typeof name === "string" && stableTrim(name).length > 0 && name === stableTrim(name)) ||
+        indexedUniqueCount(p.requiredChecks) !== p.requiredChecks.length ||
+        !stableArrayIsArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
+    for (let requiredIndex = 0; requiredIndex < p.requiredChecks.length; requiredIndex++) {
+      const name = p.requiredChecks[requiredIndex];
+      const matches = stableFilter(o.checks, (c) => c.name === name);
       if (matches.length !== 1) return hold("MISSING_OR_DUPLICATE_REQUIRED_CHECK", name);
       const c = matches[0];
       if (!sameSha(c.sha, o.integratedTip) || c.appId !== p.checkAppId ||
           !sameSha(c.workflowRevision, p.workflowRevision) || c.workflowPath !== p.workflowPath ||
-          !Number.isSafeInteger(c.runId) || c.runId <= 0 ||
-          !Number.isSafeInteger(c.attempt) || c.attempt <= 0 ||
+          !stableIsSafeInteger(c.runId) || c.runId <= 0 ||
+          !stableIsSafeInteger(c.attempt) || c.attempt <= 0 ||
           c.status !== "completed" || c.conclusion !== "success")
         return hold("CI_PROVENANCE_OR_RESULT_MISMATCH", name);
     }
-    if (!Array.isArray(o.unresolvedThreads) || o.unresolvedThreads.length !== 0)
+    if (!stableArrayIsArray(o.unresolvedThreads) || o.unresolvedThreads.length !== 0)
       return hold("UNRESOLVED_REVIEW_THREADS");
     if (!freshSyntheticReads(capture, o, p))
       return missing("CAPTURE_STALE_OR_UNORDERED");
@@ -376,7 +503,7 @@ export function evaluateOffline(input) {
       },
     };
     // Canonical deep copy prevents later fixture mutations affecting the frozen result.
-    const copied = JSON.parse(canonical(snapshot));
+    const copied = stableJSONParse(canonical(snapshot));
     const manifestDigest = evidenceDigest(copied);
     const workKey = workKeyFor(copied, manifestDigest);
     return outcome("SHADOW_EVIDENCE_READY", "SIMULATED_PREREQUISITES_ONLY", "",
@@ -391,7 +518,7 @@ export function reviewWithMock(shadow, mock) {
   try {
     // Callers may clone or deserialize a result; do not trust its stored
     // digest/work key, and snapshot it before inspecting anything mutable.
-    const candidate = inertCopy(shadow, new WeakSet(), 0, {
+    const candidate = inertCopy(shadow, new StableWeakSet(), 0, {
       nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES,
     });
     if (candidate?.mode !== "OFFLINE_SHADOW_ONLY" ||
@@ -428,7 +555,7 @@ export function reviewWithMock(shadow, mock) {
 
     const proposal = inertCopy(mock);
     if (proposal?.manifestDigest !== manifestDigest ||
-        !["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"].includes(proposal.verdict))
+        !stableArrayIncludes(["PASS", "HOLD", "INSUFFICIENT_EVIDENCE"], proposal.verdict))
       return hold("MOCK_RECEIPT_MISMATCH");
     return frozen({
       mode: "OFFLINE_SHADOW_ONLY",

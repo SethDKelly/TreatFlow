@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateOffline, evidenceDigest, reviewWithMock } from "./controller.mjs";
+import { types } from "node:util";
+import { createRequire, syncBuiltinESMExports } from "node:module";
 
 const sha = (c) => c.repeat(40);
 const digest = (c) => c.repeat(64);
@@ -69,8 +71,9 @@ const code = (update, strategy) => decide(update, strategy).code;
 
 test("offline squash and ordinary merge produce shadow-ready envelopes, never trusted PASS", () => {
   for (const s of ["squash", "merge"]) {
+    evidenceDigest(fixture(s));
     const result = evaluateOffline(fixture(s));
-    assert.equal(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.state, "SHADOW_EVIDENCE_READY", result.code);
     assert.equal(result.envelope.authenticated, false);
     assert.equal(result.envelope.manifest.sourceClass, "SYNTHETIC_UNATTESTED");
     assert.equal(result.canDispatch, false);
@@ -716,6 +719,162 @@ test("independently discovered P2: Proxy cannot execute reflective traps", () =>
   assert.equal(traps, 0);
 });
 
+
+test("S-74 P2: monkey-patched shared util.types.isProxy cannot open proxy traps", () => {
+  const original = types.isProxy;
+  let traps = 0;
+  const malicious = (target) => new Proxy(target, {
+    getPrototypeOf(inner) { traps++; return Reflect.getPrototypeOf(inner); },
+    ownKeys(inner) { traps++; return Reflect.ownKeys(inner); },
+    getOwnPropertyDescriptor(inner, key) {
+      traps++;
+      return Reflect.getOwnPropertyDescriptor(inner, key);
+    },
+  });
+  try {
+    types.isProxy = () => false;
+    assert.throws(() => evidenceDigest(malicious({ x: "safe-looking" })), TypeError);
+    assert.equal(evaluateOffline(malicious(fixture())).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    const nested = fixture();
+    nested.capture.reads[4].checkRuns[0] = malicious(nested.capture.reads[4].checkRuns[0]);
+    assert.equal(evaluateOffline(nested).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(reviewWithMock(malicious(evaluateOffline(fixture())), {
+      verdict: "PASS",
+    }).state, "SHADOW_HOLD");
+    assert.equal(reviewWithMock(evaluateOffline(fixture()), malicious({
+      verdict: "PASS",
+    })).state, "SHADOW_HOLD");
+    const revoked = Proxy.revocable({ present: true }, {});
+    revoked.revoke();
+    assert.throws(() => evidenceDigest(revoked.proxy), TypeError);
+    assert.equal(traps, 0);
+  } finally {
+    types.isProxy = original;
+  }
+});
+
+
+test("S-74 P2: syncBuiltinESMExports cannot replace module-captured proxy guard", () => {
+  const localRequire = createRequire(import.meta.url);
+  const liveTypes = localRequire("node:util/types");
+  const original = liveTypes.isProxy;
+  let traps = 0;
+  const proxy = new Proxy({ innocent: true }, {
+    getPrototypeOf(obj) { traps++; return Reflect.getPrototypeOf(obj); },
+    ownKeys(obj) { traps++; return Reflect.ownKeys(obj); },
+    getOwnPropertyDescriptor(obj, key) {
+      traps++;
+      return Reflect.getOwnPropertyDescriptor(obj, key);
+    },
+  });
+  try {
+    liveTypes.isProxy = () => false;
+    syncBuiltinESMExports();
+    assert.throws(() => evidenceDigest(proxy), TypeError);
+    const nested = fixture();
+    nested.capture.reads[4].checkRuns[0] = proxy;
+    assert.equal(evaluateOffline(nested).state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(reviewWithMock(proxy, { verdict: "PASS" }).state, "SHADOW_HOLD");
+    assert.equal(traps, 0);
+  } finally {
+    liveTypes.isProxy = original;
+    syncBuiltinESMExports();
+  }
+});
+
+test("S-74 P2: later mutated toLowerCase cannot spoof CI execution identities", () => {
+  const original = String.prototype.toLowerCase;
+  let invocations = 0;
+  const aux = {
+    name: "Auxiliary", sha: sha("2"), appId: 15368,
+    runId: 601, attempt: 1, workflowRevision: sha("6"),
+    workflowPath: ".github/workflows/optional.yml",
+    status: "completed", conclusion: "success",
+  };
+  try {
+    String.prototype.toLowerCase = function (...args) {
+      invocations++;
+      if (String(this) === "Auxiliary") return "auxiliary-" + invocations;
+      return original.apply(this, args);
+    };
+    const doubled = decide((f) => {
+      for (const run of [aux, aux]) {
+        f.observations.checks.push(clone(run));
+        f.capture.reads[1].checkRuns.push(clone(run));
+        f.capture.reads[4].checkRuns.push(clone(run));
+      }
+      f.capture.reads[4].checkRunCount = 3;
+    });
+    assert.equal(doubled.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(doubled.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(doubled.canApprove, false);
+    assert.equal(doubled.canDispatch, false);
+    assert.equal(doubled.canWrite, false);
+    assert.equal(invocations, 0, "mutable prototype normalizer must not execute");
+
+    const valid = evaluateOffline(fixture());
+    assert.equal(valid.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(valid.canApprove, false);
+    assert.equal(valid.canDispatch, false);
+    assert.equal(valid.canWrite, false);
+    assert.equal(invocations, 0);
+  } finally {
+    String.prototype.toLowerCase = original;
+  }
+});
+
+test("S-74 P2: duplicate or conflicting complete check executions cannot claim ready", () => {
+  const additional = {
+    name: "Auxiliary", sha: sha("2"), appId: 15368, runId: 601,
+    attempt: 1, workflowRevision: sha("6"),
+    workflowPath: ".github/workflows/optional.yml",
+    status: "completed", conclusion: "failure",
+  };
+  const withExtra = (f, records) => {
+    for (const run of records) {
+      f.observations.checks.push(clone(run));
+      f.capture.reads[1].checkRuns.push(clone(run));
+      f.capture.reads[4].checkRuns.push(clone(run));
+    }
+    f.capture.reads[4].checkRunCount = f.observations.checks.length;
+  };
+  assert.equal(code((f) => withExtra(f, [additional])), "SIMULATED_PREREQUISITES_ONLY");
+  for (const edit of [
+    (x) => x,
+    (x) => ({ ...x, conclusion: "success" }),
+    (x) => ({ ...x, name: "auxiliary" }), // normalized case is not a new execution
+    (x) => ({ ...x, sha: sha("9") }), // changed claimed SHA is not a new run
+    (x) => ({ ...x, workflowPath: ".github/workflows/other.yml" }),
+  ]) {
+    const result = decide((f) => {
+      withExtra(f, [additional, edit(additional)]);
+    });
+    assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(result.state, "SHADOW_INSUFFICIENT_EVIDENCE");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canDispatch, false);
+    assert.equal(result.canWrite, false);
+  }
+  for (const records of [
+    [{...additional,runId:602},additional],
+    [{...additional,attempt:2},additional],
+    [{...additional,name:"Different job"},additional],
+  ]) {
+    assert.equal(decide((f) => withExtra(f, records)).state,
+      "SHADOW_EVIDENCE_READY");
+  }
+  // A duplicated REQUIRED Verify is denied by the earlier required-check
+  // uniqueness policy (SHADOW_HOLD), before the generic complete scan runs.
+  const requiredDuplicate = decide((f) => {
+    const required = clone(f.observations.checks[0]);
+    withExtra(f, [required]);
+  });
+  assert.equal(requiredDuplicate.state, "SHADOW_HOLD");
+  assert.equal(requiredDuplicate.canApprove, false);
+  assert.equal(requiredDuplicate.canWrite, false);
+  assert.equal(requiredDuplicate.canDispatch, false);
+});
+
 test("unattested source and malformed inputs fail closed", () => {
   assert.equal(state((f) => { f.capture.source = "github-live"; }), "SHADOW_INSUFFICIENT_EVIDENCE");
   assert.equal(evaluateOffline(null).state, "SHADOW_INSUFFICIENT_EVIDENCE");
@@ -899,4 +1058,457 @@ test("mock PASS remains untrusted, never grants status writes", () => {
   assert.equal(result.canApprove, false);
   assert.equal(reviewWithMock(ready, { manifestDigest: digest("d"), verdict: "PASS" }).state, "SHADOW_HOLD");
   assert.equal(reviewWithMock(ready, { manifestDigest: ready.envelope.manifestDigest, verdict: "APPROVED" }).state, "SHADOW_HOLD");
+});
+
+
+test("S-74 P2: inherited array toJSON cannot spoof duplicate CI identities", () => {
+  const original = Object.getOwnPropertyDescriptor(Array.prototype, "toJSON");
+  let calls = 0;
+  try {
+    Object.defineProperty(Array.prototype, "toJSON", { configurable: true, value() { calls++; return String(calls); } });
+    const extra = { name: "Auxiliary", sha: sha("2"), appId: 15368, runId: 601,
+      attempt: 1, workflowRevision: sha("6"), workflowPath: ".github/workflows/optional.yml",
+      status: "completed", conclusion: "success" };
+    const result = decide((f) => {
+      for (const run of [extra, extra]) {
+        f.observations.checks.push(clone(run));
+        f.capture.reads[1].checkRuns.push(clone(run));
+        f.capture.reads[4].checkRuns.push(clone(run));
+      }
+      f.capture.reads[4].checkRunCount = 3;
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  } finally {
+    if (original) Object.defineProperty(Array.prototype, "toJSON", original);
+    else delete Array.prototype.toJSON;
+  }
+});
+
+test("S-74: mutated push cannot rewrite copied evidence", () => {
+  const original = Array.prototype.push;
+  try {
+    Array.prototype.push = function(value) { if (typeof value === "string") return this.length; return Reflect.apply(original, this, [value]); };
+    const result = decide((f) => { f.observations.integratedChange.files[0].path = "src/different.ts"; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype.push = original; }
+});
+
+test("S-74: inherited numeric setter cannot drop copied unresolved evidence", () => {
+  const original = Object.getOwnPropertyDescriptor(Array.prototype, "0");
+  try {
+    Object.defineProperty(Array.prototype, "0", { configurable: true, set() {} });
+    const result = decide((f) => { f.observations.unresolvedThreads = [{ id: 99 }]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally {
+    if (original) Object.defineProperty(Array.prototype, "0", original);
+    else delete Array.prototype[0];
+  }
+});
+
+test("S-74: mutable property definer cannot discard unresolved evidence", () => {
+  const original = Object.defineProperty;
+  try {
+    Object.defineProperty = function(target, key, descriptor) {
+      if (key === "unresolvedThreads" && target && !Object.hasOwn(target, "unresolvedThreads")) return target;
+      return Reflect.apply(original, Object, [target, key, descriptor]);
+    };
+    const result = decide((f) => { f.observations.unresolvedThreads = [{ id: 99 }]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Object.defineProperty = original; }
+});
+
+test("S-74: mutable regex matcher cannot bypass sensitive-path hold", () => {
+  const original = RegExp.prototype.test;
+  try {
+    RegExp.prototype.test = function(value) {
+      if (this.source.includes("github") && typeof value === "string") return false;
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = decide((f) => {
+      f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+      f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { RegExp.prototype.test = original; }
+});
+
+test("S-74: post-import descriptor reader cannot hide unresolved threads", () => {
+  const original = Object.getOwnPropertyDescriptor;
+  try {
+    Object.getOwnPropertyDescriptor = function(target, key) {
+      const descriptor = Reflect.apply(original, Object, [target, key]);
+      if (key === "unresolvedThreads" && descriptor && Array.isArray(descriptor.value))
+        return { ...descriptor, value: [] };
+      return descriptor;
+    };
+    const result = decide((f) => { f.observations.unresolvedThreads = [{ id: 99 }]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Object.getOwnPropertyDescriptor = original; }
+});
+
+test("S-74: post-import array predicates cannot bypass sensitive path hold", () => {
+  const original = Array.prototype.some;
+  try {
+    Array.prototype.some = function(predicate) {
+      if (this.length && this[0] && this[0].path) return false;
+      return Reflect.apply(original, this, [predicate]);
+    };
+    const result = decide((f) => {
+      f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+      f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype.some = original; }
+});
+
+test("S-74: mutated array iterator cannot suppress sensitive workflow files", () => {
+  const original = Array.prototype[Symbol.iterator];
+  const changed = (f) => {
+    f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+    f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+  };
+  assert.equal(code(changed), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      if (this.length && this[0]?.path === ".github/workflows/evil.yml") return;
+      yield* Reflect.apply(original, this, []);
+    };
+    const result = decide(changed);
+    assert.equal(result.code, "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
+
+test("S-74: mutated Date.now cannot make stale capture fresh", () => {
+  const changed = (f) => {
+    f.capture.capturedAt = at(3600);
+    for (let i = 0; i < f.capture.reads.length; i++)
+      f.capture.reads[i].observedAt = at(3604 - i);
+  };
+  assert.equal(code(changed), "CAPTURE_STALE_OR_UNORDERED");
+  const original = Date.now;
+  try {
+    Date.now = () => testClock - 3600 * 1000;
+    const result = decide(changed);
+    assert.equal(result.code, "CAPTURE_STALE_OR_UNORDERED");
+    assert.equal(result.canApprove, false);
+  } finally { Date.now = original; }
+});
+
+test("S-74: mutated Date.parse cannot reclassify invalid timestamp", () => {
+  const changed = (f) => { f.capture.capturedAt = "not-a-date"; };
+  assert.notEqual(state(changed), "SHADOW_EVIDENCE_READY");
+  const original = Date.parse;
+  try {
+    Date.parse = () => testClock;
+    const result = decide(changed);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Date.parse = original; }
+});
+
+test("S-74: mutable required-check iterator cannot suppress failed Verify", () => {
+  const original = Array.prototype[Symbol.iterator];
+  const changed = (f) => { f.observations.checks[0].conclusion = "failure"; };
+  assert.equal(code(changed), "CI_PROVENANCE_OR_RESULT_MISMATCH");
+  let visits = 0;
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      if (this.length === 1 && this[0] === "Verify") {
+        visits++;
+        if (visits > 1) return;
+      }
+      yield* Reflect.apply(original, this, []);
+    };
+    const result = decide(changed);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
+
+test("S-74: mutated RegExp.exec cannot bypass sensitive path hold", () => {
+  const original = RegExp.prototype.exec;
+  const changed = (f) => {
+    f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+    f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+  };
+  assert.equal(code(changed), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  try {
+    RegExp.prototype.exec = function(value) {
+      if (value === ".github/workflows/evil.yml") return null;
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = decide(changed);
+    assert.equal(result.code, "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { RegExp.prototype.exec = original; }
+});
+
+test("S-74: numeric validator mutation cannot authorize fractional repository identity", () => {
+  const original = Number.isSafeInteger;
+  try {
+    Number.isSafeInteger = () => true;
+    const result = decide((f) => { f.event.repositoryId = 1.5; f.policy.repositoryId = 1.5; f.observations.repositoryId = 1.5; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Number.isSafeInteger = original; }
+});
+
+test("S-74: mutable set input iterator cannot hide duplicate required checks", () => {
+  const original = Array.prototype[Symbol.iterator];
+  try {
+    Array.prototype[Symbol.iterator] = function* () {
+      if (this.length === 2 && this[0] === "Verify" && this[1] === "Verify") {
+        yield "Verify"; yield "Other"; return;
+      }
+      yield* Reflect.apply(original, this, []);
+    };
+    const result = decide((f) => { f.policy.requiredChecks = ["Verify", "Verify"]; });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Array.prototype[Symbol.iterator] = original; }
+});
+
+test("S-74: mutable array species cannot hide a duplicate required check", () => {
+  const original = Object.getOwnPropertyDescriptor(Array, Symbol.species);
+  try {
+    Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => function() { return {length: 1}; } });
+    const result = decide((f) => {
+      const check = f.observations.checks[0];
+      f.observations.checks.push({ ...check, conclusion: "failure" });
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { if (original) Object.defineProperty(Array, Symbol.species, original); else delete Array[Symbol.species]; }
+});
+
+test("S-74: live Object.create cannot inject inherited capture source", () => {
+  const input = fixture();
+  delete input.capture.source;
+  const originalCreate = Object.create;
+  const prior = Object.getOwnPropertyDescriptor(Object.prototype, "source");
+  try {
+    Object.create = () => ({});
+    Object.defineProperty(Object.prototype, "source", {configurable: true, value: "synthetic-fixture"});
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally {
+    Object.create = originalCreate;
+    if (prior) Object.defineProperty(Object.prototype, "source", prior);
+    else delete Object.prototype.source;
+  }
+});
+
+test("S-74: mutated UTC calendar methods cannot normalize invalid dates", () => {
+  const input = fixture();
+  const methods = ["setUTCFullYear", "getUTCFullYear", "getUTCMonth", "getUTCDate"];
+  const prior = methods.map((name) => [name, Date.prototype[name]]);
+  try {
+    Date.prototype.setUTCFullYear = function() { return 0; };
+    Date.prototype.getUTCFullYear = () => 2026;
+    Date.prototype.getUTCMonth = () => 1;
+    Date.prototype.getUTCDate = () => 29;
+    for (const read of input.capture.reads) read.observedAt = "2026-02-29T12:00:00Z";
+    input.capture.capturedAt = "2026-02-29T12:00:00Z";
+    const result = evaluateOffline(input);
+    assert.equal(result.code, "CAPTURE_NOT_ATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { for (const [name, fn] of prior) Date.prototype[name] = fn; }
+});
+
+test("S-74: inherited descriptor value cannot convert accessor evidence into clean data", () => {
+  const input = fixture();
+  Object.defineProperty(input.observations, "unresolvedThreads", {enumerable: true, configurable: true, get: () => [{id: 99}]});
+  const prior = Object.getOwnPropertyDescriptor(Object.prototype, "value");
+  try {
+    Object.defineProperty(Object.prototype, "value", {configurable: true, get() { return []; }});
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally {
+    if (prior) Object.defineProperty(Object.prototype, "value", prior);
+    else delete Object.prototype.value;
+  }
+});
+
+test("S-74: live WeakSet add cannot rewrite failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = WeakSet.prototype.add;
+  try {
+    WeakSet.prototype.add = function(value) {
+      if (value && value.name === "Verify") value.conclusion = "success";
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { WeakSet.prototype.add = original; }
+});
+
+test("S-74: live Set size cannot conceal duplicate merge parents", () => {
+  const input = fixture("merge");
+  input.observations.parentShas = [sha("a"), sha("A")];
+  input.observations.preIntegrationBaseSha = sha("a");
+  input.observations.reviewedHead = sha("A");
+  const prior = Object.getOwnPropertyDescriptor(Set.prototype, "size");
+  try {
+    Object.defineProperty(Set.prototype, "size", {configurable: true, get() { return 2; }});
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { Object.defineProperty(Set.prototype, "size", prior); }
+});
+
+test("S-74: WeakSet delete mutation cannot rewrite later failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = WeakSet.prototype.delete;
+  try {
+    WeakSet.prototype.delete = function(value) {
+      if (value?.kind === "merge") {
+        input.observations.checks[0].conclusion = "success";
+        input.capture.reads[1].checkRuns[0].conclusion = "success";
+        input.capture.reads[4].checkRuns[0].conclusion = "success";
+      }
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { WeakSet.prototype.delete = original; }
+});
+
+test("S-74: replaced WeakSet constructor cannot mutate Verify evidence", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = globalThis.WeakSet;
+  try {
+    globalThis.WeakSet = function(...args) {
+      input.observations.checks[0].conclusion = "success";
+      return new original(...args);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { globalThis.WeakSet = original; }
+});
+
+test("S-74: mutable global String cannot change later failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = globalThis.String;
+  try {
+    globalThis.String = function(...args) {
+      input.observations.checks[0].conclusion = "success";
+      return Reflect.apply(original, undefined, args);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { globalThis.String = original; }
+});
+
+test("S-74: mutable Object.prototype getter cannot change later failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = globalThis.Object;
+  try {
+    globalThis.Object = {get prototype() {
+      input.observations.checks[0].conclusion = "success";
+      return original.prototype;
+    }};
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { globalThis.Object = original; }
+});
+
+test("S-74: mock path uses captured WeakSet constructor before copying", () => {
+  const input = fixture();
+  const ready = evaluateOffline(input);
+  assert.equal(ready.state, "SHADOW_EVIDENCE_READY");
+  const mock = { manifestDigest: ready.envelope.manifestDigest, verdict: "PASS" };
+  const original = globalThis.WeakSet;
+  try {
+    globalThis.WeakSet = function(...args) {
+      mock.verdict = "REJECT";
+      return new original(...args);
+    };
+    const result = reviewWithMock(ready, mock);
+    assert.equal(result.state, "SHADOW_REVIEW_RECORDED");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  } finally { globalThis.WeakSet = original; }
+});
+
+test("S-74: descriptor index collision cannot hide first mismatched file", () => {
+  const input = fixture("merge");
+  const first = file("src/first.ts");
+  const second = file("src/second.ts");
+  input.observations.authoredChange.files = [first, second];
+  input.observations.integratedChange.files = [{ ...first, patchDigest: digest("e") }, second];
+  const original = globalThis.String;
+  try {
+    globalThis.String = function(value) {
+      if (typeof value === "number") return "0";
+      return Reflect.apply(original, undefined, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { globalThis.String = original; }
+});
+
+test("S-74: post-import Number replacement cannot accept impossible leap date", () => {
+  const input = fixture();
+  const invalid = "2026-02-29T12:00:00Z";
+  for (const read of input.capture.reads) read.observedAt = invalid;
+  input.capture.capturedAt = invalid;
+  const original = globalThis.Number;
+  try {
+    globalThis.Number = function(value) {
+      if (value === "2026") return 2024;
+      return Reflect.apply(original, undefined, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.equal(result.code, "CAPTURE_NOT_ATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { globalThis.Number = original; }
+});
+
+test("S-74: endpoint-aligned case aliases cannot evade duplicate parent detection", () => {
+  const input = fixture("merge");
+  input.observations.parentShas = [sha("a"), sha("A")];
+  input.observations.preIntegrationBaseSha = sha("a");
+  input.observations.reviewedHead = sha("A");
+  input.observations.authoredChange.toSha = sha("A");
+  input.observations.integratedChange.fromSha = sha("a");
+  const descriptor = Object.getOwnPropertyDescriptor(Set.prototype, "size");
+  let sizeReads = 0;
+  try {
+    Object.defineProperty(Set.prototype, "size", {
+      configurable: true,
+      get() {
+        const actual = Reflect.apply(descriptor.get, this, []);
+        sizeReads += 1;
+        return sizeReads === 1 && actual === 1 ? 2 : actual;
+      },
+    });
+    const result = evaluateOffline(input);
+    assert.equal(result.code, "INCONSISTENT_PARENT_GRAPH");
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  } finally {
+    Object.defineProperty(Set.prototype, "size", descriptor);
+  }
 });
