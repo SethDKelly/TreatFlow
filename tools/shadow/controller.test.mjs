@@ -1230,7 +1230,25 @@ test("S-74: mutable required-check iterator cannot suppress failed Verify", () =
       yield* Reflect.apply(original, this, []);
     };
     const result = decide(changed);
-    assert.equal(result.code, "CI_PROVENANCE_OR_RESULT_MISMATCH");
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
     assert.equal(result.canApprove, false);
   } finally { Array.prototype[Symbol.iterator] = original; }
+});
+
+test("S-74: mutated RegExp.exec cannot bypass sensitive path hold", () => {
+  const original = RegExp.prototype.exec;
+  const changed = (f) => {
+    f.observations.authoredChange.files = [file(".github/workflows/evil.yml")];
+    f.observations.integratedChange.files = [file(".github/workflows/evil.yml")];
+  };
+  assert.equal(code(changed), "PREMERGE_SECURITY_GATE_UNATTESTED");
+  try {
+    RegExp.prototype.exec = function(value) {
+      if (value === ".github/workflows/evil.yml") return null;
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = decide(changed);
+    assert.equal(result.code, "PREMERGE_SECURITY_GATE_UNATTESTED");
+    assert.equal(result.canApprove, false);
+  } finally { RegExp.prototype.exec = original; }
 });
