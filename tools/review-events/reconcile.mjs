@@ -113,7 +113,7 @@ const actions = stableFreeze({
 // A delivery only wakes a later source reconciliation. Even a valid-looking
 // GitHub/Codex marker, reaction, or check_run event never creates a verdict.
 export function normalizeWakeHint(event, policy) {
-  if (!safeFixture(event) || !safeFixture(policy))
+  if (stableArrayIsArray(event) || stableArrayIsArray(policy) || !safeFixture(event) || !safeFixture(policy))
     return invalid("NON_INERT_FIXTURE");
   event = detach(event);
   policy = detach(policy);
@@ -137,7 +137,7 @@ export function normalizeWakeHint(event, policy) {
 // Models duplicates/out-of-order/missed wakeups. An absent webhook must not
 // block a separately scheduled, bounded post-request source recheck.
 export function coalesceWakeHints(events, policy) {
-  if (!safeFixture(events) || !safeFixture(policy) || !stableArrayIsArray(events) || events.length > 256)
+  if (stableArrayIsArray(policy) || !safeFixture(events) || !safeFixture(policy) || !stableArrayIsArray(events) || events.length > 256)
     return stableFreeze({ accepted: 0, duplicates: 0, rejected: 0, needsRecheck: true });
   const seen = new StableSet();
   let accepted = 0, duplicates = 0, rejected = 0;
@@ -156,7 +156,7 @@ export function coalesceWakeHints(events, policy) {
 // separate, authenticated source collector can construct observed facts;
 // no event/comment payload may be substituted for those observations.
 export function reconcileOffline(input = {}) {
-  if (input === null || typeof input !== "object" || !safeFixture(input)) return invalid("NON_INERT_FIXTURE");
+  if (input === null || typeof input !== "object" || stableArrayIsArray(input) || !safeFixture(input)) return invalid("NON_INERT_FIXTURE");
   input = detach(input);
   const { policy, observed, retry } = input;
   if (!policy || !observed || !retry || typeof policy !== "object" ||
