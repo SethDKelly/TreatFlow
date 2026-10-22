@@ -29,7 +29,7 @@ const nativeArrayPrototype = Array.prototype;
 const nativeFilter = (values, predicate) => {
   const out = [];
   for (let i = 0; i < values.length; i++) {
-    if (predicate(values[i], i)) stableDefineProperty(out, String(out.length), { value: values[i], writable: true, enumerable: true, configurable: true });
+    if (predicate(values[i], i)) stableDefineProperty(out, stableString(out.length), { value: values[i], writable: true, enumerable: true, configurable: true });
   }
   return out;
 };
