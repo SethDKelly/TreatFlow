@@ -18,6 +18,7 @@ const stableGetDescriptor = Object.getOwnPropertyDescriptor;
 const stableGetPrototype = Object.getPrototypeOf;
 const stableOwnKeys = Reflect.ownKeys;
 const stableArrayIsArray = Array.isArray;
+const stableIsSafeInteger = Number.isSafeInteger;
 const stableHasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const stableJSONParse = JSON.parse;
 const stableSplit = Function.prototype.call.bind(String.prototype.split);
@@ -44,6 +45,11 @@ const stableRegexTest = (pattern, value) => stableRegexExec(pattern, value) !== 
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
+const indexedUniqueCount = (items) => {
+  const seen = new StableSet();
+  for (let i = 0; i < items.length; i++) stableSetAdd(seen, items[i]);
+  return seen.size;
+};
 
 const SHA = /^[a-f0-9]{40}$/i;
 const validSha = (value) => typeof value === "string" && stableRegexTest(SHA, value);
@@ -166,12 +172,12 @@ const validPath = (path) => typeof path === "string" && path.length > 0 &&
 function validFiles(change) {
   if (!change || change.complete !== true || !stableArrayIsArray(change.files) ||
       change.files.length === 0) return false;
-  if (new StableSet(stableMap(change.files, (file) => file.path)).size !== change.files.length)
+  if (indexedUniqueCount(stableMap(change.files, (file) => file.path)) !== change.files.length)
     return false;
   // One source cannot be renamed to multiple destinations in a single diff.
   // A duplicated source needs explicit copy provenance, unsupported here.
   const renameSources = stableMap(stableFilter(change.files, (file) => file.status === "renamed"), (file) => file.previousPath);
-  if (new StableSet(renameSources).size !== renameSources.length) return false;
+  if (indexedUniqueCount(renameSources) !== renameSources.length) return false;
   return stableEvery(change.files, (f) =>
     validPath(f.path) && stableArrayIncludes(["added", "modified", "deleted", "renamed"], f.status) &&
     (f.status !== "renamed" ||
@@ -223,7 +229,7 @@ function workKeyFor(manifest, manifestDigest) {
 // Date.parse alone coerces arrays and accepts legacy strings such as "0".
 function validCaptureTimestamp(value) {
   if (typeof value !== "string") return false;
-  const match = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.exec(value);
+  const match = stableRegexExec(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/, value);
   if (!match) return false;
   const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
   // Reject impossible calendar dates that some JS engines normalize.
@@ -277,9 +283,9 @@ function freshSyntheticReads(capture, observations, policy) {
   const completeRun = (run) => run &&
     typeof run.name === "string" && stableTrim(run.name) !== "" &&
     run.name === stableTrim(run.name) &&
-    Number.isSafeInteger(run.runId) && run.runId > 0 &&
-    Number.isSafeInteger(run.attempt) && run.attempt > 0 &&
-    validSha(run.sha) && Number.isSafeInteger(run.appId) && run.appId > 0 &&
+    stableIsSafeInteger(run.runId) && run.runId > 0 &&
+    stableIsSafeInteger(run.attempt) && run.attempt > 0 &&
+    validSha(run.sha) && stableIsSafeInteger(run.appId) && run.appId > 0 &&
     validSha(run.workflowRevision) && validPath(run.workflowPath) &&
     stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, run.workflowPath) &&
     stableArrayIncludes(["queued", "in_progress", "completed", "waiting", "pending", "requested"], run.status) &&
@@ -364,8 +370,8 @@ export function evaluateOffline(input) {
         !validCaptureTimestamp(capture.capturedAt)) return missing("CAPTURE_NOT_ATTESTED");
     if (event.action !== "closed") return outcome("SHADOW_IGNORED", "NON_CLOSED_EVENT");
     if (event.merged !== true) return outcome("SHADOW_IGNORED", "NOT_MERGED");
-    if (!Number.isSafeInteger(event.repositoryId) || event.repositoryId <= 0 ||
-        !Number.isSafeInteger(event.prNumber) || event.prNumber <= 0 ||
+    if (!stableIsSafeInteger(event.repositoryId) || event.repositoryId <= 0 ||
+        !stableIsSafeInteger(event.prNumber) || event.prNumber <= 0 ||
         event.repositoryId !== p.repositoryId || event.baseRef !== p.baseRef)
       return hold("UNAUTHORIZED_REPOSITORY_OR_BASE");
     if (o.repositoryId !== event.repositoryId || o.prNumber !== event.prNumber ||
@@ -377,7 +383,7 @@ export function evaluateOffline(input) {
       return missing("UNPINNED_GIT_OR_POLICY");
     if (!stableArrayIncludes(["merge", "squash", "rebase"], o.mergeStrategy))
       return missing("UNSUPPORTED_INTEGRATION_STRATEGY");
-    if (!Number.isSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
+    if (!stableIsSafeInteger(p.checkAppId) || p.checkAppId <= 0 ||
         !validPath(p.workflowPath) ||
         !stableRegexTest(/^\.github\/workflows\/[^/]+\.ya?ml$/, p.workflowPath) ||
         typeof p.baseRef !== "string" || !p.baseRef) return missing("UNTRUSTED_CHECK_POLICY_SOURCE");
@@ -388,7 +394,7 @@ export function evaluateOffline(input) {
     // evade self-parent or duplicate-parent checks.
     const canonicalParents = stableMap(o.parentShas, (sha) => stableLowerCase(sha));
     if (stableArrayIncludes(canonicalParents, stableLowerCase(o.integratedTip)) ||
-        new StableSet(canonicalParents).size !== canonicalParents.length)
+        indexedUniqueCount(canonicalParents) !== canonicalParents.length)
       return hold("INCONSISTENT_PARENT_GRAPH");
     if (o.mergeStrategy === "merge" && o.parentShas.length !== 2 ||
         o.mergeStrategy === "squash" && o.parentShas.length !== 1 ||
@@ -437,7 +443,7 @@ export function evaluateOffline(input) {
       return hold("ISSUE_NOT_ACCEPTANCE_ELIGIBLE");
     if (!stableArrayIsArray(p.requiredChecks) || p.requiredChecks.length === 0 ||
         !stableEvery(p.requiredChecks, (name) => typeof name === "string" && stableTrim(name).length > 0 && name === stableTrim(name)) ||
-        new StableSet(p.requiredChecks).size !== p.requiredChecks.length ||
+        indexedUniqueCount(p.requiredChecks) !== p.requiredChecks.length ||
         !stableArrayIsArray(o.checks)) return missing("REQUIRED_CHECK_POLICY_MISSING");
     for (let requiredIndex = 0; requiredIndex < p.requiredChecks.length; requiredIndex++) {
       const name = p.requiredChecks[requiredIndex];
@@ -446,8 +452,8 @@ export function evaluateOffline(input) {
       const c = matches[0];
       if (!sameSha(c.sha, o.integratedTip) || c.appId !== p.checkAppId ||
           !sameSha(c.workflowRevision, p.workflowRevision) || c.workflowPath !== p.workflowPath ||
-          !Number.isSafeInteger(c.runId) || c.runId <= 0 ||
-          !Number.isSafeInteger(c.attempt) || c.attempt <= 0 ||
+          !stableIsSafeInteger(c.runId) || c.runId <= 0 ||
+          !stableIsSafeInteger(c.attempt) || c.attempt <= 0 ||
           c.status !== "completed" || c.conclusion !== "success")
         return hold("CI_PROVENANCE_OR_RESULT_MISMATCH", name);
     }
