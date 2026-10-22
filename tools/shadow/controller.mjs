@@ -230,7 +230,7 @@ function sameChangeDescriptors(authored, integrated) {
         const value = fields[j];
         key += value === null ? "N;" : `S${value.length}:${value}`;
       }
-      stableDefineProperty(encoded, String(encoded.length), { value: key, enumerable: true, writable: true, configurable: true });
+      stableDefineProperty(encoded, stableString(encoded.length), { value: key, enumerable: true, writable: true, configurable: true });
     }
     return stableSort(encoded);
   };
@@ -386,7 +386,7 @@ export function evaluateOffline(input) {
     if (!input || typeof input !== "object") return missing("NO_INPUT");
     // Bound source inputs more tightly than output envelopes; the reserved
     // headroom guarantees every accepted READY snapshot remains replayable.
-    const captured = frozen(inertCopy(input, new WeakSet(), 0, {
+    const captured = frozen(inertCopy(input, new StableWeakSet(), 0, {
       nodes: 0, bytes: 0, maxDepth: 28, maxNodes: MAX_INPUT_NODES,
       maxBytes: MAX_INPUT_BYTES,
     }));
@@ -517,7 +517,7 @@ export function reviewWithMock(shadow, mock) {
   try {
     // Callers may clone or deserialize a result; do not trust its stored
     // digest/work key, and snapshot it before inspecting anything mutable.
-    const candidate = inertCopy(shadow, new WeakSet(), 0, {
+    const candidate = inertCopy(shadow, new StableWeakSet(), 0, {
       nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES,
     });
     if (candidate?.mode !== "OFFLINE_SHADOW_ONLY" ||
