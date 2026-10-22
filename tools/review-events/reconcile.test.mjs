@@ -479,3 +479,48 @@ test("S-42: polluted Array.prototype cannot supply top-level reconciliation reco
     }
   }
 });
+
+test("S-42: revoked proxies fail closed at all exported entry points", () => {
+  const revoked = () => { const pair = Proxy.revocable({}, {}); pair.revoke(); return pair.proxy; };
+  for (const input of [revoked(), { ...make(), observed: { ...make().observed, reviews: [revoked()] } }]) {
+    const result = reconcileOffline(input);
+    assert.equal(result.state, "INSUFFICIENT_EVIDENCE");
+    checkSafe(result);
+  }
+  for (const [event, policy] of [[revoked(), {}], [hint(), revoked()]]) {
+    const result = normalizeWakeHint(event, policy);
+    assert.equal(result.canDispatch, false);
+  }
+  const result = coalesceWakeHints([], revoked());
+  assert.equal(result.canDispatch, false);
+});
+
+test("S-42: post-import RegExp.exec cannot validate forged SHA", () => {
+  const fixture = make();
+  for (const obj of [fixture.policy, fixture.observed.pr, fixture.observed.reviews[0], fixture.observed.checks[0], ...fixture.observed.postReceiptReads]) {
+    for (const key of ["headSha", "commitSha", "workflowRevision"]) if (Object.hasOwn(obj, key)) obj[key] = "not-a-sha";
+  }
+  const original = RegExp.prototype.exec;
+  try {
+    RegExp.prototype.exec = () => [""];
+    const result = reconcileOffline(fixture);
+    assert.equal(result.state, "INSUFFICIENT_EVIDENCE");
+    checkSafe(result);
+  } finally { RegExp.prototype.exec = original; }
+});
+
+test("S-42: inherited PR and check provenance never qualifies", () => {
+  const fixture = make();
+  fixture.observed.pr = [];
+  fixture.observed.checks = [[]];
+  const original = Object.getOwnPropertyDescriptor(Array.prototype, "repositoryId");
+  try {
+    Object.defineProperty(Array.prototype, "repositoryId", { configurable: true, value: 75 });
+    const result = reconcileOffline(fixture);
+    assert.notEqual(result.state, "READY_FOR_SPONSOR_DECISION");
+    checkSafe(result);
+  } finally {
+    if (original) Object.defineProperty(Array.prototype, "repositoryId", original);
+    else delete Array.prototype.repositoryId;
+  }
+});
