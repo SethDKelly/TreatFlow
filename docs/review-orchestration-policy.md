@@ -49,3 +49,18 @@ sponsor_merge_approval: false
 
 ## Adoption
 Effective for the **next TreatFlow review cycle**. Existing PR #117 and #119 remain under their current exact-head review gates; this policy must not retroactively assert a Cursor review. A future automation may implement deterministic selection, verified dispatch, timed polling and audit ledger, but must not mark a review complete without an actual reviewer receipt.
+
+## Availability override and timed reviewer switch (v1.1)
+- Default: eligible, independent reviewers are chosen by recorded rotation with a random tie-break. Eligibility is checked **before** randomization.
+- An explicit provider rate-limit notice, exhausted quota, provider error, failed dispatch, or operator-defined maintenance interval sets that provider to `unavailable` until the documented recovery deadline or a successful capability probe. Never repeatedly dispatch to a known-exhausted provider.
+- A manual switch gate may pin the preferred provider for a bounded interval (e.g., 40 minutes). Record requester, start time, end time, reason, affected PRs, and the exact head at dispatch. The override expires automatically in the selection logic at its deadline; after expiry, re-evaluate availability and resume the default rotation. No override can waive independence or exact-head checks.
+- Switch eligibility must require a **verified operational dispatch mechanism** and an observable exact-head review receipt. If the alternate is not connected, record `BLOCKED_NO_DISPATCH` and route to a human/security reviewer or HOLD. A comment merely mentioning Cursor is not a Cursor dispatch.
+- On failure: one bounded retry of the eligible provider, then switch to another verified provider. If no provider is operational, preserve the pending review and request manual intervention. CI success does not satisfy the missing independent review.
+- During a provider outage, preserve the queue of pending reviews; don't request Codex reviews until quota recovery is confirmed. Do not fabricate completion timestamps, review identities, or outcomes.
+
+### Temporary outage ledger (operator-declared)
+- Window: next 40 minutes from the current review-cycle request; exact wall-clock start/end must be recorded by the executing dispatcher.
+- Codex: unavailable (user-reported review quota exhaustion, approximately 43 minutes).
+- Cursor: preferred if dispatch capability is verified; otherwise `BLOCKED_NO_DISPATCH`.
+- Affected: PR #117 and PR #119, both still requiring exact-head independent review.
+- Status: policy only; no verified Cursor dispatch path has been established in this session.
