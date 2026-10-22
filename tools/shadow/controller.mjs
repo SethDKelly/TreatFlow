@@ -9,6 +9,8 @@ import { isProxy as nativeIsProxy } from "node:util/types";
 const stableIsProxy = nativeIsProxy;
 const stableCreateHash = createHash;
 const stableCreate = Object.create;
+const stablePlainPrototype = Object.prototype;
+const StableWeakSet = WeakSet;
 const stableByteLength = Buffer.byteLength;
 const stableString = String;
 const stableIsFinite = Number.isFinite;
@@ -63,6 +65,7 @@ const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
 const stableSetSize = Function.prototype.call.bind(Object.getOwnPropertyDescriptor(Set.prototype, "size").get);
 const stableWeakSetHas = Function.prototype.call.bind(WeakSet.prototype.has);
 const stableWeakSetAdd = Function.prototype.call.bind(WeakSet.prototype.add);
+const stableWeakSetDelete = Function.prototype.call.bind(WeakSet.prototype.delete);
 const stableHashUpdate = Function.prototype.call.bind(Object.getPrototypeOf(createHash("sha256")).update);
 const stableHashDigest = Function.prototype.call.bind(Object.getPrototypeOf(createHash("sha256")).digest);
 const indexedUniqueCount = (items) => {
@@ -97,7 +100,7 @@ function chargeText(value, budget) {
 
 // Capture one detached, inert snapshot BEFORE validation and hashing.
 // Reject accessors, sparse arrays, exotic objects, cycles and oversized inputs.
-function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES }) {
+function inertCopy(value, seen = new StableWeakSet(), depth = 0, budget = { nodes: 0, bytes: 0, maxDepth: 40, maxNodes: MAX_ENVELOPE_NODES }) {
   // Count every copied node, including duplicated references in a DAG. A
   // WeakSet of active ancestors alone catches cycles but not exponential
   // expansion from many shared subtrees.
@@ -122,15 +125,15 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
       throw new TypeError("Sparse or extended evidence array");
     const output = [];
     for (let index = 0; index < value.length; index++) {
-      const descriptor = stableGetDescriptor(value, String(index));
+      const descriptor = stableGetDescriptor(value, stableString(index));
       if (!descriptor || !stableHasOwn(descriptor, "value")) throw new TypeError("Non-inert array");
-      chargeText(String(index), budget);
-      stableDefineProperty(output, String(index), { value: inertCopy(descriptor.value, seen, depth + 1, budget), enumerable: true, writable: true, configurable: true });
+      chargeText(stableString(index), budget);
+      stableDefineProperty(output, stableString(index), { value: inertCopy(descriptor.value, seen, depth + 1, budget), enumerable: true, writable: true, configurable: true });
     }
-    seen.delete(value);
+    stableWeakSetDelete(seen, value);
     return output;
   }
-  if (stableGetPrototype(value) !== Object.prototype && stableGetPrototype(value) !== null)
+  if (stableGetPrototype(value) !== stablePlainPrototype && stableGetPrototype(value) !== null)
     throw new TypeError("Non-plain evidence object");
   const keys = stableOwnKeys(value);
   for (let i = 0; i < keys.length; i++) {
@@ -150,7 +153,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
       value: inertCopy(descriptor.value, seen, depth + 1, budget),
     });
   }
-  seen.delete(value);
+  stableWeakSetDelete(seen, value);
   return output;
 }
 
@@ -158,7 +161,7 @@ function canonical(value) {
   if (value === null || typeof value === "string" || typeof value === "boolean") return stableStringify(value);
   if (typeof value === "number" && stableIsFinite(value)) return stableStringify(value);
   if (stableArrayIsArray(value)) return "[" + stableJoin(stableMap(value, canonical), ",") + "]";
-  if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === Object.prototype)) {
+  if (value && (stableGetPrototype(value) === null || stableGetPrototype(value) === stablePlainPrototype)) {
     return "{" + stableJoin(stableMap(stableSort(stableObjectKeys(value)), (key) => {
       if (value[key] === undefined) throw new TypeError("Undefined evidence field");
       return stableStringify(key) + ":" + canonical(value[key]);
