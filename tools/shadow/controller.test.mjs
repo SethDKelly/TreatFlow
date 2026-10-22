@@ -1320,7 +1320,7 @@ test("S-74: mutated UTC calendar methods cannot normalize invalid dates", () => 
     for (const read of input.capture.reads) read.observedAt = "2026-02-29T12:00:00Z";
     input.capture.capturedAt = "2026-02-29T12:00:00Z";
     const result = evaluateOffline(input);
-    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.code, "CAPTURE_NOT_ATTESTED");
     assert.equal(result.canApprove, false);
   } finally { for (const [name, fn] of prior) Date.prototype[name] = fn; }
 });
@@ -1358,6 +1358,8 @@ test("S-74: live WeakSet add cannot rewrite failed Verify", () => {
 test("S-74: live Set size cannot conceal duplicate merge parents", () => {
   const input = fixture("merge");
   input.observations.parentShas = [sha("a"), sha("A")];
+  input.observations.preIntegrationBaseSha = sha("a");
+  input.observations.reviewedHead = sha("A");
   const prior = Object.getOwnPropertyDescriptor(Set.prototype, "size");
   try {
     Object.defineProperty(Set.prototype, "size", {configurable: true, get() { return 2; }});
@@ -1365,4 +1367,65 @@ test("S-74: live Set size cannot conceal duplicate merge parents", () => {
     assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
     assert.equal(result.canApprove, false);
   } finally { Object.defineProperty(Set.prototype, "size", prior); }
+});
+
+test("S-74: WeakSet delete mutation cannot rewrite later failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = WeakSet.prototype.delete;
+  try {
+    WeakSet.prototype.delete = function(value) {
+      if (value?.kind === "merge") {
+        input.observations.checks[0].conclusion = "success";
+        input.capture.reads[1].checkRuns[0].conclusion = "success";
+        input.capture.reads[4].checkRuns[0].conclusion = "success";
+      }
+      return Reflect.apply(original, this, [value]);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+  } finally { WeakSet.prototype.delete = original; }
+});
+
+test("S-74: replaced WeakSet constructor cannot mutate Verify evidence", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = globalThis.WeakSet;
+  try {
+    globalThis.WeakSet = function(...args) {
+      input.observations.checks[0].conclusion = "success";
+      return new original(...args);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { globalThis.WeakSet = original; }
+});
+
+test("S-74: mutable global String cannot change later failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = globalThis.String;
+  try {
+    globalThis.String = function(...args) {
+      input.observations.checks[0].conclusion = "success";
+      return Reflect.apply(original, undefined, args);
+    };
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { globalThis.String = original; }
+});
+
+test("S-74: mutable Object.prototype getter cannot change later failed Verify", () => {
+  const input = fixture();
+  input.observations.checks[0].conclusion = "failure";
+  const original = globalThis.Object;
+  try {
+    globalThis.Object = {get prototype() {
+      input.observations.checks[0].conclusion = "success";
+      return original.prototype;
+    }};
+    const result = evaluateOffline(input);
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { globalThis.Object = original; }
 });
