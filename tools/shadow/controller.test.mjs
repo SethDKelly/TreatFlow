@@ -1489,8 +1489,22 @@ test("S-74: endpoint-aligned case aliases cannot evade duplicate parent detectio
   input.observations.parentShas = [sha("a"), sha("A")];
   input.observations.preIntegrationBaseSha = sha("a");
   input.observations.reviewedHead = sha("A");
-  const result = evaluateOffline(input);
-  assert.equal(result.code, "INCONSISTENT_PARENT_GRAPH");
-  assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
-  assert.equal(result.canApprove, false);
+  const descriptor = Object.getOwnPropertyDescriptor(Set.prototype, "size");
+  try {
+    Object.defineProperty(Set.prototype, "size", {
+      configurable: true,
+      get() {
+        const actual = Reflect.apply(descriptor.get, this, []);
+        return actual === 1 ? 2 : actual;
+      },
+    });
+    const result = evaluateOffline(input);
+    assert.equal(result.code, "INCONSISTENT_PARENT_GRAPH");
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+    assert.equal(result.canApprove, false);
+    assert.equal(result.canWrite, false);
+    assert.equal(result.canDispatch, false);
+  } finally {
+    Object.defineProperty(Set.prototype, "size", descriptor);
+  }
 });
