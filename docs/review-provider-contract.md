@@ -26,18 +26,21 @@ Required fields:
   "dispatch": {
     "mechanism": "verified provider-specific transport",
     "requestUrl": "provider/GitHub URL",
-    "requestedAt": "RFC3339 timestamp"
+    "requestedAt": "UTC-Z RFC3339 subset timestamp"
   },
   "receipt": {
     "source": "provider-authored authenticated observation",
     "sourceUrl": "GitHub review/comment or provider run",
     "reviewedSha": "40-character hex SHA",
-    "observedAt": "RFC3339 timestamp",
+    "observedAt": "UTC-Z RFC3339 subset timestamp",
     "verdict": "PASS | FINDINGS | ERROR | UNKNOWN"
   }
 }
 ```
 `receipt` is absent until verified. Text alone is never authentication; the collector must independently read trusted GitHub/provider identity and repository/head provenance. Unverified identities, mismatched SHAs, stale receipts, or missing source reads yield `UNKNOWN` / HOLD, never PASS. **A caller-provided `authenticatedSource` object is untrusted, regardless of its `authenticated` field; it cannot produce `RECEIPT_OBSERVED`.** A future S-75-qualified collector must derive provenance through an independently authenticated provider/GitHub read and a non-caller-forgeable boundary before a verified state is implemented. The executable tests are included in `npm test` and Verify CI.
+
+## Timestamp profile (v0)
+Both `requestedAt` and `observedAt` use a deliberately bounded **UTC-Z RFC 3339 subset**: `YYYY-MM-DDTHH:mm:ss[.fraction]Z`, uppercase `T` and `Z`, with **1–9 decimal digits** when a fraction is present. Numeric timezone offsets and fractions longer than nine digits are intentionally rejected; a future trusted collector must normalize such provider timestamps into this canonical profile before passing them to the evaluator. Calendar validity and full nine-digit fractional ordering are checked, so an earlier observation cannot be treated as timely merely because `Date.parse` truncates sub-millisecond precision. This narrower contract does **not** imply any provider-authenticated provenance.
 
 ## Adapter states
 `NOT_CONFIGURED -> CAPABILITY_VERIFIED -> REQUESTED -> ACKNOWLEDGED -> RECEIPT_VERIFIED` or `FAILED | RATE_LIMITED | TIMED_OUT | UNKNOWN`. State transitions must be monotonic per attempt; a new commit creates a new cycle. A reaction-only receipt is not sufficient without independently established provider-specific semantics.

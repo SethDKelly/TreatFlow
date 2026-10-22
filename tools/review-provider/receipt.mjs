@@ -14,8 +14,12 @@ const stableCall = Reflect.apply;
 const StableWeakSet = WeakSet;
 const stableWeakAdd = WeakSet.prototype.add;
 const stableWeakHas = WeakSet.prototype.has;
+const stableWeakDelete = WeakSet.prototype.delete;
 const stableIncludes = Array.prototype.includes;
 const stableRegexExec = RegExp.prototype.exec;
+const stableSlice = String.prototype.slice;
+const stablePadEnd = String.prototype.padEnd;
+const arrayIndexPattern = /^(0|[1-9]\d*)$/;
 const stableNumberSafe = Number.isSafeInteger;
 const stableNumberFinite = Number.isFinite;
 const stableParse = Date.parse;
@@ -42,11 +46,11 @@ function copy(value, seen = new StableWeakSet()) {
     if (typeof key !== "string" || (array && key === "length")) continue;
     const d=descriptors[key];
     if (!own(d,"value") || !d.enumerable) throw Error("accessor or nonenumerable");
-    if (array && !/^(0|[1-9]\d*)$/.test(key)) throw Error("array key");
+    if (array && stableCall(stableRegexExec, arrayIndexPattern, [key]) === null) throw Error("array key");
     stableDefine(result,key,{value:copy(d.value,seen),enumerable:true,writable:true,configurable:true});
   }
   if (array && result.length !== value.length) throw Error("array holes");
-  seen.delete(value);
+  stableCall(stableWeakDelete,seen,[value]);
   return result;
 }
 const record = v => v !== null && typeof v === "object" && !stableIsArray(v) && stableGetPrototype(v) === null;
@@ -59,6 +63,18 @@ function time(v) {
   if (year<1 || month<1 || month>12 || day<1 || day>31 || hour>23 || minute>59 || second>59) return false;
   const days=[31,year%4===0&&(year%100!==0||year%400===0)?29:28,31,30,31,30,31,31,30,31,30,31];
   return day<=days[month-1] && stableNumberFinite(stableCall(stableParse,stableDate,[v]));
+}
+// UTC-Z profile: fixed-width seconds and zero-padded 9-digit fractions compare exactly.
+// Date.parse truncates beyond milliseconds and MUST NOT be used for receipt ordering.
+function compareUtc(left, right) {
+  const lSeconds = stableCall(stableSlice, left, [0, 19]);
+  const rSeconds = stableCall(stableSlice, right, [0, 19]);
+  if (lSeconds !== rSeconds) return lSeconds < rSeconds ? -1 : 1;
+  const lMatch = stableCall(stableRegexExec, timestampPattern, [left]);
+  const rMatch = stableCall(stableRegexExec, timestampPattern, [right]);
+  const lFraction = stableCall(stablePadEnd, lMatch[7] ?? "", [9, "0"]);
+  const rFraction = stableCall(stablePadEnd, rMatch[7] ?? "", [9, "0"]);
+  return lFraction === rFraction ? 0 : (lFraction < rFraction ? -1 : 1);
 }
 const fail = reason => stableFreeze({state:"HOLD",reason,canApprove:false,canDispatch:false,canMerge:false});
 export function evaluateProviderAttempt(rawAttempt, rawSource) {
@@ -76,7 +92,7 @@ export function evaluateProviderAttempt(rawAttempt, rawSource) {
   if (!record(receipt) || !text(receipt.source) || !text(receipt.sourceUrl) || !sha(receipt.reviewedSha) ||
     !time(receipt.observedAt) || !stableCall(stableIncludes,["PASS","FINDINGS","ERROR","UNKNOWN"],[receipt.verdict]))
     return fail("INVALID_RECEIPT");
-  if (receipt.reviewedSha!==attempt.headSha || stableCall(stableParse,stableDate,[receipt.observedAt])<stableCall(stableParse,stableDate,[attempt.dispatch.requestedAt])) return fail("SOURCE_MISMATCH");
+  if (receipt.reviewedSha!==attempt.headSha || compareUtc(receipt.observedAt,attempt.dispatch.requestedAt)<0) return fail("SOURCE_MISMATCH");
   // Even matching caller-supplied authenticatedSource is NOT authenticated evidence.
   // S-75 must establish a non-forgeable collector provenance boundary first.
   return fail("UNVERIFIED_PROVIDER_SOURCE");
