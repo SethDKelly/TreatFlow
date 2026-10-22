@@ -1277,3 +1277,15 @@ test("S-74: mutable set input iterator cannot hide duplicate required checks", (
     assert.equal(result.canApprove, false);
   } finally { Array.prototype[Symbol.iterator] = original; }
 });
+
+test("S-74: mutable array species cannot hide a duplicate required check", () => {
+  const original = Object.getOwnPropertyDescriptor(Array, Symbol.species);
+  try {
+    Object.defineProperty(Array, Symbol.species, { configurable: true, get: () => function() { return {length: 1}; } });
+    const result = decide((f) => {
+      const check = f.observations.checks[0];
+      f.observations.checks.push({ ...check, conclusion: "failure" });
+    });
+    assert.notEqual(result.state, "SHADOW_EVIDENCE_READY");
+  } finally { if (original) Object.defineProperty(Array, Symbol.species, original); else delete Array[Symbol.species]; }
+});
