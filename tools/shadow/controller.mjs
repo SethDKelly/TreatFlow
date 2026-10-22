@@ -59,10 +59,15 @@ const stableRegexTest = (pattern, value) => stableRegexExec(pattern, value) !== 
 const StableSet = Set;
 const stableSetHas = Function.prototype.call.bind(Set.prototype.has);
 const stableSetAdd = Function.prototype.call.bind(Set.prototype.add);
+const stableSetSize = Function.prototype.call.bind(Object.getOwnPropertyDescriptor(Set.prototype, "size").get);
+const stableWeakSetHas = Function.prototype.call.bind(WeakSet.prototype.has);
+const stableWeakSetAdd = Function.prototype.call.bind(WeakSet.prototype.add);
+const stableHashUpdate = Function.prototype.call.bind(Object.getPrototypeOf(createHash("sha256")).update);
+const stableHashDigest = Function.prototype.call.bind(Object.getPrototypeOf(createHash("sha256")).digest);
 const indexedUniqueCount = (items) => {
   const seen = new StableSet();
   for (let i = 0; i < items.length; i++) stableSetAdd(seen, items[i]);
-  return seen.size;
+  return stableSetSize(seen);
 };
 
 const SHA = /^[a-f0-9]{40}$/i;
@@ -108,16 +113,16 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   // replace the latter's shared mutable property. The intrinsic must run
   // before Array.isArray, prototype, own-key or descriptor reflection.
   // A wholly compromised JS runtime before module loading is not trusted.
-  if (typeof value !== "object" || stableIsProxy(value) || seen.has(value))
+  if (typeof value !== "object" || stableIsProxy(value) || stableWeakSetHas(seen, value))
     throw new TypeError("Invalid, proxied or cyclic evidence");
-  seen.add(value);
+  stableWeakSetAdd(seen, value);
   if (stableArrayIsArray(value)) {
     if (value.length > 10000 || stableOwnKeys(value).length !== value.length + 1)
       throw new TypeError("Sparse or extended evidence array");
     const output = [];
     for (let index = 0; index < value.length; index++) {
       const descriptor = stableGetDescriptor(value, String(index));
-      if (!descriptor || !("value" in descriptor)) throw new TypeError("Non-inert array");
+      if (!descriptor || !stableHasOwn(descriptor, "value")) throw new TypeError("Non-inert array");
       chargeText(String(index), budget);
       stableDefineProperty(output, String(index), { value: inertCopy(descriptor.value, seen, depth + 1, budget), enumerable: true, writable: true, configurable: true });
     }
@@ -137,7 +142,7 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const descriptor = stableGetDescriptor(value, key);
-    if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
+    if (!descriptor.enumerable || !stableHasOwn(descriptor, "value") || descriptor.value === undefined)
       throw new TypeError("Non-inert evidence field");
     stableDefineProperty(output, key, {
       enumerable: true, configurable: true, writable: true,
@@ -162,7 +167,9 @@ function canonical(value) {
 }
 
 export function evidenceDigest(value) {
-  return stableCreateHash("sha256").update(canonical(inertCopy(value)), "utf8").digest("hex");
+  const hash = stableCreateHash("sha256");
+  stableHashUpdate(hash, canonical(inertCopy(value)), "utf8");
+  return stableHashDigest(hash, "hex");
 }
 
 function frozen(value) {
