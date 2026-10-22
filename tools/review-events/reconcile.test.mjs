@@ -352,3 +352,54 @@ test("post-import Object.freeze mutation cannot grant advisory capabilities", ()
     assert.equal(Object.isFrozen(got), true);
   } finally { Object.freeze = original; }
 });
+
+test("S-42: inherited descriptor value cannot turn accessor findings into clean receipt", () => {
+  const original = Object.getOwnPropertyDescriptor(Object.prototype, "value");
+  const fixture = make();
+  delete fixture.observed.reviews[0].hasFindings;
+  delete fixture.observed.reviews[0].unresolvedFindings;
+  Object.defineProperty(fixture.observed.reviews[0], "hasFindings", { enumerable: true, get() { throw Error("accessor must not execute"); } });
+  Object.defineProperty(fixture.observed.reviews[0], "unresolvedFindings", { enumerable: true, get() { throw Error("accessor must not execute"); } });
+  try {
+    Object.defineProperty(Object.prototype, "value", { configurable: true, value: false });
+    const got = reconcileOffline(fixture);
+    assert.equal(got.state, "INSUFFICIENT_EVIDENCE");
+    checkSafe(got);
+  } finally {
+    if (original) Object.defineProperty(Object.prototype, "value", original);
+    else delete Object.prototype.value;
+  }
+});
+
+test("S-42: mutable Object.create cannot erase findings after validation", () => {
+  const original = Object.create;
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  try {
+    Object.create = function(proto) {
+      fixture.observed.reviews[0].hasFindings = false;
+      return Reflect.apply(original, Object, [proto]);
+    };
+    const got = reconcileOffline(fixture);
+    assert.equal(got.state, "HOLD_FINDINGS");
+    checkSafe(got);
+  } finally { Object.create = original; }
+});
+
+test("S-42: mutable array species cannot erase finding flags during selection", () => {
+  const original = Object.getOwnPropertyDescriptor(Array.prototype, "constructor");
+  const fixture = make();
+  fixture.observed.reviews[0].hasFindings = true;
+  try {
+    Object.defineProperty(Array.prototype, "constructor", { configurable: true, get() {
+      fixture.observed.reviews[0].hasFindings = false;
+      return Array;
+    } });
+    const got = reconcileOffline(fixture);
+    assert.equal(got.state, "HOLD_FINDINGS");
+    checkSafe(got);
+  } finally {
+    if (original) Object.defineProperty(Array.prototype, "constructor", original);
+    else delete Array.prototype.constructor;
+  }
+});
