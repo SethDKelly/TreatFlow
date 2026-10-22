@@ -26,7 +26,13 @@ const stableStartsWith = Function.prototype.call.bind(String.prototype.startsWit
 const stableIncludes = Function.prototype.call.bind(String.prototype.includes);
 const stableTrim = Function.prototype.call.bind(String.prototype.trim);
 const stableMap = Function.prototype.call.bind(Array.prototype.map);
-const stableFilter = Function.prototype.call.bind(Array.prototype.filter);
+const stableFilter = (values, predicate) => {
+  const output = [];
+  for (let i = 0; i < values.length; i++) {
+    if (predicate(values[i], i)) stableDefineProperty(output, String(output.length), {value: values[i], enumerable: true, writable: true, configurable: true});
+  }
+  return output;
+};
 const stableEvery = Function.prototype.call.bind(Array.prototype.every);
 const stableSome = Function.prototype.call.bind(Array.prototype.some);
 const stableJoin = Function.prototype.call.bind(Array.prototype.join);
@@ -118,9 +124,10 @@ function inertCopy(value, seen = new WeakSet(), depth = 0, budget = { nodes: 0, 
   }
   // Enforce the same byte cap on property names BEFORE collecting all
   // descriptors and doing potentially expensive canonicalization/sorting.
-  for (const key of keys) chargeText(key, budget);
+  for (let i = 0; i < keys.length; i++) chargeText(keys[i], budget);
   const output = Object.create(null);
-  for (const key of keys) {
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
     const descriptor = stableGetDescriptor(value, key);
     if (!descriptor.enumerable || !("value" in descriptor) || descriptor.value === undefined)
       throw new TypeError("Non-inert evidence field");
