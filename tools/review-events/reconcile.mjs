@@ -160,7 +160,8 @@ export function reconcileOffline(input = {}) {
   input = detach(input);
   const { policy, observed, retry } = input;
   if (!policy || !observed || !retry || typeof policy !== "object" ||
-      typeof observed !== "object" || typeof retry !== "object")
+      typeof observed !== "object" || typeof retry !== "object" ||
+      stableArrayIsArray(policy) || stableArrayIsArray(observed) || stableArrayIsArray(retry))
     return invalid("MISSING_GROUP");
   if (!safeId(policy.repositoryId) || !safeId(policy.prNumber) ||
       !safeId(policy.reviewerAppId) || !safeId(policy.checkAppId) ||
