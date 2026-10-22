@@ -156,7 +156,7 @@ test("post-import intrinsic mutation cannot forge outcome", () => {
   const originals = {
     freeze: Object.freeze, has: Set.prototype.has, test: RegExp.prototype.test,
     exec: RegExp.prototype.exec, parse: Date.parse, includes: Array.prototype.includes,
-    weakDelete: WeakSet.prototype.delete,
+    weakDelete: WeakSet.prototype.delete, lower: String.prototype.toLowerCase,
   };
   let result;
   try {
@@ -167,6 +167,7 @@ test("post-import intrinsic mutation cannot forge outcome", () => {
     Date.parse = () => NaN;
     Array.prototype.includes = () => true;
     WeakSet.prototype.delete = () => { throw Error("poison"); };
+    String.prototype.toLowerCase = () => { throw Error("poison"); };
     result = evaluateProviderAttempt(attempt(), source());
   } finally {
     Object.freeze = originals.freeze;
@@ -176,6 +177,7 @@ test("post-import intrinsic mutation cannot forge outcome", () => {
     Date.parse = originals.parse;
     Array.prototype.includes = originals.includes;
     WeakSet.prototype.delete = originals.weakDelete;
+    String.prototype.toLowerCase = originals.lower;
   }
   assert.equal(result.state, "HOLD");
   assert.equal(result.reason, "UNVERIFIED_PROVIDER_SOURCE");
@@ -191,4 +193,17 @@ test("post-import global WeakSet replacement is inert", () => {
   } finally { globalThis.WeakSet = original; }
   assert.equal(result.reason, "UNVERIFIED_PROVIDER_SOURCE");
   assert.equal(Object.isFrozen(result), true);
+});
+
+test("shared-object graph expansion is bounded and fails closed", () => {
+  let shared = {leaf: "value"};
+  for (let i = 0; i < 22; i++) shared = {left: shared, right: shared};
+  const a = attempt(); a.extra = shared;
+  hold(a, source(), "INVALID_RECORD");
+});
+test("excessively deep nested input fails closed", () => {
+  let nested = {leaf: "value"};
+  for (let i = 0; i < 40; i++) nested = {next: nested};
+  const a = attempt(); a.extra = nested;
+  hold(a, source(), "INVALID_RECORD");
 });
