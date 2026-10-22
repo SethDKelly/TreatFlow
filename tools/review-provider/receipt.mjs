@@ -11,6 +11,10 @@ const stableDefine = Object.defineProperty;
 const stableFreeze = Object.freeze;
 const stableHasOwn = Object.prototype.hasOwnProperty;
 const stableCall = Reflect.apply;
+const StableWeakSet = WeakSet;
+const stableWeakAdd = WeakSet.prototype.add;
+const stableWeakHas = WeakSet.prototype.has;
+const stableIncludes = Array.prototype.includes;
 const stableRegexExec = RegExp.prototype.exec;
 const stableNumberSafe = Number.isSafeInteger;
 const stableNumberFinite = Number.isFinite;
@@ -21,13 +25,13 @@ const shaPattern = /^[a-f0-9]{40}$/i;
 const timestampPattern = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,9}))?Z$/;
 const sha = v => typeof v === "string" && stableCall(stableRegexExec, shaPattern, [v]) !== null;
 const own = (o,k) => stableCall(stableHasOwn,o,[k]);
-function copy(value, seen = new WeakSet()) {
+function copy(value, seen = new StableWeakSet()) {
   if (value === null || typeof value !== "object" || stableIsProxy(value)) {
     if (value !== null && typeof value === "object") throw Error("proxy");
     return value;
   }
-  if (seen.has(value)) throw Error("cycle");
-  seen.add(value);
+  if (stableCall(stableWeakHas,seen,[value])) throw Error("cycle");
+  stableCall(stableWeakAdd,seen,[value]);
   const array = stableIsArray(value);
   if (!array && stableGetPrototype(value) !== plainPrototype && stableGetPrototype(value) !== null) throw Error("prototype");
   const result = array ? [] : stableCreate(null);
@@ -62,15 +66,15 @@ export function evaluateProviderAttempt(rawAttempt, rawSource) {
   try {attempt=copy(rawAttempt);source=copy(rawSource);} catch {return fail("INVALID_RECORD");}
   if (!record(attempt) || !record(attempt.dispatch) || !record(source)) return fail("INVALID_RECORD");
   if (attempt.schemaVersion!==1 || !text(attempt.repository) || !stableNumberSafe(attempt.pullRequest) || attempt.pullRequest<1 ||
-    !sha(attempt.headSha) || !["codex","cursor-bugbot","cursor-agent"].includes(attempt.provider) ||
-    !["standard","targeted-adversarial"].includes(attempt.purpose) || !text(attempt.attemptId) ||
+    !sha(attempt.headSha) || !stableCall(stableIncludes,["codex","cursor-bugbot","cursor-agent"],[attempt.provider]) ||
+    !stableCall(stableIncludes,["standard","targeted-adversarial"],[attempt.purpose]) || !text(attempt.attemptId) ||
     !text(attempt.dispatch.mechanism) || !text(attempt.dispatch.requestUrl) || !time(attempt.dispatch.requestedAt))
     return fail("INVALID_ATTEMPT");
   if ((attempt.provider==="cursor-agent") !== (attempt.purpose==="targeted-adversarial")) return fail("PROVIDER_PURPOSE_MISMATCH");
   if (!own(attempt,"receipt")) return fail("RECEIPT_MISSING");
   const receipt=attempt.receipt;
   if (!record(receipt) || !text(receipt.source) || !text(receipt.sourceUrl) || !sha(receipt.reviewedSha) ||
-    !time(receipt.observedAt) || !["PASS","FINDINGS","ERROR","UNKNOWN"].includes(receipt.verdict))
+    !time(receipt.observedAt) || !stableCall(stableIncludes,["PASS","FINDINGS","ERROR","UNKNOWN"],[receipt.verdict]))
     return fail("INVALID_RECEIPT");
   if (receipt.reviewedSha!==attempt.headSha || receipt.observedAt<attempt.dispatch.requestedAt) return fail("SOURCE_MISMATCH");
   // Even matching caller-supplied authenticatedSource is NOT authenticated evidence.
