@@ -182,7 +182,16 @@ export function selectOffline(input) {
     eligible:freeze(map(candidates,p=>p.id)),canDispatch:false,canApprove:false,canMerge:false,ledger:next});
 }
 // Rejected invalidations are not empty ledgers: callers must not persist them as successful resets.
-const invalidationHold = reason => freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false});
+const invalidationHold = reason => {
+ // Null prototype prevents a rejected invalidation from inheriting a forged ledger.
+ const result=create(null);
+ result.state="HOLD";
+ result.reason=reason;
+ result.canDispatch=false;
+ result.canApprove=false;
+ result.canMerge=false;
+ return freeze(result);
+};
 export function invalidateHead(input,repository,pr,newHeadSha,now) {
  try {
   const ledger=safeCopy(input);
