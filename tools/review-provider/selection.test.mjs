@@ -1,0 +1,52 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {selectOffline,invalidateHead} from "./selection.mjs";
+const SHA="a".repeat(40);
+const base=()=>({repository:"o/r",pr:12,headSha:SHA,seed:"recorded-seed",now:100000,
+  implementer:"human",ledger:[],providers:[
+    {id:"codex",verifiedDispatch:true,healthy:true,cooldownUntil:0,weight:2},
+    {id:"cursor-bugbot",verifiedDispatch:true,healthy:true,cooldownUntil:0,weight:1},
+    {id:"cursor-agent",verifiedDispatch:false,healthy:true,cooldownUntil:0,weight:1}
+  ]});
+test("deterministic auditable weighted selection never dispatches",()=>{
+  const x=base(),a=selectOffline(x),b=selectOffline(x);
+  assert.deepEqual(a,b);assert.equal(a.state,"OFFLINE_SELECTION");
+  assert.equal(a.canDispatch,false);assert.equal(a.canMerge,false);assert.ok(a.draw>=0&&a.draw<1);
+  assert.equal(Object.isFrozen(a.ledger),true);
+});
+test("unverified, unhealthy, cooldown and implementer are ineligible",()=>{
+  const x=base();x.implementer="codex";x.providers[1].cooldownUntil=100001;
+  assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+});
+test("bounded manual pin expires and cannot bypass eligibility",()=>{
+  const x=base();x.override={provider:"cursor-bugbot",startsAt:90000,expiresAt:110000,requester:"operator",reason:"quota"};
+  assert.equal(selectOffline(x).provider,"cursor-bugbot");
+  assert.equal(selectOffline(x).selectionMethod,"BOUNDED_OVERRIDE");
+  x.now=110000;assert.equal(selectOffline(x).selectionMethod,"WEIGHTED_DETERMINISTIC");
+  x.now=100000;x.providers[1].verifiedDispatch=false;
+  assert.notEqual(selectOffline(x).provider,"cursor-bugbot");
+  x.override.expiresAt=999999999;assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+});
+test("idempotent pending and single retry then alternate",()=>{
+  const x=base(),first=selectOffline(x);x.ledger=[...first.ledger];
+  assert.equal(selectOffline(x).reason,"IDEMPOTENT_PENDING");
+  x.ledger.push({...x.ledger.at(-1),state:"TIMED_OUT"});
+  const retry=selectOffline(x);assert.equal(retry.provider,first.provider);assert.equal(retry.attempt,2);
+  x.ledger=[...retry.ledger,{...retry.ledger.at(-1),state:"FAILED"}];
+  const alt=selectOffline(x);assert.notEqual(alt.provider,first.provider);
+});
+test("quota cooldown and no verified alternate hold",()=>{
+  const x=base();x.providers[0].cooldownUntil=200000;x.providers[1].verifiedDispatch=false;
+  assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+});
+test("head changes invalidate old attempts",()=>{
+  const x=base(),a=selectOffline(x);
+  assert.equal(invalidateHead(a.ledger,"o/r",12,"b".repeat(40)).length,0);
+  assert.equal(invalidateHead(a.ledger,"o/r",12,SHA).length,1);
+});
+test("invalid and hostile inputs hold without effects",()=>{
+  assert.equal(selectOffline({}).reason,"INVALID_INPUT");
+  const x=base();x.providers[0].weight=0;assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+  const y=base();y.providers.push({...y.providers[0]});assert.equal(selectOffline(y).reason,"INVALID_INPUT");
+  assert.equal(selectOffline(new Proxy(base(),{get(){throw Error("trap")}})).reason,"INVALID_INPUT");
+});
