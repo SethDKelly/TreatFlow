@@ -160,7 +160,7 @@ export function invalidateHead(input,repository,pr,newHeadSha) {
   const current=keyOf({repository,pr,headSha:newHeadSha});
   if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
   const keep=new Set();
-  for(let i=0,items=ledger;i<items.length;i++) if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>0)) setAdd(keep,stringify([e.key,e.provider,e.attempt]));
+  for(let i=0,items=ledger;i<items.length;i++){const e=items[i];if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>0)) setAdd(keep,stringify([e.key,e.provider,e.attempt]));}
   return freeze(map(filter(ledger,e=>e.key===current||setHas(keep,stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
  }catch{return freeze([]);}
 }
