@@ -62,7 +62,8 @@ function validInput(x) {
     new Set(map(x.providers,p=>p.id)).size===x.providers.length &&
     every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && PROVIDERS.includes(e.provider) &&
       ["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"].includes(e.state) &&
-      integer(e.attempt) && e.attempt>=1 && e.attempt<=2);
+      integer(e.attempt) && e.attempt>=1 && e.attempt<=2 &&
+      (e.state!=="RATE_LIMITED" || validTime(e.retryAfter)));
 }
 export function selectOffline(input) {
   // JSON-only data is required; never execute arbitrary callbacks from evidence.
@@ -99,13 +100,16 @@ export function selectOffline(input) {
   const failures=filter(existing,e=>["FAILED","TIMED_OUT","RATE_LIMITED"].includes(e.state));
   const used=new Map();
   for(const e of failures) used.set(e.provider,Math.max(used.get(e.provider)??0,e.attempt));
-  const eligible=filter(x.providers,p=>(p.id!=="cursor-agent" || x.purpose==="targeted-adversarial") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now &&
+  const limited=filter(existing,e=>e.state==="RATE_LIMITED");
+  const recovery=new Map();
+  for(const e of limited) recovery.set(e.provider,Math.max(recovery.get(e.provider)??0,e.retryAfter));
+  const eligible=filter(x.providers,p=>(p.id!=="cursor-agent" || x.purpose==="targeted-adversarial") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now && (recovery.get(p.id)??0)<=x.now &&
     p.id!==x.implementer && (used.get(p.id)??0)<2);
   if (!eligible.length) return hold("BLOCKED_NO_DISPATCH",ledger);
   // One retry of the same provider, then verified alternate; a failure on attempt 2 excludes it.
   const latest=at(failures,-1);
   let candidates=eligible;
-  if(latest && latest.attempt===1) {
+  if(latest && latest.attempt===1 && (latest.state!=="RATE_LIMITED" || latest.retryAfter<=x.now)) {
     const retry=find(eligible,p=>p.id===latest.provider);
     if(retry) candidates=[retry];
   } else if(latest) {
@@ -140,7 +144,7 @@ export function invalidateHead(input,repository,pr,newHeadSha) {
   const ledger=safeCopy(input);
   if(!arrayIsArray(ledger)||typeof repository!=="string"||!/^[^/]+\/[^/]+$/.test(repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!SHA.test(newHeadSha)) return freeze([]);
   const current=keyOf({repository,pr,headSha:newHeadSha});
-  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&PROVIDERS.includes(e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"].includes(e.state))) return freeze([]);
+  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&PROVIDERS.includes(e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"].includes(e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
   const keep=new Set();
   for(const e of ledger) if(e.state==="COMPLETED") keep.add(JSON.stringify([e.key,e.provider,e.attempt]));
   return freeze(map(filter(ledger,e=>e.key===current||keep.has(JSON.stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
