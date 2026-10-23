@@ -94,3 +94,20 @@ On [PR #121](https://github.com/SethDKelly/TreatFlow/pull/121), Codex's [review 
 | Operational authority | None from these observations | Separate sponsor authorization for live intake, dispatch, status publication or credential changes |
 
 **S-77 remains Verification/HOLD.** Its merged offline baseline and observed PR #121 reviews do not satisfy the provider-qualification exit gate. [S-78](https://linear.app/s-kelly/issue/S-78) may retain its offline reviewed implementation but cannot exit until S-77 qualification; [S-79](https://linear.app/s-kelly/issue/S-79) remains blocked by S-75, S-77 and S-78. Next source-only step is independent review of this evidence classification and a bounded, non-operational qualification test plan; live activity is out of scope.
+
+## Next bounded gate — source-only qualification protocol (2026-10-23)
+
+This is a **proposed read-only evidence collection protocol**, not a provider activation, security approval, or claim of observed capability. The evaluator continues to HOLD all caller-asserted authenticated sources. Each row must carry the observation timestamp, immutable source URL, PR/head, observed GitHub actor and actor type, the actual API identity provenance if independently available, and an explicit VERIFIED / UNVERIFIED / NOT_CONFIGURED disposition. Absence of evidence is UNKNOWN, never PASS.
+
+| Probe | Permitted source-only action | Negative control / rejection criterion |
+| --- | --- | --- |
+| Codex identity and exact head | Read GitHub PR review objects, issue comments, check runs and provider-run references for an already completed request | A comment body, reaction or matching bot display name without independently authenticated actor provenance cannot become a trusted receipt |
+| Cursor Cloud Agent | Read existing `@cursoragent` request and `cursor[bot]` response records; correlate repository, PR, requested head, response head and provider-run identity | No assumption that Cloud Agent evidence establishes Bugbot identity or availability |
+| Cursor Bugbot | Inspect existing repository configuration, installation evidence and historical review records if readable | If no independently established installation/transport/actor, classify NOT_CONFIGURED; do not trigger a trial dispatch |
+| Cursor Automations | Inspect documented availability and any already-existing configuration without enabling it | No inferred entitlement, trigger, callback, or secret permission |
+| Collector/source custody | Document which authenticated GitHub/provider API principal could read each field, its scope, replay protection, and source-revision binding | A caller-supplied `authenticated: true`, quoted comment, or untrusted webhook payload is not trusted evidence |
+| Failure and retry | Replay offline fixtures for wrong head, forged actor, duplicated/conflicting evidence, missing receipt, rate limit, out-of-order observation and provider switch | Fail closed to UNKNOWN/HOLD; never upgrade from event notification or status text alone |
+
+**Required acceptance packet:** per-provider capability/identity table with primary evidence links and uncertainty labels; provenance and effective-permissions matrix cross-referenced to S-75; offline negative-test result and exact commit/CI; independent Codex/Cursor exact-head reviews; explicit unresolved risks and decision. A source-only PASS means the documentation/negative-test packet is sound, **not** S-77 provider qualification complete. S-77 may exit only when every enabled provider's required authenticated identity, dispatch and receipt semantics are verified under separately authorized conditions, or the provider is explicitly disabled and the acceptance scope is adjusted through the appropriate gate.
+
+**Operational STOP:** no new review dispatch, webhooks, tokens, Apps, Actions workflows, GitHub status writes, Linear status writers, AWS/IAM operations, or live collector. S-75 security and sponsor-controlled activation remain separate. PR #122 stays Draft/HOLD pending fresh exact-head CI and independent review of this addition; S-78 acceptance and S-79 implementation remain dependency-blocked.
