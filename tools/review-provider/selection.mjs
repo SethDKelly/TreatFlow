@@ -164,7 +164,7 @@ export function selectOffline(input) {
   let offset=sample*total, selected=at(candidates,-1);
   for(let i=0;i<candidates.length;i++) {offset-=weights[i];if(offset<0){selected=candidates[i];break;}}
   const attempt=(mapGet(used,selected.id)??0)+1;
-  const next=freeze([...ledger,freeze({key,provider:selected.id,attempt,state:"REQUESTED"})]);
+  const next=map(ledger,e=>e);next.push(freeze({key,provider:selected.id,attempt,state:"REQUESTED"}));freeze(next);
   return freeze({state:"OFFLINE_SELECTION",provider:selected.id,attempt,key,draw:sample,
     selectionMethod:active&&selected.id===override.provider?"BOUNDED_OVERRIDE":"WEIGHTED_DETERMINISTIC",
     eligible:freeze(map(candidates,p=>p.id)),canDispatch:false,canApprove:false,canMerge:false,ledger:next});
