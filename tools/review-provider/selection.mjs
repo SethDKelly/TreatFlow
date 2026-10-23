@@ -130,7 +130,7 @@ export function selectOffline(input) {
 export function invalidateHead(input,repository,pr,newHeadSha) {
  try {
   const ledger=safeCopy(input);
-  if(!Array.isArray(ledger)||typeof repository!=="string"||!/^[^/]+\\/[^/]+$/.test(repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!SHA.test(newHeadSha)) return freeze([]);
+  if(!Array.isArray(ledger)||typeof repository!=="string"||!/^[^/]+\/[^/]+$/.test(repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!SHA.test(newHeadSha)) return freeze([]);
   const current=keyOf({repository,pr,headSha:newHeadSha});
   if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&PROVIDERS.includes(e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"].includes(e.state))) return freeze([]);
   const keep=new Set();
