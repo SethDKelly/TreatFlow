@@ -61,7 +61,7 @@ test("malformed trailing failure cannot hide pending attempt",()=>{
 });
 test("rate-limit recovery retries once after cooldown",()=>{
  const x=base();x.providers[1].verifiedDispatch=false;
- const a=selectOffline(x);x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED"}];
+ const a=selectOffline(x);x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED",retryAfter:x.now+1}];
  x.providers[0].cooldownUntil=x.now+1;assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
  x.now+=2;const retry=selectOffline(x);assert.equal(retry.provider,"codex");assert.equal(retry.attempt,2);
 });
@@ -101,4 +101,21 @@ test("standard purpose excludes cursor cloud agent",()=>{
 });
 test("array holes are rejected",()=>{
  const x=base();delete x.providers[1];assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+});
+
+test("rate-limit ledger deadline blocks retry despite provider claiming recovery",()=>{
+ const x=base(),a=selectOffline(x);
+ x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED",retryAfter:x.now+100}];
+ x.providers[0].cooldownUntil=0;
+ const next=selectOffline(x);
+ assert.notEqual(next.provider,a.provider);
+ x.providers[1].verifiedDispatch=false;
+ assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+ x.now+=101;
+ assert.equal(selectOffline(x).provider,a.provider);
+});
+test("rate-limit event without auditable recovery deadline is invalid",()=>{
+ const x=base(),a=selectOffline(x);
+ x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED"}];
+ assert.equal(selectOffline(x).reason,"INVALID_INPUT");
 });
