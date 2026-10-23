@@ -4,6 +4,15 @@ import { types } from "node:util";
 const isProxy=types.isProxy;
 const descriptors=Object.getOwnPropertyDescriptors;
 const freeze=Object.freeze;
+const create=Object.create;
+const hasOwn=Object.hasOwn;
+const max=Math.max;
+const mapSizeGetter=Object.getOwnPropertyDescriptor(Map.prototype,"size").get;
+const setSizeGetter=Object.getOwnPropertyDescriptor(Set.prototype,"size").get;
+const mapSize=Function.call.bind(mapSizeGetter);
+const setSize=Function.call.bind(setSizeGetter);
+const parseInteger=Number.parseInt;
+const slice=Function.call.bind(String.prototype.slice);
 const filter=Function.call.bind(Array.prototype.filter);
 const map=Function.call.bind(Array.prototype.map);
 const some=Function.call.bind(Array.prototype.some);
@@ -39,10 +48,10 @@ function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  weakAdd(seen,v);
  const arr=arrayIsArray(v);
  if(!arr&&prototype(v)!==Object.prototype&&prototype(v)!==null) throw Error("prototype");
- const ds=descriptors(v),out=arr?[]:Object.create(null);
+ const ds=descriptors(v),out=arr?[]:create(null);
  for(let ki=0,kl=ownKeyList(ds);ki<kl.length;ki++){const k=kl[ki];
   if(typeof k!=="string"||(arr&&k==="length")) continue;
-  const d=ds[k];if(!Object.hasOwn(d,"value")||!d.enumerable) throw Error("accessor");
+  const d=ds[k];if(!hasOwn(d,"value")||!d.enumerable) throw Error("accessor");
   if(arr&&!regexTest(/^(0|[1-9]\d*)$/,k)) throw Error("array key");
   define(out,k,{value:safeCopy(d.value,seen,budget,depth+1),enumerable:true,writable:true,configurable:true});
  }
@@ -58,7 +67,7 @@ const hold = (reason,ledger) => freeze({state:"HOLD",reason,canDispatch:false,ca
 
 const keyOf = ({repository,pr,headSha}) => stringify([lower(repository),pr,lower(headSha)]);
 function canonicalKey(k){const v=parse(k);if(!arrayIsArray(v)||v.length!==3||typeof v[0]!=="string"||!regexTest(/^[^/]+\/[^/]+$/,v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!regexTest(SHA,v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
-const draw = (seed,key) => parseInt(hashDigest(hashUpdate(createHash("sha256"),stringify([seed,key])),"hex").slice(0,13),16)/0x10000000000000;
+const draw = (seed,key) => parseInteger(slice(hashDigest(hashUpdate(createHash("sha256"),stringify([seed,key])),"hex"),0,13),16)/0x10000000000000;
 const validTime = n => integer(n) && n>=0;
 function validInput(x) {
   if (!x || prototype(x)!==null || !arrayIsArray(x.providers) || !arrayIsArray(x.ledger) ||
@@ -73,7 +82,7 @@ function validInput(x) {
       typeof x.override.requester!=="string" || !x.override.requester)) return false;
   return every(x.providers,p=>p && includes(PROVIDERS,p.id) && typeof p.verifiedDispatch==="boolean" &&
     typeof p.healthy==="boolean" && validTime(p.cooldownUntil) && integer(p.weight) && p.weight>=1 && p.weight<=100) &&
-    new Set(map(x.providers,p=>p.id)).size===x.providers.length &&
+    setSize(new Set(map(x.providers,p=>p.id)))===x.providers.length &&
     every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && includes(PROVIDERS,e.provider) &&
       includes(["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"],e.state) &&
       integer(e.attempt) && e.attempt>=1 && e.attempt<=2 &&
@@ -116,14 +125,14 @@ export function selectOffline(input) {
       mapDelete(open,id);setAdd(finished,id);
     }
   }
-  if(open.size) return hold("IDEMPOTENT_PENDING",ledger);
+  if(mapSize(open)) return hold("IDEMPOTENT_PENDING",ledger);
   if(some(existing,e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
   const failures=filter(existing,e=>includes(["FAILED","TIMED_OUT","RATE_LIMITED"],e.state));
   const used=new Map();
-  for(let i=0,items=failures;i<items.length;i++){const e=items[i];mapSet(used,e.provider,Math.max(mapGet(used,e.provider)??0,e.attempt));}
+  for(let i=0,items=failures;i<items.length;i++){const e=items[i];mapSet(used,e.provider,max(mapGet(used,e.provider)??0,e.attempt));}
   const limited=filter(ledger,e=>e.state==="RATE_LIMITED" && parse(e.key)[0]===lower(x.repository) && parse(e.key)[1]===x.pr);
   const recovery=new Map();
-  for(let i=0,items=limited;i<items.length;i++){const e=items[i];mapSet(recovery,e.provider,Math.max(mapGet(recovery,e.provider)??0,e.retryAfter));}
+  for(let i=0,items=limited;i<items.length;i++){const e=items[i];mapSet(recovery,e.provider,max(mapGet(recovery,e.provider)??0,e.retryAfter));}
   const eligible=filter(x.providers,p=>(x.purpose==="targeted-adversarial" ? p.id==="cursor-agent" : p.id!=="cursor-agent") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now && (mapGet(recovery,p.id)??0)<=x.now &&
     p.id!==x.implementer && (mapGet(used,p.id)??0)<2);
   if (!eligible.length) return hold("BLOCKED_NO_DISPATCH",ledger);
