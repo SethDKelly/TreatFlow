@@ -27,6 +27,8 @@ const mapHas=Function.call.bind(Map.prototype.has);
 const mapDelete=Function.call.bind(Map.prototype.delete);
 const setAdd=Function.call.bind(Set.prototype.add);
 const setHas=Function.call.bind(Set.prototype.has);
+const weakAdd=Function.call.bind(WeakSet.prototype.add);
+const weakDelete=Function.call.bind(WeakSet.prototype.delete);
 const hashDigest=Function.call.bind(createHash("sha256").constructor.prototype.digest);
 const hashUpdate=Function.call.bind(createHash("sha256").constructor.prototype.update);
 
@@ -34,7 +36,7 @@ function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  if(++budget.n>2048||depth>32) throw Error("budget");
  if(v===null||typeof v!=="object") return v;
  if(isProxy(v)||seen.has(v)) throw Error("proxy or cycle");
- setAdd(seen,v);
+ weakAdd(seen,v);
  const arr=arrayIsArray(v);
  if(!arr&&prototype(v)!==Object.prototype&&prototype(v)!==null) throw Error("prototype");
  const ds=descriptors(v),out=arr?[]:Object.create(null);
@@ -46,7 +48,7 @@ function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  }
  if(arr&&out.length!==v.length) throw Error("holes");
  if(arr&&keys(out).length!==v.length) throw Error("holes");
- mapDelete(seen,v);return out;
+ weakDelete(seen,v);return out;
 }
 const PROVIDERS = freeze(["codex","cursor-bugbot","cursor-agent"]);
 const SHA = /^[a-f0-9]{40}$/i;
