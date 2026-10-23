@@ -306,3 +306,31 @@ test("invalid head invalidation is distinguishable from successful empty history
  assert.equal(rejected.reason,"INVALID_LEDGER");
  assert.equal("ledger" in rejected,false);
 });
+
+test("rejected invalidation cannot inherit a forged ledger from Object.prototype",()=>{
+ const x=base();x.providers[1].verifiedDispatch=false;
+ const first=selectOffline(x);
+ assert.equal(first.state,"OFFLINE_SELECTION");
+ const ledger=[...first.ledger,{...first.ledger[0],state:"RATE_LIMITED",retryAfter:x.now+100000}];
+ const prior=Object.getOwnPropertyDescriptor(Object.prototype,"ledger");
+ try {
+  Object.defineProperty(Object.prototype,"ledger",{configurable:true,value:[]});
+  const rejected=invalidateHead(ledger,"o/r",12,"b".repeat(40)); // missing required now
+  assert.equal(rejected.state,"HOLD");
+  assert.equal(rejected.reason,"INVALID_INPUT");
+  assert.equal(Object.getPrototypeOf(rejected),null);
+  assert.equal("ledger" in rejected,false);
+  assert.equal(Object.hasOwn(rejected,"ledger"),false);
+  assert.equal(rejected.ledger,undefined);
+  const y=base();y.headSha="b".repeat(40);y.providers[1].verifiedDispatch=false;
+  y.ledger=rejected.ledger;
+  assert.equal(selectOffline(y).reason,"INVALID_INPUT");
+  const valid=invalidateHead(ledger,"o/r",12,y.headSha,x.now);
+  assert.equal(Array.isArray(valid),true);
+  y.ledger=valid;
+  assert.equal(selectOffline(y).reason,"BLOCKED_NO_DISPATCH");
+ } finally {
+  if(prior)Object.defineProperty(Object.prototype,"ledger",prior);
+  else delete Object.prototype.ledger;
+ }
+});
