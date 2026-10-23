@@ -119,3 +119,20 @@ test("rate-limit event without auditable recovery deadline is invalid",()=>{
  x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED"}];
  assert.equal(selectOffline(x).reason,"INVALID_INPUT");
 });
+
+test("targeted purpose exclusively selects cloud agent",()=>{
+ const x=base();x.purpose="targeted-adversarial";x.providers[2].verifiedDispatch=true;
+ assert.equal(selectOffline(x).provider,"cursor-agent");
+ x.providers[2].verifiedDispatch=false;assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+});
+test("attempt two requires prior terminal failure",()=>{
+ const x=base(),key=JSON.stringify(["o/r",12,SHA]);
+ x.ledger=[{key,provider:"codex",attempt:2,state:"REQUESTED"},{key,provider:"codex",attempt:2,state:"COMPLETED"}];
+ assert.equal(selectOffline(x).reason,"INVALID_LEDGER");
+});
+test("rate limit survives head invalidation",()=>{
+ const x=base(),a=selectOffline(x);
+ x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED",retryAfter:x.now+100}];
+ const y=base();y.headSha="b".repeat(40);y.ledger=invalidateHead(x.ledger,"o/r",12,y.headSha);
+ assert.notEqual(selectOffline(y).provider,a.provider);
+});
