@@ -76,3 +76,21 @@ S-78 owns weighted selection, recorded random draw, timed override, health/coold
 - Demonstrated read-only exact-head dispatch and receipt for each **enabled** provider; otherwise record provider as NOT_CONFIGURED.
 - Independent review of adapter code and a documented S-75 permission boundary.
 - Do not declare S-77 complete merely because a contract document exists.
+
+## Qualification evidence checkpoint — 2026-10-23 (read-only)
+
+The offline contract and evaluator from [PR #120](https://github.com/SethDKelly/TreatFlow/pull/120) are merged at `01b2001fd0b40686b231171d91356080e91fb577`. The receipt evaluator's negative-case suite covers forged caller sources, missing/stale/wrong-head receipts, mismatched provider and purpose, duplicate evidence, accessor/proxy attacks, timestamp ordering, and ambient intrinsic mutation. These tests establish **offline fail-closed behavior only**, not authenticated provider observations.
+
+On [PR #121](https://github.com/SethDKelly/TreatFlow/pull/121), Codex's [review receipt](https://github.com/SethDKelly/TreatFlow/pull/121#issuecomment-6372527888) identifies exact head `b08ac68bad` and reports no major issues; Cursor Cloud Agent's [adversarial review](https://github.com/SethDKelly/TreatFlow/pull/121#issuecomment-6370335186) reports PASS on full head `b08ac68bad683b7dd0222bfbf19260f09b04a12c`. [Exact-head CI](https://github.com/SethDKelly/TreatFlow/actions/runs/39991749268) succeeded. These are read-only **observed review signals**, not proof that the S-77 evaluator can authenticate provider identity, source provenance, or a dispatch/receipt round trip. Cloud Agent remains distinct from unverified Bugbot.
+
+| Acceptance dimension | Current evidence | Remaining gate |
+| --- | --- | --- |
+| Offline contract and adversarial validation | Merged PR #120 and executable negative tests | Preserve fail-closed behavior under subsequent changes |
+| Codex review observation | Exact-head GitHub receipt on PR #121 | Independently authenticate actor/source and provider-specific dispatch, quota, retry and failure semantics |
+| Cursor Cloud Agent observation | Exact-head read-only PASS on PR #121 | Independently authenticate actor/source and provider run/receipt semantics |
+| Cursor Bugbot | **NOT_CONFIGURED / unverified** | Confirm installation, distinct dispatch and identity, findings/completion mapping, or explicitly keep disabled |
+| Cursor Automations | **NOT_CONFIGURED / unverified** | Confirm feature availability and event/permission/audit semantics before any trigger design is activated |
+| Trusted collector and source custody | No S-75-qualified collector | Verify least privilege, provenance, replay/fencing, denied unsafe writes and independent security decision |
+| Operational authority | None from these observations | Separate sponsor authorization for live intake, dispatch, status publication or credential changes |
+
+**S-77 remains Verification/HOLD.** Its merged offline baseline and observed PR #121 reviews do not satisfy the provider-qualification exit gate. [S-78](https://linear.app/s-kelly/issue/S-78) may retain its offline reviewed implementation but cannot exit until S-77 qualification; [S-79](https://linear.app/s-kelly/issue/S-79) remains blocked by S-75, S-77 and S-78. Next source-only step is independent review of this evidence classification and a bounded, non-operational qualification test plan; live activity is out of scope.
