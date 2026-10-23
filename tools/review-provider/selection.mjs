@@ -46,6 +46,7 @@ const hashUpdate=Function.call.bind(createHash("sha256").constructor.prototype.u
 
 function safeCopy(v,seen=new WeakSetCtor(),budget={n:0},depth=0){
  if(++budget.n>2048||depth>32) throw Error("budget");
+ if(typeof v==="function") throw Error("function evidence");
  if(v===null||typeof v!=="object") return v;
  if(isProxy(v)||weakHas(seen,v)) throw Error("proxy or cycle");
  weakAdd(seen,v);
@@ -180,15 +181,17 @@ export function selectOffline(input) {
     selectionMethod:active&&selected.id===override.provider?"BOUNDED_OVERRIDE":"WEIGHTED_DETERMINISTIC",
     eligible:freeze(map(candidates,p=>p.id)),canDispatch:false,canApprove:false,canMerge:false,ledger:next});
 }
+// Rejected invalidations are not empty ledgers: callers must not persist them as successful resets.
+const invalidationHold = reason => freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false});
 export function invalidateHead(input,repository,pr,newHeadSha,now) {
  try {
   const ledger=safeCopy(input);
-  if(!arrayIsArray(ledger)||typeof repository!=="string"||!regexTest(/^[^/]+\/[^/]+$/,repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!regexTest(SHA,newHeadSha)||!validTime(now)) return freeze([]);
+  if(!arrayIsArray(ledger)||typeof repository!=="string"||!regexTest(/^[^/]+\/[^/]+$/,repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!regexTest(SHA,newHeadSha)||!validTime(now)) return invalidationHold("INVALID_INPUT");
   const current=keyOf({repository,pr,headSha:newHeadSha});
-  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
-  if(!validTransitions(ledger)) return freeze([]);
+  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return invalidationHold("INVALID_LEDGER");
+  if(!validTransitions(ledger)) return invalidationHold("INVALID_LEDGER");
   const keep=new SetCtor();
   for(let i=0,items=ledger;i<items.length;i++){const e=items[i];if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>now && parse(e.key)[0]===lower(repository) && parse(e.key)[1]===pr)) setAdd(keep,tuple3(e.key,e.provider,e.attempt));}
   return freeze(map(filter(ledger,e=>e.key===current||setHas(keep,tuple3(e.key,e.provider,e.attempt))),e=>freeze(e)));
- }catch{return freeze([]);}
+ }catch{return invalidationHold("INVALID_INPUT");}
 }
