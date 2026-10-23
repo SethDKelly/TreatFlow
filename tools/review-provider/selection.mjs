@@ -3,6 +3,12 @@ import { createHash } from "node:crypto";
 import { types } from "node:util";
 const isProxy=types.isProxy;
 const descriptors=Object.getOwnPropertyDescriptors;
+const freeze=Object.freeze;
+const filter=Function.call.bind(Array.prototype.filter);
+const map=Function.call.bind(Array.prototype.map);
+const some=Function.call.bind(Array.prototype.some);
+const every=Function.call.bind(Array.prototype.every);
+const lower=Function.call.bind(String.prototype.toLowerCase);
 const prototype=Object.getPrototypeOf;
 function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  if(++budget.n>2048||depth>32) throw Error("budget");
@@ -19,15 +25,17 @@ function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
   Object.defineProperty(out,k,{value:safeCopy(d.value,seen,budget,depth+1),enumerable:true,writable:true,configurable:true});
  }
  if(arr&&out.length!==v.length) throw Error("holes");
+ if(arr&&Object.keys(out).length!==v.length) throw Error("holes");
  seen.delete(v);return out;
 }
-const PROVIDERS = Object.freeze(["codex","cursor-bugbot","cursor-agent"]);
+const PROVIDERS = freeze(["codex","cursor-bugbot","cursor-agent"]);
 const SHA = /^[a-f0-9]{40}$/i;
 const integer = Number.isSafeInteger;
 const own = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
 const hold = (reason,ledger) => Object.freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false,ledger});
-const freeze = value => Object.freeze(value);
-const keyOf = ({repository,pr,headSha}) => JSON.stringify([repository,pr,headSha.toLowerCase()]);
+
+const keyOf = ({repository,pr,headSha}) => JSON.stringify([lower(repository),pr,lower(headSha)]);
+function canonicalKey(k){const v=JSON.parse(k);if(!Array.isArray(v)||v.length!==3||typeof v[0]!=="string"||!/^[^/]+\\/[^/]+$/.test(v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!SHA.test(v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
 const draw = (seed,key) => parseInt(createHash("sha256").update(JSON.stringify([seed,key])).digest("hex").slice(0,13),16)/0x10000000000000;
 const validTime = n => integer(n) && n>=0;
 function validInput(x) {
@@ -36,14 +44,15 @@ function validInput(x) {
       !integer(x.pr) || x.pr<1 || typeof x.headSha!=="string" || !SHA.test(x.headSha) ||
       typeof x.seed!=="string" || !x.seed || !validTime(x.now) ||
       !["codex","cursor-bugbot","cursor-agent","human","unknown"].includes(x.implementer)) return false;
+  if (x.purpose!==undefined && !["standard","targeted-adversarial"].includes(x.purpose)) return false;
   if (x.override && (!PROVIDERS.includes(x.override.provider) || !validTime(x.override.startsAt) ||
       !validTime(x.override.expiresAt) || x.override.expiresAt<=x.override.startsAt ||
       x.override.expiresAt-x.override.startsAt>3600000 || typeof x.override.reason!=="string" || !x.override.reason ||
       typeof x.override.requester!=="string" || !x.override.requester)) return false;
-  return x.providers.every(p=>p && PROVIDERS.includes(p.id) && typeof p.verifiedDispatch==="boolean" &&
+  return every(x.providers,p=>p && PROVIDERS.includes(p.id) && typeof p.verifiedDispatch==="boolean" &&
     typeof p.healthy==="boolean" && validTime(p.cooldownUntil) && integer(p.weight) && p.weight>=1 && p.weight<=100) &&
     new Set(x.providers.map(p=>p.id)).size===x.providers.length &&
-    x.ledger.every(e=>e && typeof e.key==="string" && PROVIDERS.includes(e.provider) &&
+    every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && PROVIDERS.includes(e.provider) &&
       ["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"].includes(e.state) &&
       integer(e.attempt) && e.attempt>=1 && e.attempt<=2);
 }
@@ -55,8 +64,15 @@ export function selectOffline(input) {
     if (!validInput(x)) return hold("INVALID_INPUT",freeze([]));
   } catch { return hold("INVALID_INPUT",freeze([])); }
   const key=keyOf(x);
-  const ledger=freeze(x.ledger.map(e=>freeze({...e})));
-  const existing=ledger.filter(e=>e.key===key);
+  const ledger=freeze(map(x.ledger,e=>freeze({...e})));
+  const existing=filter(ledger,e=>e.key===key);
+  // Validate all historical attempts before allowing their completion to influence rotation.
+  const allOpen=new Map(),allFinished=new Set();
+  for(const e of ledger){const id=JSON.stringify([e.key,e.provider,e.attempt]);
+   if(e.state==="REQUESTED"){if(allOpen.has(id)||allFinished.has(id)) return hold("INVALID_LEDGER",ledger);allOpen.set(id,true);}
+   else if(e.state==="RECEIPT_PENDING"){if(!allOpen.has(id)) return hold("INVALID_LEDGER",ledger);}
+   else {if(!allOpen.has(id)) return hold("INVALID_LEDGER",ledger);allOpen.delete(id);allFinished.add(id);}
+  }
   const open=new Map(),finished=new Set();
   for(const e of existing){
     const id=JSON.stringify([e.provider,e.attempt]);
@@ -71,21 +87,21 @@ export function selectOffline(input) {
     }
   }
   if(open.size) return hold("IDEMPOTENT_PENDING",ledger);
-  if(existing.some(e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
+  if(some(existing,e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
   const failures=existing.filter(e=>["FAILED","TIMED_OUT","RATE_LIMITED"].includes(e.state));
   const used=new Map();
   for(const e of failures) used.set(e.provider,Math.max(used.get(e.provider)??0,e.attempt));
-  const eligible=x.providers.filter(p=>p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now &&
+  const eligible=filter(x.providers,p=>(p.id!=="cursor-agent" || x.purpose==="targeted-adversarial") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now &&
     p.id!==x.implementer && (used.get(p.id)??0)<2);
   if (!eligible.length) return hold("BLOCKED_NO_DISPATCH",ledger);
   // One retry of the same provider, then verified alternate; a failure on attempt 2 excludes it.
   const latest=failures.at(-1);
   let candidates=eligible;
-  if(latest && latest.attempt===1 && true) {
+  if(latest && latest.attempt===1) {
     const retry=eligible.find(p=>p.id===latest.provider);
     if(retry) candidates=[retry];
   } else if(latest) {
-    const alternate=eligible.filter(p=>p.id!==latest.provider);
+    const alternate=filter(eligible,p=>p.id!==latest.provider);
     if(alternate.length) candidates=alternate;
     else return hold("BLOCKED_NO_ALTERNATE",ledger);
   }
@@ -98,9 +114,9 @@ export function selectOffline(input) {
   const history=new Map();
   const completed=ledger.filter(e=>e.state==="COMPLETED");
   const previous=completed.at(-1)?.provider;
-  if(candidates.length>1 && previous){const rotated=candidates.filter(p=>p.id!==previous);if(rotated.length)candidates=rotated;}
+  if(candidates.length>1 && previous){const rotated=filter(candidates,p=>p.id!==previous);if(rotated.length)candidates=rotated;}
   for(const e of completed) history.set(e.provider,(history.get(e.provider)??0)+1);
-  const weights=candidates.map(p=>p.weight/(1+(history.get(p.id)??0)));
+  const weights=map(candidates,p=>p.weight/(1+(history.get(p.id)??0)));
   const total=weights.reduce((a,b)=>a+b,0);
   const sample=draw(x.seed,key);
   let offset=sample*total, selected=candidates.at(-1);
@@ -111,8 +127,14 @@ export function selectOffline(input) {
     selectionMethod:active&&selected.id===override.provider?"BOUNDED_OVERRIDE":"WEIGHTED_DETERMINISTIC",
     eligible:freeze(candidates.map(p=>p.id)),canDispatch:false,canApprove:false,canMerge:false,ledger:next});
 }
-export function invalidateHead(ledger,repository,pr,newHeadSha) {
-  if (!Array.isArray(ledger) || typeof repository!=="string" || !integer(pr) || !SHA.test(newHeadSha)) throw Error("invalid head");
+export function invalidateHead(input,repository,pr,newHeadSha) {
+ try {
+  const ledger=safeCopy(input);
+  if(!Array.isArray(ledger)||typeof repository!=="string"||!/^[^/]+\\/[^/]+$/.test(repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!SHA.test(newHeadSha)) return freeze([]);
   const current=keyOf({repository,pr,headSha:newHeadSha});
-  return freeze(ledger.filter(e=>e.key===current).map(e=>freeze({...e})));
+  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&PROVIDERS.includes(e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"].includes(e.state))) return freeze([]);
+  const keep=new Set();
+  for(const e of ledger) if(e.state==="COMPLETED") keep.add(JSON.stringify([e.key,e.provider,e.attempt]));
+  return freeze(map(filter(ledger,e=>e.key===current||keep.has(JSON.stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
+ }catch{return freeze([]);}
 }
