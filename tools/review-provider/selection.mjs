@@ -2,6 +2,7 @@
 import { createHash } from "node:crypto";
 import { types } from "node:util";
 const isProxy=types.isProxy;
+const MapCtor=Map, SetCtor=Set, WeakSetCtor=WeakSet;
 const descriptors=Object.getOwnPropertyDescriptors;
 const freeze=Object.freeze;
 const create=Object.create;
@@ -13,8 +14,9 @@ const mapSize=Function.call.bind(mapSizeGetter);
 const setSize=Function.call.bind(setSizeGetter);
 const parseInteger=Number.parseInt;
 const slice=Function.call.bind(String.prototype.slice);
-const filter=Function.call.bind(Array.prototype.filter);
-const map=Function.call.bind(Array.prototype.map);
+// Indexed copies avoid mutable Array[Symbol.species] and iterable hooks.
+const map=(items,fn)=>{const out=[];for(let i=0;i<items.length;i++) define(out,i,{value:fn(items[i],i),enumerable:true,writable:true,configurable:true});return out;};
+const filter=(items,fn)=>{const out=[];for(let i=0,j=0;i<items.length;i++) if(fn(items[i],i)) define(out,j++,{value:items[i],enumerable:true,writable:true,configurable:true});return out;};
 const some=Function.call.bind(Array.prototype.some);
 const every=Function.call.bind(Array.prototype.every);
 const lower=Function.call.bind(String.prototype.toLowerCase);
@@ -36,15 +38,16 @@ const mapHas=Function.call.bind(Map.prototype.has);
 const mapDelete=Function.call.bind(Map.prototype.delete);
 const setAdd=Function.call.bind(Set.prototype.add);
 const setHas=Function.call.bind(Set.prototype.has);
+const weakHas=Function.call.bind(WeakSet.prototype.has);
 const weakAdd=Function.call.bind(WeakSet.prototype.add);
 const weakDelete=Function.call.bind(WeakSet.prototype.delete);
 const hashDigest=Function.call.bind(createHash("sha256").constructor.prototype.digest);
 const hashUpdate=Function.call.bind(createHash("sha256").constructor.prototype.update);
 
-function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
+function safeCopy(v,seen=new WeakSetCtor(),budget={n:0},depth=0){
  if(++budget.n>2048||depth>32) throw Error("budget");
  if(v===null||typeof v!=="object") return v;
- if(isProxy(v)||seen.has(v)) throw Error("proxy or cycle");
+ if(isProxy(v)||weakHas(seen,v)) throw Error("proxy or cycle");
  weakAdd(seen,v);
  const arr=arrayIsArray(v);
  if(!arr&&prototype(v)!==Object.prototype&&prototype(v)!==null) throw Error("prototype");
@@ -65,10 +68,18 @@ const integer = Number.isSafeInteger;
 
 const hold = (reason,ledger) => freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false,ledger});
 
-const keyOf = ({repository,pr,headSha}) => stringify([lower(repository),pr,lower(headSha)]);
+// Serialize primitive tuples without Array.prototype.toJSON.
+const tuple2=(a,b)=>"["+stringify(a)+","+stringify(b)+"]";
+const tuple3=(a,b,c)=>"["+stringify(a)+","+stringify(b)+","+stringify(c)+"]";
+const keyOf = ({repository,pr,headSha}) => tuple3(lower(repository),pr,lower(headSha));
 function canonicalKey(k){const v=parse(k);if(!arrayIsArray(v)||v.length!==3||typeof v[0]!=="string"||!regexTest(/^[^/]+\/[^/]+$/,v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!regexTest(SHA,v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
-const draw = (seed,key) => parseInteger(slice(hashDigest(hashUpdate(createHash("sha256"),stringify([seed,key])),"hex"),0,13),16)/0x10000000000000;
+const draw = (seed,key) => parseInteger(slice(hashDigest(hashUpdate(createHash("sha256"),tuple2(seed,key)),"hex"),0,13),16)/0x10000000000000;
 const validTime = n => integer(n) && n>=0;
+function uniqueProviders(providers) {
+ const seen=new SetCtor();
+ for(let i=0;i<providers.length;i++){const id=providers[i].id;if(setHas(seen,id))return false;setAdd(seen,id);}
+ return true;
+}
 function validInput(x) {
   if (!x || prototype(x)!==null || !arrayIsArray(x.providers) || !arrayIsArray(x.ledger) ||
       typeof x.repository!=="string" || !regexTest(/^[^/]+\/[^/]+$/,x.repository) ||
@@ -82,21 +93,21 @@ function validInput(x) {
       typeof x.override.requester!=="string" || !x.override.requester)) return false;
   return every(x.providers,p=>p && includes(PROVIDERS,p.id) && typeof p.verifiedDispatch==="boolean" &&
     typeof p.healthy==="boolean" && validTime(p.cooldownUntil) && integer(p.weight) && p.weight>=1 && p.weight<=100) &&
-    setSize(new Set(map(x.providers,p=>p.id)))===x.providers.length &&
+    uniqueProviders(x.providers) &&
     every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && includes(PROVIDERS,e.provider) &&
       includes(["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"],e.state) &&
       integer(e.attempt) && e.attempt>=1 && e.attempt<=2 &&
       (e.state!=="RATE_LIMITED" || validTime(e.retryAfter)));
 }
 function validTransitions(ledger) {
- const allOpen=new Map(),allFinished=new Set(),firstTerminal=new Map();
- for(let i=0;i<ledger.length;i++){const e=ledger[i],id=stringify([e.key,e.provider,e.attempt]);
+ const allOpen=new MapCtor(),allFinished=new SetCtor(),firstTerminal=new MapCtor();
+ for(let i=0;i<ledger.length;i++){const e=ledger[i],id=tuple3(e.key,e.provider,e.attempt);
   if(e.state==="REQUESTED"){if(mapHas(allOpen,id)||setHas(allFinished,id)) return false;
-   if(e.attempt===2&&!includes(["FAILED","TIMED_OUT","RATE_LIMITED"],mapGet(firstTerminal,stringify([e.key,e.provider])))) return false;
+   if(e.attempt===2&&!includes(["FAILED","TIMED_OUT","RATE_LIMITED"],mapGet(firstTerminal,tuple2(e.key,e.provider)))) return false;
    mapSet(allOpen,id,true);
   } else if(e.state==="RECEIPT_PENDING"){if(!mapHas(allOpen,id)) return false;
   } else {if(!mapHas(allOpen,id)) return false;mapDelete(allOpen,id);setAdd(allFinished,id);
-   if(e.attempt===1) mapSet(firstTerminal,stringify([e.key,e.provider]),e.state);
+   if(e.attempt===1) mapSet(firstTerminal,tuple2(e.key,e.provider),e.state);
   }
  }
  return true;
@@ -112,9 +123,9 @@ export function selectOffline(input) {
   const ledger=freeze(map(x.ledger,e=>freeze({...e})));
   const existing=filter(ledger,e=>e.key===key);
   if(!validTransitions(ledger)) return hold("INVALID_LEDGER",ledger);
-  const open=new Map(),finished=new Set();
+  const open=new MapCtor(),finished=new SetCtor();
   for(let i=0,items=existing;i<items.length;i++){const e=items[i];
-    const id=stringify([e.provider,e.attempt]);
+    const id=tuple2(e.provider,e.attempt);
     if(e.state==="REQUESTED"){
       if(mapHas(open,id)||setHas(finished,id)) return hold("INVALID_LEDGER",ledger);
       mapSet(open,id,true);
@@ -128,10 +139,10 @@ export function selectOffline(input) {
   if(mapSize(open)) return hold("IDEMPOTENT_PENDING",ledger);
   if(some(existing,e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
   const failures=filter(existing,e=>includes(["FAILED","TIMED_OUT","RATE_LIMITED"],e.state));
-  const used=new Map();
+  const used=new MapCtor();
   for(let i=0,items=failures;i<items.length;i++){const e=items[i];mapSet(used,e.provider,max(mapGet(used,e.provider)??0,e.attempt));}
   const limited=filter(ledger,e=>e.state==="RATE_LIMITED" && parse(e.key)[0]===lower(x.repository) && parse(e.key)[1]===x.pr);
-  const recovery=new Map();
+  const recovery=new MapCtor();
   for(let i=0,items=limited;i<items.length;i++){const e=items[i];mapSet(recovery,e.provider,max(mapGet(recovery,e.provider)??0,e.retryAfter));}
   const eligible=filter(x.providers,p=>(x.purpose==="targeted-adversarial" ? p.id==="cursor-agent" : p.id!=="cursor-agent") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now && (mapGet(recovery,p.id)??0)<=x.now &&
     p.id!==x.implementer && (mapGet(used,p.id)??0)<2);
@@ -153,7 +164,7 @@ export function selectOffline(input) {
     const pinned=find(candidates,p=>p.id===override.provider);
     if(pinned) candidates=[pinned]; // override cannot bypass eligibility
   }
-  const history=new Map();
+  const history=new MapCtor();
   const completed=filter(ledger,e=>e.state==="COMPLETED");
   const previous=at(completed,-1)?.provider;
   if(candidates.length>1 && previous){const rotated=filter(candidates,p=>p.id!==previous);if(rotated.length)candidates=rotated;}
@@ -164,7 +175,7 @@ export function selectOffline(input) {
   let offset=sample*total, selected=at(candidates,-1);
   for(let i=0;i<candidates.length;i++) {offset-=weights[i];if(offset<0){selected=candidates[i];break;}}
   const attempt=(mapGet(used,selected.id)??0)+1;
-  const next=map(ledger,e=>e);next.push(freeze({key,provider:selected.id,attempt,state:"REQUESTED"}));freeze(next);
+  const next=map(ledger,e=>e);define(next,next.length,{value:freeze({key,provider:selected.id,attempt,state:"REQUESTED"}),enumerable:true,writable:true,configurable:true});freeze(next);
   return freeze({state:"OFFLINE_SELECTION",provider:selected.id,attempt,key,draw:sample,
     selectionMethod:active&&selected.id===override.provider?"BOUNDED_OVERRIDE":"WEIGHTED_DETERMINISTIC",
     eligible:freeze(map(candidates,p=>p.id)),canDispatch:false,canApprove:false,canMerge:false,ledger:next});
@@ -176,8 +187,8 @@ export function invalidateHead(input,repository,pr,newHeadSha) {
   const current=keyOf({repository,pr,headSha:newHeadSha});
   if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
   if(!validTransitions(ledger)) return freeze([]);
-  const keep=new Set();
-  for(let i=0,items=ledger;i<items.length;i++){const e=items[i];if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>0)) setAdd(keep,stringify([e.key,e.provider,e.attempt]));}
-  return freeze(map(filter(ledger,e=>e.key===current||setHas(keep,stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
+  const keep=new SetCtor();
+  for(let i=0,items=ledger;i<items.length;i++){const e=items[i];if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>0)) setAdd(keep,tuple3(e.key,e.provider,e.attempt));}
+  return freeze(map(filter(ledger,e=>e.key===current||setHas(keep,tuple3(e.key,e.provider,e.attempt))),e=>freeze(e)));
  }catch{return freeze([]);}
 }
