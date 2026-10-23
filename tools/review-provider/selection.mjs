@@ -1,0 +1,206 @@
+// S-78 deterministic OFFLINE decision engine. No provider transport, authenticated receipt or writer.
+import { createHash } from "node:crypto";
+import { types } from "node:util";
+const isProxy=types.isProxy;
+const MapCtor=Map, SetCtor=Set, WeakSetCtor=WeakSet;
+const descriptors=Object.getOwnPropertyDescriptors;
+const freeze=Object.freeze;
+const create=Object.create;
+const hasOwn=Object.hasOwn;
+const max=Math.max;
+const mapSizeGetter=Object.getOwnPropertyDescriptor(Map.prototype,"size").get;
+const setSizeGetter=Object.getOwnPropertyDescriptor(Set.prototype,"size").get;
+const mapSize=Function.call.bind(mapSizeGetter);
+const setSize=Function.call.bind(setSizeGetter);
+const parseInteger=Number.parseInt;
+const slice=Function.call.bind(String.prototype.slice);
+// Indexed copies avoid mutable Array[Symbol.species] and iterable hooks.
+const map=(items,fn)=>{const out=[];for(let i=0;i<items.length;i++) define(out,i,{value:fn(items[i],i),enumerable:true,writable:true,configurable:true});return out;};
+const filter=(items,fn)=>{const out=[];for(let i=0,j=0;i<items.length;i++) if(fn(items[i],i)) define(out,j++,{value:items[i],enumerable:true,writable:true,configurable:true});return out;};
+const some=Function.call.bind(Array.prototype.some);
+const every=Function.call.bind(Array.prototype.every);
+const lower=Function.call.bind(String.prototype.toLowerCase);
+const prototype=Object.getPrototypeOf;
+const arrayIsArray=Array.isArray;
+const includes=Function.call.bind(Array.prototype.includes);
+const find=Function.call.bind(Array.prototype.find);
+const at=Function.call.bind(Array.prototype.at);
+const reduce=Function.call.bind(Array.prototype.reduce);
+const keys=Object.keys;
+const define=Object.defineProperty;
+const ownKeyList=Reflect.ownKeys;
+const stringify=JSON.stringify;
+const parse=JSON.parse;
+const regexTest=Function.call.bind(RegExp.prototype.test);
+const mapGet=Function.call.bind(Map.prototype.get);
+const mapSet=Function.call.bind(Map.prototype.set);
+const mapHas=Function.call.bind(Map.prototype.has);
+const mapDelete=Function.call.bind(Map.prototype.delete);
+const setAdd=Function.call.bind(Set.prototype.add);
+const setHas=Function.call.bind(Set.prototype.has);
+const weakHas=Function.call.bind(WeakSet.prototype.has);
+const weakAdd=Function.call.bind(WeakSet.prototype.add);
+const weakDelete=Function.call.bind(WeakSet.prototype.delete);
+const hashDigest=Function.call.bind(createHash("sha256").constructor.prototype.digest);
+const hashUpdate=Function.call.bind(createHash("sha256").constructor.prototype.update);
+
+function safeCopy(v,seen=new WeakSetCtor(),budget={n:0},depth=0){
+ if(++budget.n>2048||depth>32) throw Error("budget");
+ if(typeof v==="function") throw Error("function evidence");
+ if(v===null||typeof v!=="object") return v;
+ if(isProxy(v)||weakHas(seen,v)) throw Error("proxy or cycle");
+ weakAdd(seen,v);
+ const arr=arrayIsArray(v);
+ if(!arr&&prototype(v)!==Object.prototype&&prototype(v)!==null) throw Error("prototype");
+ const ds=descriptors(v),out=arr?[]:create(null);
+ for(let ki=0,kl=ownKeyList(ds);ki<kl.length;ki++){const k=kl[ki];
+  if(typeof k!=="string"||(arr&&k==="length")) continue;
+  const d=ds[k];if(!hasOwn(d,"value")||!d.enumerable) throw Error("accessor");
+  if(arr&&!regexTest(/^(0|[1-9]\d*)$/,k)) throw Error("array key");
+  define(out,k,{value:safeCopy(d.value,seen,budget,depth+1),enumerable:true,writable:true,configurable:true});
+ }
+ if(arr&&out.length!==v.length) throw Error("holes");
+ if(arr&&keys(out).length!==v.length) throw Error("holes");
+ weakDelete(seen,v);return out;
+}
+const PROVIDERS = freeze(["codex","cursor-bugbot","cursor-agent"]);
+const SHA = /^[a-f0-9]{40}$/i;
+const integer = Number.isSafeInteger;
+
+const hold = (reason,ledger) => freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false,ledger});
+
+// Serialize primitive tuples without Array.prototype.toJSON.
+const tuple2=(a,b)=>"["+stringify(a)+","+stringify(b)+"]";
+const tuple3=(a,b,c)=>"["+stringify(a)+","+stringify(b)+","+stringify(c)+"]";
+const keyOf = ({repository,pr,headSha}) => tuple3(lower(repository),pr,lower(headSha));
+function canonicalKey(k){const v=parse(k);if(!arrayIsArray(v)||v.length!==3||typeof v[0]!=="string"||!regexTest(/^[^/]+\/[^/]+$/,v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!regexTest(SHA,v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
+const draw = (seed,key) => parseInteger(slice(hashDigest(hashUpdate(createHash("sha256"),tuple2(seed,key)),"hex"),0,13),16)/0x10000000000000;
+const validTime = n => integer(n) && n>=0;
+function uniqueProviders(providers) {
+ const seen=new SetCtor();
+ for(let i=0;i<providers.length;i++){const id=providers[i].id;if(setHas(seen,id))return false;setAdd(seen,id);}
+ return true;
+}
+function validInput(x) {
+  if (!x || prototype(x)!==null || !arrayIsArray(x.providers) || !arrayIsArray(x.ledger) ||
+      typeof x.repository!=="string" || !regexTest(/^[^/]+\/[^/]+$/,x.repository) ||
+      !integer(x.pr) || x.pr<1 || typeof x.headSha!=="string" || !regexTest(SHA,x.headSha) ||
+      typeof x.seed!=="string" || !x.seed || !validTime(x.now) ||
+      !includes(["codex","cursor-bugbot","cursor-agent","human","unknown"],x.implementer)) return false;
+  if (x.purpose!==undefined && !includes(["standard","targeted-adversarial"],x.purpose)) return false;
+  if (x.override && (!includes(PROVIDERS,x.override.provider) || !validTime(x.override.startsAt) ||
+      !validTime(x.override.expiresAt) || x.override.expiresAt<=x.override.startsAt ||
+      x.override.expiresAt-x.override.startsAt>3600000 || typeof x.override.reason!=="string" || !x.override.reason ||
+      typeof x.override.requester!=="string" || !x.override.requester)) return false;
+  return every(x.providers,p=>p && includes(PROVIDERS,p.id) && typeof p.verifiedDispatch==="boolean" &&
+    typeof p.healthy==="boolean" && validTime(p.cooldownUntil) && integer(p.weight) && p.weight>=1 && p.weight<=100) &&
+    uniqueProviders(x.providers) &&
+    every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && includes(PROVIDERS,e.provider) &&
+      includes(["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"],e.state) &&
+      integer(e.attempt) && e.attempt>=1 && e.attempt<=2 &&
+      (e.state!=="RATE_LIMITED" || validTime(e.retryAfter)));
+}
+function validTransitions(ledger) {
+ const allOpen=new MapCtor(),allFinished=new SetCtor(),firstTerminal=new MapCtor();
+ for(let i=0;i<ledger.length;i++){const e=ledger[i],id=tuple3(e.key,e.provider,e.attempt);
+  if(e.state==="REQUESTED"){if(mapHas(allOpen,id)||setHas(allFinished,id)) return false;
+   if(e.attempt===2&&!includes(["FAILED","TIMED_OUT","RATE_LIMITED"],mapGet(firstTerminal,tuple2(e.key,e.provider)))) return false;
+   mapSet(allOpen,id,true);
+  } else if(e.state==="RECEIPT_PENDING"){if(!mapHas(allOpen,id)) return false;
+  } else {if(!mapHas(allOpen,id)) return false;mapDelete(allOpen,id);setAdd(allFinished,id);
+   if(e.attempt===1) mapSet(firstTerminal,tuple2(e.key,e.provider),e.state);
+  }
+ }
+ return true;
+}
+export function selectOffline(input) {
+  // JSON-only data is required; never execute arbitrary callbacks from evidence.
+  let x;
+  try {
+    x=safeCopy(input);
+    if (!validInput(x)) return hold("INVALID_INPUT",freeze([]));
+  } catch { return hold("INVALID_INPUT",freeze([])); }
+  const key=keyOf(x);
+  const ledger=freeze(map(x.ledger,e=>freeze({...e})));
+  const existing=filter(ledger,e=>e.key===key);
+  if(!validTransitions(ledger)) return hold("INVALID_LEDGER",ledger);
+  const open=new MapCtor(),finished=new SetCtor();
+  for(let i=0,items=existing;i<items.length;i++){const e=items[i];
+    const id=tuple2(e.provider,e.attempt);
+    if(e.state==="REQUESTED"){
+      if(mapHas(open,id)||setHas(finished,id)) return hold("INVALID_LEDGER",ledger);
+      mapSet(open,id,true);
+    } else if(e.state==="RECEIPT_PENDING"){
+      if(!mapHas(open,id)) return hold("INVALID_LEDGER",ledger);
+    } else {
+      if(!mapHas(open,id)) return hold("INVALID_LEDGER",ledger);
+      mapDelete(open,id);setAdd(finished,id);
+    }
+  }
+  if(mapSize(open)) return hold("IDEMPOTENT_PENDING",ledger);
+  if(some(existing,e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
+  const failures=filter(existing,e=>includes(["FAILED","TIMED_OUT","RATE_LIMITED"],e.state));
+  const used=new MapCtor();
+  for(let i=0,items=failures;i<items.length;i++){const e=items[i];mapSet(used,e.provider,max(mapGet(used,e.provider)??0,e.attempt));}
+  const limited=filter(ledger,e=>e.state==="RATE_LIMITED" && parse(e.key)[0]===lower(x.repository) && parse(e.key)[1]===x.pr);
+  const recovery=new MapCtor();
+  for(let i=0,items=limited;i<items.length;i++){const e=items[i];mapSet(recovery,e.provider,max(mapGet(recovery,e.provider)??0,e.retryAfter));}
+  const eligible=filter(x.providers,p=>(x.purpose==="targeted-adversarial" ? p.id==="cursor-agent" : p.id!=="cursor-agent") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now && (mapGet(recovery,p.id)??0)<=x.now &&
+    p.id!==x.implementer && (mapGet(used,p.id)??0)<2);
+  if (!eligible.length) return hold("BLOCKED_NO_DISPATCH",ledger);
+  // One retry of the same provider, then verified alternate; a failure on attempt 2 excludes it.
+  const latest=at(failures,-1);
+  let candidates=eligible;
+  if(latest && latest.attempt===1 && (latest.state!=="RATE_LIMITED" || latest.retryAfter<=x.now)) {
+    const retry=find(eligible,p=>p.id===latest.provider);
+    if(retry) candidates=[retry];
+  } else if(latest) {
+    const alternate=filter(eligible,p=>p.id!==latest.provider);
+    if(alternate.length) candidates=alternate;
+    else return hold("BLOCKED_NO_ALTERNATE",ledger);
+  }
+  const override=x.override;
+  const active=override && x.now>=override.startsAt && x.now<override.expiresAt;
+  if(active) {
+    const pinned=find(candidates,p=>p.id===override.provider);
+    if(pinned) candidates=[pinned]; // override cannot bypass eligibility
+  }
+  const history=new MapCtor();
+  const completed=filter(ledger,e=>e.state==="COMPLETED");
+  const previous=at(completed,-1)?.provider;
+  if(candidates.length>1 && previous){const rotated=filter(candidates,p=>p.id!==previous);if(rotated.length)candidates=rotated;}
+  for(let i=0,items=completed;i<items.length;i++){const e=items[i];mapSet(history,e.provider,(mapGet(history,e.provider)??0)+1);}
+  const weights=map(candidates,p=>p.weight/(1+(mapGet(history,p.id)??0)));
+  const total=reduce(weights,(a,b)=>a+b,0);
+  const sample=draw(x.seed,key);
+  let offset=sample*total, selected=at(candidates,-1);
+  for(let i=0;i<candidates.length;i++) {offset-=weights[i];if(offset<0){selected=candidates[i];break;}}
+  const attempt=(mapGet(used,selected.id)??0)+1;
+  const next=map(ledger,e=>e);define(next,next.length,{value:freeze({key,provider:selected.id,attempt,state:"REQUESTED"}),enumerable:true,writable:true,configurable:true});freeze(next);
+  return freeze({state:"OFFLINE_SELECTION",provider:selected.id,attempt,key,draw:sample,
+    selectionMethod:active&&selected.id===override.provider?"BOUNDED_OVERRIDE":"WEIGHTED_DETERMINISTIC",
+    eligible:freeze(map(candidates,p=>p.id)),canDispatch:false,canApprove:false,canMerge:false,ledger:next});
+}
+// Rejected invalidations are not empty ledgers: callers must not persist them as successful resets.
+const invalidationHold = reason => {
+ // Null prototype prevents a rejected invalidation from inheriting a forged ledger.
+ const result=create(null);
+ result.state="HOLD";
+ result.reason=reason;
+ result.canDispatch=false;
+ result.canApprove=false;
+ result.canMerge=false;
+ return freeze(result);
+};
+export function invalidateHead(input,repository,pr,newHeadSha,now) {
+ try {
+  const ledger=safeCopy(input);
+  if(!arrayIsArray(ledger)||typeof repository!=="string"||!regexTest(/^[^/]+\/[^/]+$/,repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!regexTest(SHA,newHeadSha)||!validTime(now)) return invalidationHold("INVALID_INPUT");
+  const current=keyOf({repository,pr,headSha:newHeadSha});
+  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return invalidationHold("INVALID_LEDGER");
+  if(!validTransitions(ledger)) return invalidationHold("INVALID_LEDGER");
+  const keep=new SetCtor();
+  for(let i=0,items=ledger;i<items.length;i++){const e=items[i];if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>now && parse(e.key)[0]===lower(repository) && parse(e.key)[1]===pr)) setAdd(keep,tuple3(e.key,e.provider,e.attempt));}
+  return freeze(map(filter(ledger,e=>e.key===current||setHas(keep,tuple3(e.key,e.provider,e.attempt))),e=>freeze(e)));
+ }catch{return invalidationHold("INVALID_INPUT");}
+}
