@@ -79,6 +79,19 @@ function validInput(x) {
       integer(e.attempt) && e.attempt>=1 && e.attempt<=2 &&
       (e.state!=="RATE_LIMITED" || validTime(e.retryAfter)));
 }
+function validTransitions(ledger) {
+ const allOpen=new Map(),allFinished=new Set(),firstTerminal=new Map();
+ for(let i=0;i<ledger.length;i++){const e=ledger[i],id=stringify([e.key,e.provider,e.attempt]);
+  if(e.state==="REQUESTED"){if(mapHas(allOpen,id)||setHas(allFinished,id)) return false;
+   if(e.attempt===2&&!includes(["FAILED","TIMED_OUT","RATE_LIMITED"],mapGet(firstTerminal,stringify([e.key,e.provider])))) return false;
+   mapSet(allOpen,id,true);
+  } else if(e.state==="RECEIPT_PENDING"){if(!mapHas(allOpen,id)) return false;
+  } else {if(!mapHas(allOpen,id)) return false;mapDelete(allOpen,id);setAdd(allFinished,id);
+   if(e.attempt===1) mapSet(firstTerminal,stringify([e.key,e.provider]),e.state);
+  }
+ }
+ return true;
+}
 export function selectOffline(input) {
   // JSON-only data is required; never execute arbitrary callbacks from evidence.
   let x;
@@ -89,13 +102,7 @@ export function selectOffline(input) {
   const key=keyOf(x);
   const ledger=freeze(map(x.ledger,e=>freeze({...e})));
   const existing=filter(ledger,e=>e.key===key);
-  // Validate all historical attempts before allowing their completion to influence rotation.
-  const allOpen=new Map(),allFinished=new Set(),firstTerminal=new Map();
-  for(let i=0,items=ledger;i<items.length;i++){const e=items[i];const id=stringify([e.key,e.provider,e.attempt]);
-   if(e.state==="REQUESTED"){if(mapHas(allOpen,id)||setHas(allFinished,id)) return hold("INVALID_LEDGER",ledger);if(e.attempt===2&&!includes(["FAILED","TIMED_OUT","RATE_LIMITED"],mapGet(firstTerminal,stringify([e.key,e.provider])))) return hold("INVALID_LEDGER",ledger);mapSet(allOpen,id,true);}
-   else if(e.state==="RECEIPT_PENDING"){if(!mapHas(allOpen,id)) return hold("INVALID_LEDGER",ledger);}
-   else {if(!mapHas(allOpen,id)) return hold("INVALID_LEDGER",ledger);mapDelete(allOpen,id);setAdd(allFinished,id);if(e.attempt===1) mapSet(firstTerminal,stringify([e.key,e.provider]),e.state);}
-  }
+  if(!validTransitions(ledger)) return hold("INVALID_LEDGER",ledger);
   const open=new Map(),finished=new Set();
   for(let i=0,items=existing;i<items.length;i++){const e=items[i];
     const id=stringify([e.provider,e.attempt]);
@@ -159,6 +166,7 @@ export function invalidateHead(input,repository,pr,newHeadSha) {
   if(!arrayIsArray(ledger)||typeof repository!=="string"||!regexTest(/^[^/]+\/[^/]+$/,repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!regexTest(SHA,newHeadSha)) return freeze([]);
   const current=keyOf({repository,pr,headSha:newHeadSha});
   if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
+  if(!validTransitions(ledger)) return freeze([]);
   const keep=new Set();
   for(let i=0,items=ledger;i<items.length;i++){const e=items[i];if(e.state==="COMPLETED" || (e.state==="RATE_LIMITED" && e.retryAfter>0)) setAdd(keep,stringify([e.key,e.provider,e.attempt]));}
   return freeze(map(filter(ledger,e=>e.key===current||setHas(keep,stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
