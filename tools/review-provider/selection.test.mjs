@@ -87,7 +87,7 @@ test("head invalidation retains validated completed cycle and safely rejects get
  const next=base();next.headSha="b".repeat(40);next.ledger=kept;
  assert.equal(selectOffline(next).provider,"cursor-bugbot");
  let invoked=0;const hostile=[{get key(){invoked++;return a.key;}}];
- assert.deepEqual(invalidateHead(hostile,"o/r",12,SHA,100000),[]);
+ assert.equal(invalidateHead(hostile,"o/r",12,SHA,100000).reason,"INVALID_INPUT");
  assert.equal(invoked,0);
 });
 test("repository case normalizes idempotency",()=>{
@@ -141,13 +141,13 @@ test("head invalidation rejects orphan completed and rate-limited events",()=>{
  const key=JSON.stringify(["o/r",12,SHA]);
  for(const state of ["COMPLETED","RATE_LIMITED"]){
   const event={key,provider:"codex",attempt:1,state,...(state==="RATE_LIMITED"?{retryAfter:100100}:{})};
-  assert.deepEqual(invalidateHead([event],"o/r",12,"b".repeat(40),100000),[]);
+  assert.equal(invalidateHead([event],"o/r",12,"b".repeat(40),100000).reason,"INVALID_LEDGER");
  }
 });
 test("head invalidation rejects second attempt without first failure",()=>{
  const key=JSON.stringify(["o/r",12,SHA]);
  const events=[{key,provider:"codex",attempt:2,state:"REQUESTED"},{key,provider:"codex",attempt:2,state:"COMPLETED"}];
- assert.deepEqual(invalidateHead(events,"o/r",12,"b".repeat(40),100000),[]);
+ assert.equal(invalidateHead(events,"o/r",12,"b".repeat(40),100000).reason,"INVALID_LEDGER");
 });
 
 test("mutated Object.create cannot inject an unverified provider",()=>{
@@ -262,5 +262,47 @@ test("head invalidation drops expired and unrelated rate-limit history",()=>{
  assert.equal(kept.length,2);
  assert.equal(kept[0].provider,"cursor-bugbot");
  assert.equal(kept[1].state,"RATE_LIMITED");
- assert.deepEqual(invalidateHead(ledger,"o/r",12,"b".repeat(40)),[]);
+ assert.equal(invalidateHead(ledger,"o/r",12,"b".repeat(40)).reason,"INVALID_INPUT");
+});
+
+test("function-valued evidence is rejected without executing getters",()=>{
+ let calls=0;
+ const hostile=function(){};
+ Object.defineProperty(hostile,"id",{enumerable:true,get(){calls++;return "codex";}});
+ Object.assign(hostile,{verifiedDispatch:true,healthy:true,cooldownUntil:0,weight:2});
+ const x=base();x.providers[0]=hostile;
+ assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+ assert.equal(calls,0);
+ const y=base();y.ledger=[hostile];
+ assert.equal(selectOffline(y).reason,"INVALID_INPUT");
+ const z=base();z.override=hostile;
+ assert.equal(selectOffline(z).reason,"INVALID_INPUT");
+ const nested=base();nested.extra={callback:hostile};
+ assert.equal(selectOffline(nested).reason,"INVALID_INPUT");
+ assert.equal(calls,0);
+ assert.equal(invalidateHead([hostile],"o/r",12,SHA,100000).reason,"INVALID_INPUT");
+ assert.equal(calls,0);
+});
+
+test("invalid head invalidation is distinguishable from successful empty history",()=>{
+ const nextHead="b".repeat(40),x=base(),first=selectOffline(x);
+ const validEmpty=invalidateHead(first.ledger,"o/r",12,nextHead,x.now);
+ assert.deepEqual(validEmpty,[]);
+ assert.equal(Object.isFrozen(validEmpty),true);
+ const invalid=invalidateHead(first.ledger,"o/r",12,nextHead);
+ assert.equal(invalid.state,"HOLD");
+ assert.equal(invalid.reason,"INVALID_INPUT");
+ assert.equal(invalid.canDispatch,false);
+ assert.equal(invalid.canApprove,false);
+ assert.equal(invalid.canMerge,false);
+ assert.equal("ledger" in invalid,false);
+ const next=base();next.headSha=nextHead;next.ledger=invalid;
+ assert.equal(selectOffline(next).reason,"INVALID_INPUT");
+ next.ledger=invalid.ledger;
+ assert.equal(selectOffline(next).reason,"INVALID_INPUT");
+ const bad=[{...first.ledger[0],state:"COMPLETED"}];
+ const rejected=invalidateHead(bad,"o/r",12,nextHead,x.now);
+ assert.equal(rejected.state,"HOLD");
+ assert.equal(rejected.reason,"INVALID_LEDGER");
+ assert.equal("ledger" in rejected,false);
 });
