@@ -15,7 +15,7 @@ function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  for(const k of Reflect.ownKeys(ds)){
   if(typeof k!=="string"||(arr&&k==="length")) continue;
   const d=ds[k];if(!Object.hasOwn(d,"value")||!d.enumerable) throw Error("accessor");
-  if(arr&&!/^(0|[1-9]\\d*)$/.test(k)) throw Error("array key");
+  if(arr&&!/^(0|[1-9]\d*)$/.test(k)) throw Error("array key");
   Object.defineProperty(out,k,{value:safeCopy(d.value,seen,budget,depth+1),enumerable:true,writable:true,configurable:true});
  }
  if(arr&&out.length!==v.length) throw Error("holes");
