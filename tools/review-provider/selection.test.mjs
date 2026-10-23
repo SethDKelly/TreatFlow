@@ -50,3 +50,23 @@ test("invalid and hostile inputs hold without effects",()=>{
   const y=base();y.providers.push({...y.providers[0]});assert.equal(selectOffline(y).reason,"INVALID_INPUT");
   assert.equal(selectOffline(new Proxy(base(),{get(){throw Error("trap")}})).reason,"INVALID_INPUT");
 });
+
+test("accessor evidence rejected without getter invocation",()=>{
+ let invoked=0;const x=base();Object.defineProperty(x,"seed",{enumerable:true,get(){invoked++;return "evil";}});
+ assert.equal(selectOffline(x).reason,"INVALID_INPUT");assert.equal(invoked,0);
+});
+test("malformed trailing failure cannot hide pending attempt",()=>{
+ const x=base(),a=selectOffline(x);x.ledger=[...a.ledger,{key:a.key,provider:"cursor-agent",attempt:1,state:"FAILED"}];
+ assert.equal(selectOffline(x).reason,"INVALID_LEDGER");
+});
+test("rate-limit recovery retries once after cooldown",()=>{
+ const x=base();x.providers[1].verifiedDispatch=false;
+ const a=selectOffline(x);x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED"}];
+ x.providers[0].cooldownUntil=x.now+1;assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+ x.now+=2;const retry=selectOffline(x);assert.equal(retry.provider,"codex");assert.equal(retry.attempt,2);
+});
+test("completed cycle excludes previous reviewer when alternative exists",()=>{
+ const x=base();const oldKey=JSON.stringify(["o/r",11,SHA]);
+ x.ledger=[{key:oldKey,provider:"codex",attempt:1,state:"REQUESTED"},{key:oldKey,provider:"codex",attempt:1,state:"COMPLETED"}];
+ assert.equal(selectOffline(x).provider,"cursor-bugbot");
+});
