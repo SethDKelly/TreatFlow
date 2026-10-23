@@ -89,13 +89,13 @@ export function selectOffline(input) {
   const existing=filter(ledger,e=>e.key===key);
   // Validate all historical attempts before allowing their completion to influence rotation.
   const allOpen=new Map(),allFinished=new Set(),firstTerminal=new Map();
-  for(let i=0,items=ledger;i<items.length;i++){const id=stringify([e.key,e.provider,e.attempt]);
+  for(let i=0,items=ledger;i<items.length;i++){const e=items[i];const id=stringify([e.key,e.provider,e.attempt]);
    if(e.state==="REQUESTED"){if(mapHas(allOpen,id)||setHas(allFinished,id)) return hold("INVALID_LEDGER",ledger);if(e.attempt===2&&!includes(["FAILED","TIMED_OUT","RATE_LIMITED"],mapGet(firstTerminal,stringify([e.key,e.provider])))) return hold("INVALID_LEDGER",ledger);mapSet(allOpen,id,true);}
    else if(e.state==="RECEIPT_PENDING"){if(!mapHas(allOpen,id)) return hold("INVALID_LEDGER",ledger);}
    else {if(!mapHas(allOpen,id)) return hold("INVALID_LEDGER",ledger);mapDelete(allOpen,id);setAdd(allFinished,id);if(e.attempt===1) mapSet(firstTerminal,stringify([e.key,e.provider]),e.state);}
   }
   const open=new Map(),finished=new Set();
-  for(let i=0,items=existing;i<items.length;i++){
+  for(let i=0,items=existing;i<items.length;i++){const e=items[i];
     const id=stringify([e.provider,e.attempt]);
     if(e.state==="REQUESTED"){
       if(mapHas(open,id)||setHas(finished,id)) return hold("INVALID_LEDGER",ledger);
@@ -111,10 +111,10 @@ export function selectOffline(input) {
   if(some(existing,e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
   const failures=filter(existing,e=>includes(["FAILED","TIMED_OUT","RATE_LIMITED"],e.state));
   const used=new Map();
-  for(let i=0,items=failures;i<items.length;i++) mapSet(used,e.provider,Math.max(mapGet(used,e.provider)??0,e.attempt));
+  for(let i=0,items=failures;i<items.length;i++){const e=items[i];mapSet(used,e.provider,Math.max(mapGet(used,e.provider)??0,e.attempt));}
   const limited=filter(ledger,e=>e.state==="RATE_LIMITED" && parse(e.key)[0]===lower(x.repository) && parse(e.key)[1]===x.pr);
   const recovery=new Map();
-  for(let i=0,items=limited;i<items.length;i++) mapSet(recovery,e.provider,Math.max(mapGet(recovery,e.provider)??0,e.retryAfter));
+  for(let i=0,items=limited;i<items.length;i++){const e=items[i];mapSet(recovery,e.provider,Math.max(mapGet(recovery,e.provider)??0,e.retryAfter));}
   const eligible=filter(x.providers,p=>(x.purpose==="targeted-adversarial" ? p.id==="cursor-agent" : p.id!=="cursor-agent") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now && (mapGet(recovery,p.id)??0)<=x.now &&
     p.id!==x.implementer && (mapGet(used,p.id)??0)<2);
   if (!eligible.length) return hold("BLOCKED_NO_DISPATCH",ledger);
@@ -139,7 +139,7 @@ export function selectOffline(input) {
   const completed=filter(ledger,e=>e.state==="COMPLETED");
   const previous=at(completed,-1)?.provider;
   if(candidates.length>1 && previous){const rotated=filter(candidates,p=>p.id!==previous);if(rotated.length)candidates=rotated;}
-  for(let i=0,items=completed;i<items.length;i++) mapSet(history,e.provider,(mapGet(history,e.provider)??0)+1);
+  for(let i=0,items=completed;i<items.length;i++){const e=items[i];mapSet(history,e.provider,(mapGet(history,e.provider)??0)+1);}
   const weights=map(candidates,p=>p.weight/(1+(mapGet(history,p.id)??0)));
   const total=reduce(weights,(a,b)=>a+b,0);
   const sample=draw(x.seed,key);
