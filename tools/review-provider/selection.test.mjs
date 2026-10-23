@@ -206,3 +206,47 @@ test("poisoned array iterator cannot omit validated ledger history",()=>{
   assert.equal(next.ledger[2].attempt,2);
  } finally {Array.prototype[Symbol.iterator]=iterator;}
 });
+
+test("array species replacement cannot forge eligibility or throw from selection",()=>{
+ const x=base(),expected=selectOffline(x);
+ const prior=Object.getOwnPropertyDescriptor(Array,Symbol.species);
+ let actual;
+ try {
+  Object.defineProperty(Array,Symbol.species,{configurable:true,get(){throw Error("poisoned species");}});
+  actual=selectOffline(x);
+ } finally {Object.defineProperty(Array,Symbol.species,prior);}
+ assert.deepEqual(actual,expected);
+});
+test("poisoned array iterator cannot forge duplicate-provider uniqueness",()=>{
+ const x=base();x.providers.push({...x.providers[1]});
+ const original=Array.prototype[Symbol.iterator];
+ let actual;
+ try {
+  Array.prototype[Symbol.iterator]=function*(){for(let i=0;i<this.length;i++)yield "forged-unique-"+i;};
+  actual=selectOffline(x);
+ } finally {Array.prototype[Symbol.iterator]=original;}
+ assert.equal(actual.state,"HOLD");
+ assert.equal(actual.reason,"INVALID_INPUT");
+});
+test("mutated Map and Set globals cannot escape fail-closed selection",()=>{
+ const x=base(),expected=selectOffline(x),mapCtor=globalThis.Map,setCtor=globalThis.Set;
+ let actual;
+ try {
+  globalThis.Map=class {constructor(){throw Error("map-ctor");}};
+  globalThis.Set=class {constructor(){throw Error("set-ctor");}};
+  actual=selectOffline(x);
+ } finally {globalThis.Map=mapCtor;globalThis.Set=setCtor;}
+ assert.deepEqual(actual,expected);
+});
+test("Array.prototype.toJSON cannot forge repository identity or draw",()=>{
+ const x=base(),expected=selectOffline(x),prior=Object.getOwnPropertyDescriptor(Array.prototype,"toJSON");
+ let actual;
+ try {
+  Object.defineProperty(Array.prototype,"toJSON",{configurable:true,value(){return ["evil/repo",99,"b".repeat(40)];}});
+  actual=selectOffline(x);
+ } finally {
+  if(prior)Object.defineProperty(Array.prototype,"toJSON",prior);
+  else delete Array.prototype.toJSON;
+ }
+ assert.deepEqual(actual,expected);
+});
