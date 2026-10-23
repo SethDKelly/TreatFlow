@@ -40,7 +40,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 ## Engineering design exit and next readiness gate
 
 - [Phase 013 AWS architecture and MVP program](phases/013/) — [013-G conditional selection](phases/013/013-g-architecture-mvp-delivery-decision.md) and merged [013-H evidence-calibrated exit](phases/013/013-h-independent-exit-authorization.md).
-- [Phase 014 foundation](phases/014/) — 014-A inventory and Track L L01–L04 merged; [014-B-C01 backbone security / deployment authority](phases/014/014-b-c01-backbone-security-deployment-authority.md) opens Track C (narrow TreatFlow OIDC + unprivileged CI). C02+ application AWS resources, DNS and real data remain separately unauthorized.
+- [Phase 014 foundation](phases/014/) — Track L complete; [014-B-C01](phases/014/014-b-c01-backbone-security-deployment-authority.md) applied (A-01 PASS; C01-K needs live assume, not sims alone); [014-B-C02](phases/014/014-b-c02-aws-dev-iac-access-gate.md) entry for selections + template-only CDK diff. App AWS deploy, DNS and real data remain separately unauthorized.
 - [Phase 016 Observation behavior](phases/016/) — local 016-B/C seven-action surface merged; [016-D](phases/016/016-d-factual-correction-product-decision.md) records Option B as bounded synthetic deferral (visible noncorrection before hosted 018; second report ≠ correction; revisit toward Option A on T1/T2).
 
 ## Governance and limits

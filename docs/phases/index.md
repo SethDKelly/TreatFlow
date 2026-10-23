@@ -32,7 +32,7 @@ Phase 012 is a Base transition phase, not part of Jackson's concept-design metho
 These are **TreatFlow-specific engineering phases**, not Base's refined 000–012 template or official Daniel Jackson phases:
 
 - [013 — AWS Engineering Architecture & MVP Program Design](013/) — A–H merged; [013-H independent exit](013/013-h-independent-exit-authorization.md) grants design readiness but holds AWS/implementation execution.
-- [014 — AWS Foundation & Environment Readiness](014/) — [014-A](014/014-a-entry-inventory.md) and Track L L01–L04 merged; [014-B-C01](014/014-b-c01-backbone-security-deployment-authority.md) authorized Track C entry (OIDC/CI authority); C02+ paid app resources remain unauthorized.
+- [014 — AWS Foundation & Environment Readiness](014/) — Track L complete; [014-B-C01](014/014-b-c01-backbone-security-deployment-authority.md) applied; [014-B-C02](014/014-b-c02-aws-dev-iac-access-gate.md) entry for IaC/access selections; paid app deploy remains unauthorized.
 - [016 — Observation-first behavior and bounded correction](016/) — local 016-B/C seven-action Observation surface merged; [016-D](016/016-d-factual-correction-product-decision.md) records Option B bounded deferral (G-05 closed for synthetic path; Option A eventual); no Revision or cloud authorization from this index alone.
 
 [The conditional MVP roadmap](013/mvp-roadmap.md) defines the later 015–019 implementation and qualification packages. No phase index is deployment authority.

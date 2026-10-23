@@ -1,7 +1,7 @@
 ---
 type: Engineering Implementation Package
 title: TreatFlow 014-B-C01 — Backbone Security and Deployment Authority
-description: Track C first package — narrow TreatFlow OIDC deploy principal, shared-vs-app IAM boundary, CDK bootstrap ownership, untrusted-PR denial and unprivileged CI; no application AWS resources. Exit HOLD until A-01 and permission-isolation negative tests verify live.
+description: Track C first package exit evidence — narrow TreatFlow OIDC deploy principal, main-ref-only bootstrap trust, unprivileged CI; C01-K requires live assumed-role verification (policy sims are supporting only).
 tags: [treatflow, phase-014, track-c, c01, aws-backbone, oidc, iam, ci, authorization]
 ---
 
@@ -9,68 +9,49 @@ tags: [treatflow, phase-014, track-c, c01, aws-backbone, oidc, iam, ci, authoriz
 
 ## Purpose and authorization
 
-**STATUS: SPONSOR-AUTHORIZED PACKAGE IN PROGRESS. EXIT HOLD — A-01 and C01-02 require live independent verification after aws-backbone merge/apply. NOT AUTHORIZATION FOR 014-B-C02, CDK BOOTSTRAP, OR PAID AWS APPLICATION RESOURCES.**
+**STATUS: APPLY EVIDENCE RECORDED. A-01 PASS (live trust). C01-K HOLD — requires live assumed-role verification (policy simulations are supporting only). NOT AUTHORIZATION FOR 014-B-C02 DEPLOY, CDK BOOTSTRAP, OR PAID AWS APPLICATION RESOURCES.**
 
-Opens Track C per [014-B](014-b-local-first-implementation-plan.md) and addresses [014-A](014-a-entry-inventory.md) work for TreatFlow. **A-01 remains a blocking gate** until preventive privileged-PR controls are independently verified live (014-A: remediate before trust expansion). **A-02/A-03 remain open for TreatFlow** until permission isolation (not merely OIDC entry) and negative tests pass. **A-04/A-05** and live drift remain **HOLD for C02**. **A-09** closed by [016-D Option B](../016/016-d-factual-correction-product-decision.md). **A-08/A-10** remain later gates.
+Opens Track C per [014-B](014-b-local-first-implementation-plan.md). Companion: private `aws-backbone` `docs/treatflow-014-b-c01.md`.
 
-**Companion private record:** `aws-backbone` `docs/treatflow-014-b-c01.md` (ARNs, policy detail, negative-test commands — not duplicated here).
+**Apply baseline:** aws-backbone `2d4eb9d1aa009296bb97387e6fa859ea22a8e330` — [Terraform Apply success](https://github.com/SethDKelly/aws-backbone/actions/runs/39376871791) (verify step green).
 
 ## Deliverables
 
-| ID | Deliverable | Owner | Evidence |
-|---|---|---|---|
-| **C01-01** | Dedicated TreatFlow deploy role (not shared `dev-github-deploy`) | aws-backbone Terraform | Role `treatflow-dev-github-deploy`; OIDC **exact** `environment:dev` |
-| **C01-02** | Shared-vs-app **permission** boundary (beyond OIDC entry) | aws-backbone | No PowerUser; app prefix excludes deploy role; forced permissions boundary on created roles; bounded Attach/PassRole; **negative tests required** before PASS |
-| **C01-03** | CDK bootstrap ownership | Documented decision | Bootstrap is **central/privileged**; TreatFlow CI must not run `cdk bootstrap` |
-| **C01-04** | Untrusted-PR denial (TreatFlow app) | OIDC + GitHub Environment | Deploy assume requires Environment `dev`; PR CI has no AWS role assume |
-| **C01-05** | Unprivileged TreatFlow CI | TreatFlow workflow | `.github/workflows/ci.yml` — no AWS assume |
-| **C01-06** | Protected main / Environment contract | TreatFlow maintainer | Maintainer-applied protection + Environment `dev`; independent re-verify if reviewer APIs return 403 |
+| ID | Deliverable | Evidence |
+|---|---|---|
+| **C01-01** | Dedicated TreatFlow deploy role | Live `treatflow-dev-github-deploy`; OIDC exact `environment:dev` |
+| **C01-02** | Permission isolation beyond OIDC | Source + no PowerUser on apply; **C01-K = live assume gate** (sims supporting only) |
+| **C01-03** | CDK bootstrap ownership | Central/privileged; TreatFlow must not bootstrap |
+| **C01-04** | Untrusted-PR denial (TreatFlow) | Environment `dev` required for deploy assume; PR CI has no AWS |
+| **C01-05** | Unprivileged TreatFlow CI | `.github/workflows/ci.yml` |
+| **C01-06** | Protected main / Environment `dev` | Maintainer-set (independent 403 possible) |
 
 ## Acceptance checklist
 
 | Check | Result |
 |---|---|
-| **C01-A** Sponsor authorized C01 (not whole Track C through C02) | **PASS** — explicit proceed 2026-10-19 |
-| **C01-B** Narrow TreatFlow role + exact environment subject merged/applied | **PENDING** — aws-backbone PR; apply on merge |
-| **C01-C** Shared role trust excludes TreatFlow; apply verify asserts exclusion | **PENDING** — same backbone PR |
-| **C01-D** TreatFlow unprivileged CI; no AWS assume on PR | **PASS** — workflow source + Verify check green on PR |
-| **C01-E** Main branch protection (PR + required check) | **MAINTAINER-SET** — configured via admin API 2026-10-19 (`Verify` required). Independent agents may see **403**; treat as **unconfirmed by third party** until re-checked with sufficient token scope. Not a substitute for A-01. |
-| **C01-F** GitHub Environment `dev` (reviewers; `main`-only branches) | **MAINTAINER-SET** — same caveat as C01-E; required before any C02 deploy workflow |
-| **C01-G** No TreatFlow app AWS resources / CDK bootstrap in this package | **PASS** by scope |
-| **C01-H** Budget ceiling + DNS owner attestation | **HOLD → C02** (A-04/A-05) |
-| **C01-I** Live AWS read-only drift vs Terraform `main` | **HOLD → C02** |
-| **C01-J** A-01 privileged backbone PR execution controlled | **HOLD** — companion uses validate-only PR CI and **main-ref-only** bootstrap OIDC (no `:pull_request`; no unprotected `environment:` subjects — PR jobs requesting privileged Environments cannot assume). **Not PASS until N-A01-* live verifies**. Trust expansion / C01 exit blocked meanwhile. |
-| **C01-K** C01-02 isolation negative tests | **HOLD** — source control landed (see companion). **Not PASS until N-C02-* live verifies**. Do not close A-02/A-03 for TreatFlow before this. |
-
-## Application vs shared contract (binding)
-
-| Concern | Owner | TreatFlow must not |
-|---|---|---|
-| GitHub OIDC provider, shared IAM, permission boundaries | aws-backbone | Recreate OIDC provider or mutate central roles from app CI |
-| TreatFlow deploy trust | aws-backbone `treatflow-dev-github-deploy` | Use shared `dev-github-deploy` or `repo:…:*` subjects |
-| App workload permissions | aws-backbone boundary + future C02 Allows | Assume PowerUser or unmanaged IAM; create roles without the required app boundary |
-| App stacks | TreatFlow app IaC after **C02** | Bootstrap CDK or invent shared IAM from app repo |
-| Unprivileged verification | TreatFlow `ci.yml` | Assume AWS roles on pull_request |
-
-## Why C01-02 was corrected
-
-OIDC exact-subject trust controls **who may enter**. It does **not** by itself establish application isolation. Accepting C01-02 requires independently reviewed **resource/delegated-role** limits and negative tests in the private backbone companion—not only a dedicated role name or IAM name prefix.
-
-## Explicit non-goals (stop conditions)
-
-- No application AWS writes, DNS changes, or production roles
-- No TreatFlow deploy workflow authorization (**014-B-C02**)
-- No real-person intake (R-P02) or disclosure (R-P03)
-- No Revision / factual correction (016-D Option B deferral stands)
-- No copying privileged IAM remediation detail into this public repository
-- **No C01 exit while C01-J or C01-K remain HOLD**
+| **C01-A** Sponsor authorized C01 | **PASS** |
+| **C01-B** TreatFlow role + exact subject applied | **PASS** — apply run above |
+| **C01-C** Shared role excludes TreatFlow | **PASS** — apply verify |
+| **C01-D** Unprivileged TreatFlow CI | **PASS** |
+| **C01-E** Main branch protection | **MAINTAINER-SET** |
+| **C01-F** Environment `dev` | **MAINTAINER-SET** |
+| **C01-G** No app AWS resources in C01 | **PASS** |
+| **C01-H** Budget + DNS attestation | **HOLD → C02** |
+| **C01-I** Broader live drift inventory | **HOLD → C02** |
+| **C01-J** A-01 main-ref-only bootstrap | **PASS** — live trust main-ref-only |
+| **C01-K** Live assumed-role isolation verification | **HOLD** — must **assume** `treatflow-dev-github-deploy` and run Layer L API checks (companion). Backbone **policy sims are supporting only** and **cannot** alone set this to PASS ([IAM simulator caveats](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_testing-policies.html)). |
+| **C01-K-S** Policy simulations (optional) | **OPTIONAL** — backbone `TreatFlow C01 policy sims`; record URL as supporting evidence only |
 
 ## Exit decision
 
-**C01 may exit only after:** companion aws-backbone PR merges, Terraform apply succeeds, **C01-J and C01-K** move to PASS on live negative-test evidence recorded in the private companion, and C01-B/C are PASS.
+**C01 authority work is applied.** Closing A-02/A-03 for TreatFlow requires **C01-K PASS** (Layer L live assume), not simulator success alone.
 
-**Then:** separately authorize [014-B-C02](014-b-local-first-implementation-plan.md). C01 alone does **not** authorize C02.
+**Next:** [014-B-C02 entry](014-b-c02-aws-dev-iac-access-gate.md). **C02 resource deploy** requires C01-K (live), C02 ledger, and separate sponsor deploy authorization.
 
-## Independent review kickoff
+## Explicit non-goals
 
-> Independently review TreatFlow 014-B-C01 against this record and aws-backbone companion `docs/treatflow-014-b-c01.md`. Confirm A-01 is preventive (not a residual waiver), C01-02 claims wait on live N-C02-* tests, CI has no AWS assume, and no app resources/CDK bootstrap are introduced. Record PASS/HOLD for C01-A–K. Do not authorize C02 or TreatFlow onboarding while C01-J/K are HOLD.
+- No TreatFlow deploy workflow merge from this record
+- No CDK bootstrap / paid app stacks
+- No treating SimulatePrincipalPolicy as live permission proof
+- No R-P02/R-P03; 016-D Option B deferral stands
