@@ -20,3 +20,8 @@ The ledger keys attempts by repository/PR/exact head. Pending attempts HOLD idem
 ## 2026-10-23 intrinsic-hardening gate
 
 The offline engine captures `Object.create`, `Object.hasOwn`, `Math.max`, Map/Set size getters, `Number.parseInt`, and string slicing at module initialization. Adversarial tests mutate these ambient intrinsics after import and verify fail-closed eligibility, pending-ledger handling, cooldown enforcement, and deterministic draws. This is a bounded mitigation, not proof of comprehensive runtime-intrinsic immunity; further independent review must evaluate remaining mutable operations and runtime assumptions. PR #121 stays Draft/HOLD until exact-head CI and independent Codex/Cursor reviews pass. No live dispatch or privileged cloud operations are authorized.
+
+
+## 2026-10-23 array-iterator ledger integrity remediation
+
+Selection appends a new REQUESTED event by copying the validated ledger with the captured `Array.prototype.map` binding, not with iterable spread. The adversarial regression poisons `Array.prototype[Symbol.iterator]` after module initialization and asserts the complete three-event request/failure/retry history is preserved. This is not an independent review verdict. Require green CI and fresh exact-head Codex and Cursor reviews before changing Draft/HOLD or considering merge eligibility.
