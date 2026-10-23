@@ -149,3 +149,44 @@ test("head invalidation rejects second attempt without first failure",()=>{
  const events=[{key,provider:"codex",attempt:2,state:"REQUESTED"},{key,provider:"codex",attempt:2,state:"COMPLETED"}];
  assert.deepEqual(invalidateHead(events,"o/r",12,"b".repeat(40)),[]);
 });
+
+test("mutated Object.create cannot inject an unverified provider",()=>{
+ const original=Object.create;
+ try {
+  Object.create=()=>({providers:[{id:"cursor-agent",verifiedDispatch:true,healthy:true,cooldownUntil:0,weight:100}]});
+  const x=base();x.providers[0].verifiedDispatch=false;x.providers[1].verifiedDispatch=false;
+  assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+ } finally {Object.create=original;}
+});
+test("mutated Math.max cannot bypass retry limits or rate-limit cooldown",()=>{
+ const original=Math.max;
+ try {
+  Math.max=()=>0;
+  const x=base();x.providers[1].verifiedDispatch=false;
+  const first=selectOffline(x);
+  x.ledger=[...first.ledger,{...first.ledger[0],state:"RATE_LIMITED",retryAfter:x.now+100}];
+  assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+ } finally {Math.max=original;}
+});
+test("mutated collection size getters cannot bypass duplicate providers or pending ledger",()=>{
+ const mapDescriptor=Object.getOwnPropertyDescriptor(Map.prototype,"size");
+ const setDescriptor=Object.getOwnPropertyDescriptor(Set.prototype,"size");
+ try {
+  Object.defineProperty(Map.prototype,"size",{configurable:true,get(){return 0;}});
+  Object.defineProperty(Set.prototype,"size",{configurable:true,get(){return 0;}});
+  const x=base();x.providers.push({...x.providers[0]});
+  assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+  const y=base(),first=selectOffline(y);y.ledger=[...first.ledger];
+  assert.equal(selectOffline(y).reason,"IDEMPOTENT_PENDING");
+ } finally {
+  Object.defineProperty(Map.prototype,"size",mapDescriptor);
+  Object.defineProperty(Set.prototype,"size",setDescriptor);
+ }
+});
+test("mutated parseInt and string slice cannot alter deterministic draw",()=>{
+ const x=base(),expected=selectOffline(x),parse=Number.parseInt,slice=String.prototype.slice;
+ try {
+  Number.parseInt=()=>0;String.prototype.slice=()=> "0000000000000";
+  assert.deepEqual(selectOffline(x),expected);
+ } finally {Number.parseInt=parse;String.prototype.slice=slice;}
+});
