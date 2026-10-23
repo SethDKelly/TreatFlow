@@ -18,6 +18,10 @@ const reduce=Function.call.bind(Array.prototype.reduce);
 const keys=Object.keys;
 const define=Object.defineProperty;
 const ownKeyList=Reflect.ownKeys;
+const stringify=JSON.stringify;
+const parse=JSON.parse;
+const regexTest=Function.call.bind(RegExp.prototype.test);
+
 function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  if(++budget.n>2048||depth>32) throw Error("budget");
  if(v===null||typeof v!=="object") return v;
@@ -29,7 +33,7 @@ function safeCopy(v,seen=new WeakSet(),budget={n:0},depth=0){
  for(const k of ownKeyList(ds)){
   if(typeof k!=="string"||(arr&&k==="length")) continue;
   const d=ds[k];if(!Object.hasOwn(d,"value")||!d.enumerable) throw Error("accessor");
-  if(arr&&!/^(0|[1-9]\d*)$/.test(k)) throw Error("array key");
+  if(arr&&!regexTest(/^(0|[1-9]\d*)$/,k)) throw Error("array key");
   define(out,k,{value:safeCopy(d.value,seen,budget,depth+1),enumerable:true,writable:true,configurable:true});
  }
  if(arr&&out.length!==v.length) throw Error("holes");
@@ -42,26 +46,26 @@ const integer = Number.isSafeInteger;
 
 const hold = (reason,ledger) => freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false,ledger});
 
-const keyOf = ({repository,pr,headSha}) => JSON.stringify([lower(repository),pr,lower(headSha)]);
-function canonicalKey(k){const v=JSON.parse(k);if(!arrayIsArray(v)||v.length!==3||typeof v[0]!=="string"||!/^[^/]+\/[^/]+$/.test(v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!SHA.test(v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
-const draw = (seed,key) => parseInt(createHash("sha256").update(JSON.stringify([seed,key])).digest("hex").slice(0,13),16)/0x10000000000000;
+const keyOf = ({repository,pr,headSha}) => stringify([lower(repository),pr,lower(headSha)]);
+function canonicalKey(k){const v=parse(k);if(!arrayIsArray(v)||v.length!==3||typeof v[0]!=="string"||!regexTest(/^[^/]+\/[^/]+$/,v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!regexTest(SHA,v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
+const draw = (seed,key) => parseInt(createHash("sha256").update(stringify([seed,key])).digest("hex").slice(0,13),16)/0x10000000000000;
 const validTime = n => integer(n) && n>=0;
 function validInput(x) {
   if (!x || prototype(x)!==null || !arrayIsArray(x.providers) || !arrayIsArray(x.ledger) ||
-      typeof x.repository!=="string" || !/^[^/]+\/[^/]+$/.test(x.repository) ||
-      !integer(x.pr) || x.pr<1 || typeof x.headSha!=="string" || !SHA.test(x.headSha) ||
+      typeof x.repository!=="string" || !regexTest(/^[^/]+\/[^/]+$/,x.repository) ||
+      !integer(x.pr) || x.pr<1 || typeof x.headSha!=="string" || !regexTest(SHA,x.headSha) ||
       typeof x.seed!=="string" || !x.seed || !validTime(x.now) ||
-      !["codex","cursor-bugbot","cursor-agent","human","unknown"].includes(x.implementer)) return false;
-  if (x.purpose!==undefined && !["standard","targeted-adversarial"].includes(x.purpose)) return false;
-  if (x.override && (!PROVIDERS.includes(x.override.provider) || !validTime(x.override.startsAt) ||
+      !includes(["codex","cursor-bugbot","cursor-agent","human","unknown"],x.implementer)) return false;
+  if (x.purpose!==undefined && !includes(["standard","targeted-adversarial"],x.purpose)) return false;
+  if (x.override && (!includes(PROVIDERS,x.override.provider) || !validTime(x.override.startsAt) ||
       !validTime(x.override.expiresAt) || x.override.expiresAt<=x.override.startsAt ||
       x.override.expiresAt-x.override.startsAt>3600000 || typeof x.override.reason!=="string" || !x.override.reason ||
       typeof x.override.requester!=="string" || !x.override.requester)) return false;
-  return every(x.providers,p=>p && PROVIDERS.includes(p.id) && typeof p.verifiedDispatch==="boolean" &&
+  return every(x.providers,p=>p && includes(PROVIDERS,p.id) && typeof p.verifiedDispatch==="boolean" &&
     typeof p.healthy==="boolean" && validTime(p.cooldownUntil) && integer(p.weight) && p.weight>=1 && p.weight<=100) &&
     new Set(map(x.providers,p=>p.id)).size===x.providers.length &&
-    every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && PROVIDERS.includes(e.provider) &&
-      ["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"].includes(e.state) &&
+    every(x.ledger,e=>e && typeof e.key==="string" && canonicalKey(e.key)===e.key && includes(PROVIDERS,e.provider) &&
+      includes(["REQUESTED","TIMED_OUT","FAILED","RATE_LIMITED","RECEIPT_PENDING","COMPLETED"],e.state) &&
       integer(e.attempt) && e.attempt>=1 && e.attempt<=2 &&
       (e.state!=="RATE_LIMITED" || validTime(e.retryAfter)));
 }
@@ -77,14 +81,14 @@ export function selectOffline(input) {
   const existing=filter(ledger,e=>e.key===key);
   // Validate all historical attempts before allowing their completion to influence rotation.
   const allOpen=new Map(),allFinished=new Set();
-  for(const e of ledger){const id=JSON.stringify([e.key,e.provider,e.attempt]);
+  for(const e of map(ledger,e=>e)){const id=stringify([e.key,e.provider,e.attempt]);
    if(e.state==="REQUESTED"){if(allOpen.has(id)||allFinished.has(id)) return hold("INVALID_LEDGER",ledger);allOpen.set(id,true);}
    else if(e.state==="RECEIPT_PENDING"){if(!allOpen.has(id)) return hold("INVALID_LEDGER",ledger);}
    else {if(!allOpen.has(id)) return hold("INVALID_LEDGER",ledger);allOpen.delete(id);allFinished.add(id);}
   }
   const open=new Map(),finished=new Set();
-  for(const e of existing){
-    const id=JSON.stringify([e.provider,e.attempt]);
+  for(const e of map(existing,e=>e)){
+    const id=stringify([e.provider,e.attempt]);
     if(e.state==="REQUESTED"){
       if(open.has(id)||finished.has(id)) return hold("INVALID_LEDGER",ledger);
       open.set(id,true);
@@ -97,12 +101,12 @@ export function selectOffline(input) {
   }
   if(open.size) return hold("IDEMPOTENT_PENDING",ledger);
   if(some(existing,e=>e.state==="COMPLETED")) return hold("CYCLE_COMPLETED",ledger);
-  const failures=filter(existing,e=>["FAILED","TIMED_OUT","RATE_LIMITED"].includes(e.state));
+  const failures=filter(existing,e=>includes(["FAILED","TIMED_OUT","RATE_LIMITED"],e.state));
   const used=new Map();
-  for(const e of failures) used.set(e.provider,Math.max(used.get(e.provider)??0,e.attempt));
+  for(const e of map(failures,e=>e)) used.set(e.provider,Math.max(used.get(e.provider)??0,e.attempt));
   const limited=filter(existing,e=>e.state==="RATE_LIMITED");
   const recovery=new Map();
-  for(const e of limited) recovery.set(e.provider,Math.max(recovery.get(e.provider)??0,e.retryAfter));
+  for(const e of map(limited,e=>e)) recovery.set(e.provider,Math.max(recovery.get(e.provider)??0,e.retryAfter));
   const eligible=filter(x.providers,p=>(p.id!=="cursor-agent" || x.purpose==="targeted-adversarial") && p.verifiedDispatch && p.healthy && p.cooldownUntil<=x.now && (recovery.get(p.id)??0)<=x.now &&
     p.id!==x.implementer && (used.get(p.id)??0)<2);
   if (!eligible.length) return hold("BLOCKED_NO_DISPATCH",ledger);
@@ -127,7 +131,7 @@ export function selectOffline(input) {
   const completed=filter(ledger,e=>e.state==="COMPLETED");
   const previous=at(completed,-1)?.provider;
   if(candidates.length>1 && previous){const rotated=filter(candidates,p=>p.id!==previous);if(rotated.length)candidates=rotated;}
-  for(const e of completed) history.set(e.provider,(history.get(e.provider)??0)+1);
+  for(const e of map(completed,e=>e)) history.set(e.provider,(history.get(e.provider)??0)+1);
   const weights=map(candidates,p=>p.weight/(1+(history.get(p.id)??0)));
   const total=reduce(weights,(a,b)=>a+b,0);
   const sample=draw(x.seed,key);
@@ -142,11 +146,11 @@ export function selectOffline(input) {
 export function invalidateHead(input,repository,pr,newHeadSha) {
  try {
   const ledger=safeCopy(input);
-  if(!arrayIsArray(ledger)||typeof repository!=="string"||!/^[^/]+\/[^/]+$/.test(repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!SHA.test(newHeadSha)) return freeze([]);
+  if(!arrayIsArray(ledger)||typeof repository!=="string"||!regexTest(/^[^/]+\/[^/]+$/,repository)||!integer(pr)||pr<1||typeof newHeadSha!=="string"||!regexTest(SHA,newHeadSha)) return freeze([]);
   const current=keyOf({repository,pr,headSha:newHeadSha});
-  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&PROVIDERS.includes(e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"].includes(e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
+  if(!every(ledger,e=>e&&typeof e.key==="string"&&canonicalKey(e.key)===e.key&&includes(PROVIDERS,e.provider)&&integer(e.attempt)&&e.attempt>=1&&e.attempt<=2&&includes(["REQUESTED","RECEIPT_PENDING","FAILED","TIMED_OUT","RATE_LIMITED","COMPLETED"],e.state)&&(e.state!=="RATE_LIMITED"||validTime(e.retryAfter)))) return freeze([]);
   const keep=new Set();
-  for(const e of ledger) if(e.state==="COMPLETED") keep.add(JSON.stringify([e.key,e.provider,e.attempt]));
-  return freeze(map(filter(ledger,e=>e.key===current||keep.has(JSON.stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
+  for(const e of map(ledger,e=>e)) if(e.state==="COMPLETED") keep.add(stringify([e.key,e.provider,e.attempt]));
+  return freeze(map(filter(ledger,e=>e.key===current||keep.has(stringify([e.key,e.provider,e.attempt]))),e=>freeze(e)));
  }catch{return freeze([]);}
 }
