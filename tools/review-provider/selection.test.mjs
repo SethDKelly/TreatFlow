@@ -70,3 +70,35 @@ test("completed cycle excludes previous reviewer when alternative exists",()=>{
  x.ledger=[{key:oldKey,provider:"codex",attempt:1,state:"REQUESTED"},{key:oldKey,provider:"codex",attempt:1,state:"COMPLETED"}];
  assert.equal(selectOffline(x).provider,"cursor-bugbot");
 });
+
+test("noncanonical ledger keys fail closed instead of replaying",()=>{
+ const x=base(),a=selectOffline(x);x.ledger=[{...a.ledger[0],key:JSON.stringify(["O/R",12,SHA.toUpperCase()])}];
+ assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+});
+test("historical unmatched completion cannot manipulate rotation",()=>{
+ const x=base();x.ledger=[{key:JSON.stringify(["other/repo",12,SHA]),provider:"codex",attempt:1,state:"COMPLETED"}];
+ assert.equal(selectOffline(x).reason,"INVALID_LEDGER");
+});
+test("head invalidation retains validated completed cycle and safely rejects getters",()=>{
+ const x=base(),a=selectOffline(x);
+ const complete=[...a.ledger,{...a.ledger[0],state:"COMPLETED"}];
+ const kept=invalidateHead(complete,"o/r",12,"b".repeat(40));
+ assert.equal(kept.length,2);
+ const next=base();next.headSha="b".repeat(40);next.ledger=kept;
+ assert.equal(selectOffline(next).provider,"cursor-bugbot");
+ let invoked=0;const hostile=[{get key(){invoked++;return a.key;}}];
+ assert.deepEqual(invalidateHead(hostile,"o/r",12,SHA),[]);
+ assert.equal(invoked,0);
+});
+test("repository case normalizes idempotency",()=>{
+ const x=base(),a=selectOffline(x);x.repository="O/R";x.ledger=[...a.ledger];
+ assert.equal(selectOffline(x).reason,"IDEMPOTENT_PENDING");
+});
+test("standard purpose excludes cursor cloud agent",()=>{
+ const x=base();x.providers[0].verifiedDispatch=false;x.providers[1].verifiedDispatch=false;x.providers[2].verifiedDispatch=true;
+ assert.equal(selectOffline(x).reason,"BLOCKED_NO_DISPATCH");
+ x.purpose="targeted-adversarial";assert.equal(selectOffline(x).provider,"cursor-agent");
+});
+test("array holes are rejected",()=>{
+ const x=base();delete x.providers[1];assert.equal(selectOffline(x).reason,"INVALID_INPUT");
+});
