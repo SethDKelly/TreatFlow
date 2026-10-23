@@ -32,10 +32,10 @@ const PROVIDERS = freeze(["codex","cursor-bugbot","cursor-agent"]);
 const SHA = /^[a-f0-9]{40}$/i;
 const integer = Number.isSafeInteger;
 const own = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
-const hold = (reason,ledger) => Object.freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false,ledger});
+const hold = (reason,ledger) => freeze({state:"HOLD",reason,canDispatch:false,canApprove:false,canMerge:false,ledger});
 
 const keyOf = ({repository,pr,headSha}) => JSON.stringify([lower(repository),pr,lower(headSha)]);
-function canonicalKey(k){const v=JSON.parse(k);if(!Array.isArray(v)||v.length!==3||typeof v[0]!=="string"||!/^[^/]+\\/[^/]+$/.test(v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!SHA.test(v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
+function canonicalKey(k){const v=JSON.parse(k);if(!Array.isArray(v)||v.length!==3||typeof v[0]!=="string"||!/^[^/]+\/[^/]+$/.test(v[0])||!integer(v[1])||v[1]<1||typeof v[2]!=="string"||!SHA.test(v[2])) throw Error("key");return keyOf({repository:v[0],pr:v[1],headSha:v[2]});}
 const draw = (seed,key) => parseInt(createHash("sha256").update(JSON.stringify([seed,key])).digest("hex").slice(0,13),16)/0x10000000000000;
 const validTime = n => integer(n) && n>=0;
 function validInput(x) {
