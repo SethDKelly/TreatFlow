@@ -9,7 +9,7 @@ TreatFlow uses an observation-first concept design: **effortless private recordi
 ## Engineering review governance
 
 - [Independent review orchestration policy](review-orchestration-policy.md) — provider eligibility, exact-head evidence, HOLD, and sponsor merge authorization; implementation remains separately gated.
-- [S-77 review provider contract](review-provider-contract.md) — offline receipt schema, provider qualification, fail-closed trust boundaries and S-78 handoff; not a live adapter or security-exit authorization.
+- [S-78 offline reviewer selection](review-selection-offline.md) — deterministic eligibility, weighted selection, bounded override, retry/HOLD; no live dispatch.\n- [S-77 review provider contract](review-provider-contract.md) — offline receipt schema, provider qualification, fail-closed trust boundaries and S-78 handoff; not a live adapter or security-exit authorization.
 
 ## Current design authority
 
