@@ -190,3 +190,19 @@ test("mutated parseInt and string slice cannot alter deterministic draw",()=>{
   assert.deepEqual(selectOffline(x),expected);
  } finally {Number.parseInt=parse;String.prototype.slice=slice;}
 });
+
+test("poisoned array iterator cannot omit validated ledger history",()=>{
+ const x=base(),first=selectOffline(x);
+ x.ledger=Array.from(first.ledger);
+ x.ledger.push({...x.ledger[0],state:"TIMED_OUT"});
+ const iterator=Array.prototype[Symbol.iterator];
+ try {
+  Array.prototype[Symbol.iterator]=function*(){};
+  const next=selectOffline(x);
+  assert.equal(next.state,"OFFLINE_SELECTION");
+  assert.equal(next.ledger.length,3);
+  assert.equal(next.ledger[0].state,"REQUESTED");
+  assert.equal(next.ledger[1].state,"TIMED_OUT");
+  assert.equal(next.ledger[2].attempt,2);
+ } finally {Array.prototype[Symbol.iterator]=iterator;}
+});
