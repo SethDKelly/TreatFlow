@@ -41,8 +41,8 @@ test("quota cooldown and no verified alternate hold",()=>{
 });
 test("head changes invalidate old attempts",()=>{
   const x=base(),a=selectOffline(x);
-  assert.equal(invalidateHead(a.ledger,"o/r",12,"b".repeat(40)).length,0);
-  assert.equal(invalidateHead(a.ledger,"o/r",12,SHA).length,1);
+  assert.equal(invalidateHead(a.ledger,"o/r",12,"b".repeat(40),100000).length,0);
+  assert.equal(invalidateHead(a.ledger,"o/r",12,SHA,100000).length,1);
 });
 test("invalid and hostile inputs hold without effects",()=>{
   assert.equal(selectOffline({}).reason,"INVALID_INPUT");
@@ -82,12 +82,12 @@ test("historical unmatched completion cannot manipulate rotation",()=>{
 test("head invalidation retains validated completed cycle and safely rejects getters",()=>{
  const x=base(),a=selectOffline(x);
  const complete=[...a.ledger,{...a.ledger[0],state:"COMPLETED"}];
- const kept=invalidateHead(complete,"o/r",12,"b".repeat(40));
+ const kept=invalidateHead(complete,"o/r",12,"b".repeat(40),100000);
  assert.equal(kept.length,2);
  const next=base();next.headSha="b".repeat(40);next.ledger=kept;
  assert.equal(selectOffline(next).provider,"cursor-bugbot");
  let invoked=0;const hostile=[{get key(){invoked++;return a.key;}}];
- assert.deepEqual(invalidateHead(hostile,"o/r",12,SHA),[]);
+ assert.deepEqual(invalidateHead(hostile,"o/r",12,SHA,100000),[]);
  assert.equal(invoked,0);
 });
 test("repository case normalizes idempotency",()=>{
@@ -133,7 +133,7 @@ test("attempt two requires prior terminal failure",()=>{
 test("rate limit survives head invalidation",()=>{
  const x=base(),a=selectOffline(x);
  x.ledger=[...a.ledger,{...a.ledger[0],state:"RATE_LIMITED",retryAfter:x.now+100}];
- const y=base();y.headSha="b".repeat(40);y.ledger=invalidateHead(x.ledger,"o/r",12,y.headSha);
+ const y=base();y.headSha="b".repeat(40);y.ledger=invalidateHead(x.ledger,"o/r",12,y.headSha,x.now);
  assert.notEqual(selectOffline(y).provider,a.provider);
 });
 
@@ -141,13 +141,13 @@ test("head invalidation rejects orphan completed and rate-limited events",()=>{
  const key=JSON.stringify(["o/r",12,SHA]);
  for(const state of ["COMPLETED","RATE_LIMITED"]){
   const event={key,provider:"codex",attempt:1,state,...(state==="RATE_LIMITED"?{retryAfter:100100}:{})};
-  assert.deepEqual(invalidateHead([event],"o/r",12,"b".repeat(40)),[]);
+  assert.deepEqual(invalidateHead([event],"o/r",12,"b".repeat(40),100000),[]);
  }
 });
 test("head invalidation rejects second attempt without first failure",()=>{
  const key=JSON.stringify(["o/r",12,SHA]);
  const events=[{key,provider:"codex",attempt:2,state:"REQUESTED"},{key,provider:"codex",attempt:2,state:"COMPLETED"}];
- assert.deepEqual(invalidateHead(events,"o/r",12,"b".repeat(40)),[]);
+ assert.deepEqual(invalidateHead(events,"o/r",12,"b".repeat(40),100000),[]);
 });
 
 test("mutated Object.create cannot inject an unverified provider",()=>{
@@ -249,4 +249,18 @@ test("Array.prototype.toJSON cannot forge repository identity or draw",()=>{
   else delete Array.prototype.toJSON;
  }
  assert.deepEqual(actual,expected);
+});
+
+test("head invalidation drops expired and unrelated rate-limit history",()=>{
+ const target=JSON.stringify(["o/r",12,SHA]),other=JSON.stringify(["other/repo",12,SHA]);
+ const pair=(key,provider,retryAfter)=>[
+  {key,provider,attempt:1,state:"REQUESTED"},
+  {key,provider,attempt:1,state:"RATE_LIMITED",retryAfter}
+ ];
+ const ledger=[...pair(target,"codex",100001),...pair(other,"codex",200000),...pair(target,"cursor-bugbot",200000)];
+ const kept=invalidateHead(ledger,"O/R",12,"b".repeat(40),100010);
+ assert.equal(kept.length,2);
+ assert.equal(kept[0].provider,"cursor-bugbot");
+ assert.equal(kept[1].state,"RATE_LIMITED");
+ assert.deepEqual(invalidateHead(ledger,"o/r",12,"b".repeat(40)),[]);
 });
