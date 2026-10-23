@@ -136,3 +136,16 @@ test("rate limit survives head invalidation",()=>{
  const y=base();y.headSha="b".repeat(40);y.ledger=invalidateHead(x.ledger,"o/r",12,y.headSha);
  assert.notEqual(selectOffline(y).provider,a.provider);
 });
+
+test("head invalidation rejects orphan completed and rate-limited events",()=>{
+ const key=JSON.stringify(["o/r",12,SHA]);
+ for(const state of ["COMPLETED","RATE_LIMITED"]){
+  const event={key,provider:"codex",attempt:1,state,...(state==="RATE_LIMITED"?{retryAfter:100100}:{})};
+  assert.deepEqual(invalidateHead([event],"o/r",12,"b".repeat(40)),[]);
+ }
+});
+test("head invalidation rejects second attempt without first failure",()=>{
+ const key=JSON.stringify(["o/r",12,SHA]);
+ const events=[{key,provider:"codex",attempt:2,state:"REQUESTED"},{key,provider:"codex",attempt:2,state:"COMPLETED"}];
+ assert.deepEqual(invalidateHead(events,"o/r",12,"b".repeat(40)),[]);
+});
