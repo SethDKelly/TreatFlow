@@ -36,7 +36,7 @@ export function selectOffline(input) {
   const key=keyOf(x);
   const ledger=freeze(x.ledger.map(e=>freeze({...e})));
   const existing=ledger.filter(e=>e.key===key);
-  if (existing.some(e=>e.state==="REQUESTED" || e.state==="RECEIPT_PENDING"))
+  if (existing.length && ["REQUESTED","RECEIPT_PENDING"].includes(existing.at(-1).state))
     return hold("IDEMPOTENT_PENDING",ledger);
   const failures=existing.filter(e=>["FAILED","TIMED_OUT","RATE_LIMITED"].includes(e.state));
   const used=new Map();
