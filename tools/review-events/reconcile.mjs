@@ -37,6 +37,18 @@ const nativeFilter = (values, predicate) => {
 };
 const nativeSome = Function.prototype.call.bind(Array.prototype.some);
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
+const stableTrim = Function.prototype.call.bind(String.prototype.trim);
+// Avoid replace/replaceAll: native string replacement dynamically dispatches
+// through mutable String.prototype[Symbol.replace], even when bound at import.
+const normalizedReviewState = (state) => {
+  if (typeof state !== "string") return "";
+  const lower = stableLowerCase(stableTrim(state));
+  let normalized = "";
+  for (let i = 0; i < lower.length; i++) {
+    normalized += lower[i] === "-" ? "_" : lower[i];
+  }
+  return normalized;
+};
 const ownValue = (obj, key) => stableGetDescriptor(obj, key)?.value;
 function detach(value) {
   if (value === null || typeof value !== "object") return value;
@@ -198,6 +210,19 @@ export function reconcileOffline(input = {}) {
   const current = nativeFilter(observed.reviews, (review) =>
     review && own(review, "appId") === policy.reviewerAppId &&
     sameSha(own(review, "commitSha"), policy.headSha));
+  // A stringified version of the exact reviewer App ID is malformed, not an
+  // unrelated reviewer. Do not silently ignore it beside a clean receipt.
+  if (nativeSome(observed.reviews, (review) =>
+      review && typeof review === "object" && !stableIsArray(review) &&
+      sameSha(own(review, "commitSha"), policy.headSha) &&
+      typeof own(review, "appId") === "string" &&
+      own(review, "appId") === stableString(policy.reviewerAppId)))
+    return invalid("MALFORMED_REVIEW_IDENTITY");
+  // Explicit dismissal flags must be booleans. String "true" must not
+  // disappear as a nonnegative flag while a separate clean receipt exists.
+  if (nativeSome(current, (review) =>
+      stableHasOwn(review, "dismissed") && typeof own(review, "dismissed") !== "boolean"))
+    return invalid("MALFORMED_DISMISSAL_FLAG");
   // Reject malformed same-app/current-head receipts before terminal filtering.
   if (nativeSome(current, (review) =>
       (own(review, "state") === "completed" &&
@@ -211,8 +236,15 @@ export function reconcileOffline(input = {}) {
       if (own(current[i], "id") === own(current[j], "id")) return invalid("DUPLICATE_REVIEW_ID");
     }
   }
-  const dismissed = nativeSome(current, (review) => own(review, "dismissed") === true);
-  if (dismissed) return result("HOLD_FINDINGS", "REVIEW_DISMISSED");
+  // Current-head negative review states must not be hidden by a separate clean
+  // completed receipt or by source arrival order. Source normalization can
+  // represent dismissal as a state rather than a separate boolean.
+  const negativeState = nativeSome(current, (review) => {
+    const state = normalizedReviewState(own(review, "state"));
+    return own(review, "dismissed") === true ||
+      state === "dismissed" || state === "changes_requested";
+  });
+  if (negativeState) return result("HOLD_FINDINGS", "NEGATIVE_REVIEW_STATE");
 
   const terminal = nativeFilter(current, (review) => own(review, "state") === "completed" &&
     own(review, "source") === "provider-authored" &&
