@@ -30,7 +30,7 @@ During Gate A/B, seek targeted advisory feedback on material security or interfa
 - Poll the GitHub review timeline, threads, and exact-head checks after request. Treat missing, failed, timed-out, or non-exact-head reviews as incomplete.
 - If no valid exact-head receipt appears within 15 minutes, retry **once** with a new explicitly recorded request. After another 15 minutes, route to the alternate **verified** reviewer, or escalate to a human reviewer if the alternate cannot be dispatched. Do not endlessly spam requests.
 - Record attempts, failures, fallback reason, and identity of the reviewer actually completing the pass. An unavailable Cursor integration is a blocked fallback, not an implicit review.
-- Any code change invalidates previous exact-head review and CI clearance; restart relevant checks.
+- **Any change to the candidate head SHA**, including documentation-only, evidence-only, or code commits, invalidates previous exact-head review and CI clearance; restart relevant checks and request fresh reviews on the new SHA. Avoid unnecessary evidence-only candidate commits, but never exempt one from this rule.
 
 ## Closure and non-bypassable gates
 - CI passes at the exact reviewed head; review comments are reconciled against that head; new blockers have regression tests and independent verification; stale threads receive explicit evidence-backed dispositions.
