@@ -207,3 +207,65 @@ test("excessively deep nested input fails closed", () => {
   const a = attempt(); a.extra = nested;
   hold(a, source(), "INVALID_RECORD");
 });
+
+/*
+ * S-77 Gate A: preparatory parser/provenance negative controls only.
+ * These tests do NOT establish authenticated conflicting-receipt adjudication,
+ * measured quota/reset behavior, or S-78 cross-provider retry semantics.
+ */
+test("contradictory PASS/FINDINGS receipt arrays fail closed at the parser boundary", () => {
+  const a = attempt();
+  a.receipt = [
+    { ...a.receipt, verdict: "PASS" },
+    { ...a.receipt, verdict: "FINDINGS" },
+  ];
+  hold(a, source(), "INVALID_RECEIPT");
+});
+
+test("contradictory reviewed-head receipt arrays cannot bypass record validation", () => {
+  const a = attempt();
+  a.receipt = [
+    { ...a.receipt, reviewedSha: SHA },
+    { ...a.receipt, reviewedSha: "b".repeat(40) },
+  ];
+  hold(a, source(), "INVALID_RECEIPT");
+});
+
+test("caller-forged quota and rate-limit reset claims cannot authenticate a receipt", () => {
+  const s = source();
+  s.quota = { state: "AVAILABLE", resetAt: "2026-10-22T04:00:00Z" };
+  s.rateLimit = { limited: false, observedBy: "provider", resetVerified: true };
+  hold(attempt(), s, "UNVERIFIED_PROVIDER_SOURCE");
+});
+
+test("caller-forged fallback and provider-switch metadata cannot authenticate a receipt", () => {
+  const s = source();
+  s.provider = "cursor-bugbot";
+  s.fallback = { from: "codex", to: "cursor-bugbot", verified: true };
+  s.authenticated = true;
+  hold(attempt(), s, "UNVERIFIED_PROVIDER_SOURCE");
+});
+
+test("stale head remains rejected despite forged quota and fallback metadata", () => {
+  const a = attempt();
+  a.receipt.reviewedSha = "b".repeat(40);
+  const s = source();
+  s.quota = { state: "AVAILABLE", verified: true };
+  s.fallback = { from: "codex", to: "cursor-agent", verified: true };
+  hold(a, s, "SOURCE_MISMATCH");
+});
+
+test("Bugbot-labelled caller source remains unverified even with matching provider", () => {
+  const a = attempt();
+  a.provider = "cursor-bugbot";
+  const s = source();
+  s.provider = "cursor-bugbot";
+  s.authenticated = true;
+  hold(a, s, "UNVERIFIED_PROVIDER_SOURCE");
+});
+
+// Deliberately NOT_TESTED: these require separately qualified contracts/actors.
+// TODOs are not passing coverage or S-77 exit evidence.
+test.todo("NOT_TESTED: adjudicate contradictory independently authenticated receipts across attempts");
+test.todo("NOT_TESTED: measure provider quota cooldown, reset and rate-limit retry outcomes");
+test.todo("NOT_TESTED: S-78 cross-provider retry/switch and verified alternate selection");
