@@ -38,9 +38,17 @@ const nativeFilter = (values, predicate) => {
 const nativeSome = Function.prototype.call.bind(Array.prototype.some);
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
 const stableTrim = Function.prototype.call.bind(String.prototype.trim);
-const stableReplaceAll = Function.prototype.call.bind(String.prototype.replaceAll);
-const normalizedReviewState = (state) => typeof state === "string"
-  ? stableReplaceAll(stableLowerCase(stableTrim(state)), "-", "_") : "";
+// Avoid replace/replaceAll: native string replacement dynamically dispatches
+// through mutable String.prototype[Symbol.replace], even when bound at import.
+const normalizedReviewState = (state) => {
+  if (typeof state !== "string") return "";
+  const lower = stableLowerCase(stableTrim(state));
+  let normalized = "";
+  for (let i = 0; i < lower.length; i++) {
+    normalized += lower[i] === "-" ? "_" : lower[i];
+  }
+  return normalized;
+};
 const ownValue = (obj, key) => stableGetDescriptor(obj, key)?.value;
 function detach(value) {
   if (value === null || typeof value !== "object") return value;
