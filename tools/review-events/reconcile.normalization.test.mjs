@@ -49,6 +49,25 @@ function expect(input, state, reason) {
   assert.equal(Object.isFrozen(got), true);
 }
 
+test("post-import String.prototype[Symbol.replace] mutation cannot suppress negative-state veto", () => {
+  const original = Object.getOwnPropertyDescriptor(String.prototype, Symbol.replace);
+  Object.defineProperty(String.prototype, Symbol.replace, {
+    configurable: true, writable: true, value: () => "",
+  });
+  try {
+    for (const state of ["dismissed", "changes-requested", "CHANGES_REQUESTED "]) {
+      const input = fixture();
+      input.observed.reviews.push(negative(11, { state }));
+      expect(input, "HOLD_FINDINGS", "NEGATIVE_REVIEW_STATE");
+    }
+    // The adversarial mutation must not turn a clean receipt into a false HOLD.
+    expect(fixture(), "READY_FOR_SPONSOR_DECISION");
+  } finally {
+    if (original) Object.defineProperty(String.prototype, Symbol.replace, original);
+    else Reflect.deleteProperty(String.prototype, Symbol.replace);
+  }
+});
+
 test("control: canonical clean receipt remains advisory only", () => {
   expect(fixture(), "READY_FOR_SPONSOR_DECISION");
 });
