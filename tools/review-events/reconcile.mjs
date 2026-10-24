@@ -37,6 +37,10 @@ const nativeFilter = (values, predicate) => {
 };
 const nativeSome = Function.prototype.call.bind(Array.prototype.some);
 const stableLowerCase = Function.prototype.call.bind(String.prototype.toLowerCase);
+const stableTrim = Function.prototype.call.bind(String.prototype.trim);
+const stableReplaceAll = Function.prototype.call.bind(String.prototype.replaceAll);
+const normalizedReviewState = (state) => typeof state === "string"
+  ? stableReplaceAll(stableLowerCase(stableTrim(state)), "-", "_") : "";
 const ownValue = (obj, key) => stableGetDescriptor(obj, key)?.value;
 function detach(value) {
   if (value === null || typeof value !== "object") return value;
@@ -198,6 +202,19 @@ export function reconcileOffline(input = {}) {
   const current = nativeFilter(observed.reviews, (review) =>
     review && own(review, "appId") === policy.reviewerAppId &&
     sameSha(own(review, "commitSha"), policy.headSha));
+  // A stringified version of the exact reviewer App ID is malformed, not an
+  // unrelated reviewer. Do not silently ignore it beside a clean receipt.
+  if (nativeSome(observed.reviews, (review) =>
+      review && typeof review === "object" && !stableIsArray(review) &&
+      sameSha(own(review, "commitSha"), policy.headSha) &&
+      typeof own(review, "appId") === "string" &&
+      own(review, "appId") === stableString(policy.reviewerAppId)))
+    return invalid("MALFORMED_REVIEW_IDENTITY");
+  // Explicit dismissal flags must be booleans. String "true" must not
+  // disappear as a nonnegative flag while a separate clean receipt exists.
+  if (nativeSome(current, (review) =>
+      stableHasOwn(review, "dismissed") && typeof own(review, "dismissed") !== "boolean"))
+    return invalid("MALFORMED_DISMISSAL_FLAG");
   // Reject malformed same-app/current-head receipts before terminal filtering.
   if (nativeSome(current, (review) =>
       (own(review, "state") === "completed" &&
@@ -215,10 +232,9 @@ export function reconcileOffline(input = {}) {
   // completed receipt or by source arrival order. Source normalization can
   // represent dismissal as a state rather than a separate boolean.
   const negativeState = nativeSome(current, (review) => {
-    const state = own(review, "state");
+    const state = normalizedReviewState(own(review, "state"));
     return own(review, "dismissed") === true ||
-      state === "dismissed" || state === "DISMISSED" ||
-      state === "changes_requested" || state === "CHANGES_REQUESTED";
+      state === "dismissed" || state === "changes_requested";
   });
   if (negativeState) return result("HOLD_FINDINGS", "NEGATIVE_REVIEW_STATE");
 
