@@ -211,8 +211,16 @@ export function reconcileOffline(input = {}) {
       if (own(current[i], "id") === own(current[j], "id")) return invalid("DUPLICATE_REVIEW_ID");
     }
   }
-  const dismissed = nativeSome(current, (review) => own(review, "dismissed") === true);
-  if (dismissed) return result("HOLD_FINDINGS", "REVIEW_DISMISSED");
+  // Current-head negative review states must not be hidden by a separate clean
+  // completed receipt or by source arrival order. Source normalization can
+  // represent dismissal as a state rather than a separate boolean.
+  const negativeState = nativeSome(current, (review) => {
+    const state = own(review, "state");
+    return own(review, "dismissed") === true ||
+      state === "dismissed" || state === "DISMISSED" ||
+      state === "changes_requested" || state === "CHANGES_REQUESTED";
+  });
+  if (negativeState) return result("HOLD_FINDINGS", "NEGATIVE_REVIEW_STATE");
 
   const terminal = nativeFilter(current, (review) => own(review, "state") === "completed" &&
     own(review, "source") === "provider-authored" &&
