@@ -156,6 +156,48 @@ Before finishing substantive implementation work, when implementation is authori
 
 Do not manufacture tests that only mirror the implementation or repeatedly run broad suites without a reason.
 
+## Qualified implementation and delegated verification gates (proposed bounded adoption)
+
+This is a **process contract for future eligible implementation packages**, not retroactive acceptance of an existing PR, permission to start a blocked story, evidence that multiple agents actually ran, or authorization for live provider dispatch. Use the current canonical concept/phase owner and Linear dependency graph as authority; [013-F](../phases/013/013-f-agentic-independent-test-control.md) continues to govern independent test-control and protected operational boundaries. One PR should represent **one coherent, independently verifiable behavior or integration slice** rather than a phase-wide grab bag or a series of trivial review-triggering edits.
+
+### Gate A — qualify scope before implementation
+
+The bounded package owner records in the Linear story and PR plan, **before coding**:
+
+- **Identity and authority:** issue/phase, current base SHA, current canonical owner, entry prerequisites, relevant dependencies, risk class, responsible integrator and permitted files/operations.
+- **Behavioral contract:** observable inputs/outputs, invariants, failure/UNKNOWN/HOLD outcomes, relevant interfaces and data/authority boundaries; explicit in-scope and excluded behavior.
+- **Acceptance examples:** representative success, boundary and negative scenarios, including spoofing, stale-head, replay, concurrency, malformed input, quota/error and denial cases where applicable. Distinguish *required observable behavior* from implementation-specific test design.
+- **Independent evaluation plan:** which obligations will be checked by unit/contract tests, integration or black-box tests, and independent adversarial/holdout evaluation; what evidence is needed for each. A test's existence is not proof it passed, and an unimplemented scenario remains NOT_TESTED/HOLD.
+- **Stop conditions:** unresolved design contradiction, unauthorized cloud/credential/real-person change, unqualified dependency, unexpected privilege or cost, missing independent evaluator, or scope drift. These require HOLD and explicit reopening of the appropriate owner.
+
+A package is **Gate A qualified** only when the above is specific enough for implementer and test author to work from the same observable contract. Qualification does not mean implementation, testing, security exit, or merge acceptance has passed.
+
+### Delegated, isolated work packages
+
+Where independent authorized workers and tools are available, the integrator may prepare parallel bounded assignments from Gate A:
+
+| Workstream | Deliverable | Isolation / independence |
+| --- | --- | --- |
+| Implementation | Production code and narrow implementation-facing unit tests | Own branch/worktree and scoped source paths; no final acceptance verdict |
+| Unit and regression test author | Behavioral unit/contract and negative tests traced to Gate A, including boundary/failure controls | Prefer separate branch/worktree and test paths; derive assertions from the qualified contract, **not** from production code's chosen behavior |
+| Independent adversarial test designer | Threat hypotheses, black-box/holdout cases, mutation and bypass probes, negative controls | Separate context/fixture custody; do not reveal protected expected outputs to implementer or accept implementer-selected tests as independent |
+| Documentation/evidence owner | Requirement-to-test matrix, change inventory, current-authority reconciliation, run and review links | No fabricated execution or provenance; transient verdicts belong in PR/Linear and stable evidence snapshots, not commits to candidate head |
+| Integrator | Resolve interface conflicts, integrate reviewed branches, run checks and present one candidate | Does not silently reinterpret canonical behavior, merge a blocked dependency, or count self-review as independent |
+
+Delegation is **conditional**, not a claim that separate agents are connected or can be dispatched. Agree on file ownership and interfaces first; avoid simultaneous edits to the same branch or cherry-picking an unreviewed change after candidate freeze. If separate workers are unavailable, perform sequential bounded work and disclose the independence limitation. Do not build a new orchestration service merely to delegate.
+
+### Gate B — integrate, verify, freeze candidate
+
+The integrator consolidates compatible changes and fixes into a **coherent review batch**, reconciles the Gate A requirement-to-test matrix, verifies negative controls and regression coverage, checks no scope drift or stale canonical references, and runs local/static/unit/contract checks. Verify CI against the candidate's **exact full head SHA** before asking for final deep reviews when CI is available. Record absent tests as NOT_TESTED, inaccessible evidence as UNKNOWN, and unresolved material defects as HOLD. Freeze the candidate SHA for independent exit; avoid review-request churn from small wording-only or evidence-only commits. High-risk design questions may receive early **advisory** review, which is not Gate C acceptance.
+
+### Gate C — deep independent exit and merge decision
+
+Request independent Codex/Cursor exact-head reviews only on the stable Gate B candidate, where those reviewers are actually available; use a blind-first pass and cumulative adversarial recheck as required by the [review orchestration policy](../review-orchestration-policy.md). Independently designed tests and CI must assess the **qualified observable contract**, not just author-written tests. Recheck reviewer identity, reviewed SHA, substantive findings, review threads, base/head changes, required GitHub checks, dependencies, security evidence, and sponsor authorization **at decision time**. Native bot comments are not authenticated S-77 provider receipts or formal protected approvals.
+
+On a finding, triage root cause, **batch related remediations and regression tests**, rerun checks, freeze a **new** exact SHA and obtain fresh reviews; never transfer a prior SHA's PASS. Avoid duplicate pending review requests, while preserving the policy's bounded timeout/retry/fallback procedure. Maintain a source-linked stable [review-evidence ledger candidate](../review-orchestration-evidence-ledger.md) only when that file is actually merged and authoritative; otherwise use PR/Linear comments for transient evidence and do not cite an unmerged proposal as active policy. A documentation-only review PASS never clears an unrelated operational/security HOLD.
+
+**Exit:** merge only after all applicable exact-head CI, independent tests/reviews, branch-protection, dependency, scope and separately authorized security/human gates are satisfied. An existing explicit sponsor authorization may cover qualifying merges but never waives those gates. Following merge, reconcile Linear and current repository documentation before admitting the next bounded package. Track review requests per candidate, remediations per root cause, Gate A-to-C lead time and independently found regressions to assess whether batching improves throughput without suppressing defects.
+
 ## Pull-request traceability and ordinary review authority
 
 This methodology is the **durable shared policy** for Cursor, Codex, Claude, and other agents. The root [AGENTS.md](../../AGENTS.md) is its **portable, immediately executable repository adapter**: it contains short working instructions for agents that consume AGENTS.md directly. These two owners must remain consistent; changing shared review/workflow expectations requires updating this methodology and, when relevant, its root adapter. Do not proliferate tool-specific full policy copies.
