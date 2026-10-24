@@ -9,6 +9,12 @@ title: TreatFlow independent review orchestration policy
 ## Authority and scope
 This policy governs new TreatFlow engineering PR review cycles, including S-32/S-42/S-74 evidence-sensitive changes. It is a process specification, **not** proof that an agent was dispatched. GitHub CI is not independent code review; an automated review receipt is not a merge authorization. Explicit sponsor approval is mandatory before merge.
 
+## Qualified candidate review timing (proposed adoption)
+
+Use the existing [shared implementation governance](methodology/agentic-development-governance.md) for Gate A (qualified scope), delegated implementation/test work, Gate B (coherent integration, requirement-to-test traceability and exact-head CI), and Gate C (deep independent review, independently derived negative tests and merge/exit decision). The Gate A contract is visible to implementer and test author; separate adversarial/holdout cases are designed from that contract without relying on implementation-selected examples. Do not pretend hidden test infrastructure or independent provider identities exist unless verified.
+
+During Gate A/B, seek targeted advisory feedback on material security or interface risks, but **do not repeatedly request full exit reviews for each intermediate edit**. After Gate B freeze, request Codex/Cursor independent reviews on the stable exact head and reconcile both findings and source provenance. Consolidate related findings and regression fixes before refreezing and re-reviewing a changed SHA. Preserve the bounded timeout/retry/fallback rules below; an unanswered request is not PASS. Keep stable receipts in PR/Linear and only milestone snapshots in a separately reviewed evidence ledger to avoid evidence-only candidate-head churn. No qualification or favorable source-only review waives existing S-75/S-77/S-78/S-79 dependencies, branch protections or separately authorized operational boundaries.
+
 ## Reviewer assignment and rotation
 1. Record implementation agent (Codex, Cursor, human, or unknown), exact PR head SHA, risk class, and reviewer availability before dispatch.
 2. Eligible reviewers are Codex and Cursor **only if a working, authorized dispatch path is verified**. A GitHub comment tagging Codex is a request, not proof of execution. Do not claim Cursor was dispatched merely by mentioning it in a comment.
@@ -24,7 +30,7 @@ This policy governs new TreatFlow engineering PR review cycles, including S-32/S
 - Poll the GitHub review timeline, threads, and exact-head checks after request. Treat missing, failed, timed-out, or non-exact-head reviews as incomplete.
 - If no valid exact-head receipt appears within 15 minutes, retry **once** with a new explicitly recorded request. After another 15 minutes, route to the alternate **verified** reviewer, or escalate to a human reviewer if the alternate cannot be dispatched. Do not endlessly spam requests.
 - Record attempts, failures, fallback reason, and identity of the reviewer actually completing the pass. An unavailable Cursor integration is a blocked fallback, not an implicit review.
-- Any code change invalidates previous exact-head review and CI clearance; restart relevant checks.
+- **Any change to the candidate head SHA**, including documentation-only, evidence-only, or code commits, invalidates previous exact-head review and CI clearance; restart relevant checks and request fresh reviews on the new SHA. Avoid unnecessary evidence-only candidate commits, but never exempt one from this rule.
 
 ## Closure and non-bypassable gates
 - CI passes at the exact reviewed head; review comments are reconciled against that head; new blockers have regression tests and independent verification; stale threads receive explicit evidence-backed dispositions.
