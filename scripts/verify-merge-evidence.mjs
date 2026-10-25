@@ -2,6 +2,7 @@
 // Local, caller-supplied JSON cannot authenticate any check, reviewer, policy or SHA.
 // Consequently this tool NEVER grants a gate, even when every field is consistent.
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 const SHA_RE = /^[a-f0-9]{40}$/;
 const RUN_RE = /^https:\/\/github\.com\/SethDKelly\/TreatFlow\/actions\/runs\/\d+$/;
 export function evaluate(e) {
@@ -37,7 +38,13 @@ export function evaluate(e) {
   }
   return { decision: 'HOLD', errors };
 }
-if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
+// Compare canonical filesystem paths: Node resolves symlinked entrypoints before import.
+// A symlink invocation must execute the CLI and fail closed, not silently exit 0.
+function isCliEntrypoint() {
+  try { return !!process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url)); }
+  catch { return false; }
+}
+if (isCliEntrypoint()) {
   try {
     const result = evaluate(JSON.parse(fs.readFileSync(process.argv[2], 'utf8')));
     console.log(JSON.stringify(result));
