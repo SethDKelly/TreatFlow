@@ -18,12 +18,13 @@ export function evaluate(e) {
   need(e.requiredCheckName === 'Verify', 'required check not identified');
   need(e.protectionVerified === true, 'branch protection not independently verified');
   need(e.independentReviewVerified === true, 'independent review not verified');
-  return { decision: errors.length ? 'HOLD' : 'EVIDENCE_ELIGIBLE_FOR_GATE_C', errors };
+  // These are caller assertions, not authenticated provider receipts; structural consistency cannot clear a gate.
+  return { decision: errors.length ? 'HOLD' : 'UNVERIFIED_EVIDENCE', errors };
 }
 if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
   try {
     const r = evaluate(JSON.parse(fs.readFileSync(process.argv[2], 'utf8')));
     console.log(JSON.stringify(r));
-    process.exitCode = r.errors.length ? 1 : 0;
+    process.exitCode = r.errors.length ? 1 : 2; // structurally consistent still requires external verification
   } catch (err) { console.error('HOLD: invalid evidence input:', err.message); process.exitCode = 1; }
 }
