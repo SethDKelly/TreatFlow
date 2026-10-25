@@ -15,3 +15,33 @@ test('head check and merge checkout must remain distinct',()=>assert.ok(evaluate
 test('replayed self-consistent packet still HOLD',()=>assert.equal(evaluate({...claimed}).decision,'HOLD'));
 test('inherited fields cannot authenticate',()=>assert.equal(evaluate(Object.create(claimed)).decision,'HOLD'));
 test('proxy getter trap cannot clear gate',()=>assert.equal(evaluate(new Proxy({}, {get(){throw Error('trap')}})).decision,'HOLD'));
+
+import { mkdtempSync, symlinkSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+
+test('symlinked CLI invocation evaluates packet and never exits 0', () => {
+  const dir = mkdtempSync(join(tmpdir(), 's42-symlink-'));
+  try {
+    const link = join(dir, 'verifier-link.mjs');
+    const packet = join(dir, 'forged.json');
+    symlinkSync(fileURLToPath(new URL('./verify-merge-evidence.mjs', import.meta.url)), link);
+    writeFileSync(packet, JSON.stringify(claimed));
+    const run = spawnSync(process.execPath, [link, packet], { encoding: 'utf8' });
+    assert.equal(run.status, 1, run.stderr);
+    assert.match(run.stdout, /"decision":"HOLD"/);
+    assert.match(run.stdout, /UNAUTHENTICATED_EVIDENCE/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+test('symlinked CLI missing packet also exits nonzero', () => {
+  const dir = mkdtempSync(join(tmpdir(), 's42-symlink-missing-'));
+  try {
+    const link = join(dir, 'verifier-link.mjs');
+    symlinkSync(fileURLToPath(new URL('./verify-merge-evidence.mjs', import.meta.url)), link);
+    const run = spawnSync(process.execPath, [link], { encoding: 'utf8' });
+    assert.equal(run.status, 1);
+    assert.match(run.stderr, /HOLD/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
