@@ -4,8 +4,14 @@ import assert from 'node:assert/strict';
 import { evaluate } from './verify-merge-evidence.mjs';
 const a='a'.repeat(40),b='b'.repeat(40),c='c'.repeat(40);
 const claimed={repository:'SethDKelly/TreatFlow',pr:130,baseSha:a,headSha:b,mergeSha:c,observedBaseSha:a,observedHeadSha:b,observedMergeSha:c,testedSha:c,checkAssociatedSha:c,checkConclusion:'success',checkRunUrl:'https://github.com/SethDKelly/TreatFlow/actions/runs/99999999',requiredCheckName:'Verify',protectionVerified:true,independentReviewVerified:true};
-test('fully forged but internally coherent source cannot produce PASS or Gate C clearance',()=>assert.equal(evaluate(claimed).decision,'UNVERIFIED_EVIDENCE'));
+test('forged coherent packet must HOLD with nonempty provenance errors',()=>{const r=evaluate(claimed);assert.equal(r.decision,'HOLD');assert.ok(r.errors.length>0);});
 test('caller cannot bypass missing independent protection evidence',()=>assert.equal(evaluate({...claimed,protectionVerified:'true'}).decision,'HOLD'));
 test('caller cannot bypass missing independent reviewer evidence',()=>assert.equal(evaluate({...claimed,independentReviewVerified:1}).decision,'HOLD'));
 for(const x of [null,[],{},'garbage',3]) test('untrusted input fails closed: '+String(x),()=>assert.equal(evaluate(x).decision,'HOLD'));
-test('synthetic merge same-tree claim is not authenticated by self-consistent SHA',()=>assert.notEqual(evaluate({...claimed,mergeSha:a,observedMergeSha:a,testedSha:a,checkAssociatedSha:a}).decision,'PASS'));
+test('same-tree synthetic merge claim explicitly diagnosed',()=>assert.ok(evaluate({...claimed,mergeSha:a,observedMergeSha:a,testedSha:a,checkAssociatedSha:a}).errors.includes('IMPOSSIBLE_MERGE_IDENTITY')));
+
+test('fake run URL never becomes authenticated',()=>assert.equal(evaluate({...claimed,checkRunUrl:'https://github.com/SethDKelly/TreatFlow/actions/runs/1'}).decision,'HOLD'));
+test('head check and merge checkout must remain distinct',()=>assert.ok(evaluate({...claimed,checkAssociatedSha:b}).errors.includes('CHECK_ON_PR_HEAD_NOT_MERGE')));
+test('replayed self-consistent packet still HOLD',()=>assert.equal(evaluate({...claimed}).decision,'HOLD'));
+test('inherited fields cannot authenticate',()=>assert.equal(evaluate(Object.create(claimed)).decision,'HOLD'));
+test('proxy getter trap cannot clear gate',()=>assert.equal(evaluate(new Proxy({}, {get(){throw Error('trap')}})).decision,'HOLD'));
