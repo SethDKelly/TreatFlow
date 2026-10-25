@@ -13,11 +13,12 @@
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit --pretty false",
     "lint": "eslint .",
-    "test": "vitest run && npm run test:shadow && npm run test:review-events && npm run test:review-provider",
+    "test": "vitest run && npm run test:shadow && npm run test:review-events && npm run test:review-provider && npm run test:ci-evidence",
     "test:watch": "vitest",
     "test:shadow": "node --test tools/shadow/*.test.mjs",
     "test:review-events": "node --test tools/review-events/*.test.mjs",
-    "test:review-provider": "node --test tools/review-provider/*.test.mjs"
+    "test:review-provider": "node --test tools/review-provider/*.test.mjs",
+    "test:ci-evidence": "node --test scripts/verify-merge-evidence.test.mjs scripts/verify-merge-evidence.adversarial.test.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",
